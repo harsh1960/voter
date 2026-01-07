@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Voter ID Generator (SaaS)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+/* ================= RESET & BASICS ================= */
+*{ margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body{ background: #e5e7eb; padding: 10px; min-height: 100vh; }
+
+/* ================= SCREENS (LOGIN / PAYWALL) ================= */
+.auth-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+.auth-container h1 { margin-bottom: 10px; color: #333; }
+.auth-container p { margin-bottom: 20px; color: #666; }
+.google-btn {
+    background: #4285F4; color: white; border: none; padding: 12px 20px;
+    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;
+}
+.pay-btn {
+    background: #2563eb; color: white; border: none; padding: 12px 20px;
+    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;
+}
+.loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ================= APP CONTAINER (Hidden by default) ================= */
+#app-screen { display: none; }
+#login-screen { display: block; }
+#paywall-screen { display: none; }
+
+/* ================= GENERATOR STYLES ================= */
+.container{ max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+h2{ text-align: center; margin-bottom: 20px; color: #333; }
+.form{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form input, .form textarea{ padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; width: 100%; }
+.form textarea{ resize: vertical; height: 80px; }
+.full-width { grid-column: span 2; }
+.hindi-input::placeholder { color: #d946ef; font-weight: bold; }
+button.gen-btn{ margin-top: 20px; width: 100%; padding: 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+button.gen-btn:hover{ background: #1e40af; }
+.card-area { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; padding-bottom: 20px; overflow: hidden; }
+.card{ width: 420px; height: 260px; position: relative; background-color: #eee; background-size: cover; background-position: center; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,.25); display: none; flex-shrink: 0; color: #000; }
+#cardFront { background-image: url("voter-bg.png"); }
+#cardBack { background-image: url("voter_back.png"); }
+.epic{ position: absolute; left: 12px; top: 68px; font-size: 14px; font-weight: bold; }
+.photo-box{ position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #555; background: #fff; overflow: hidden; }
+.photo-box img{ width: 100%; height: 100%; object-fit: cover; }
+.h-name{ position: absolute; left: 140px; top: 120px; font-size: 12.5px; font-weight: bold; }
+.e-name{ position: absolute; left: 140px; top: 138px; font-size: 12.5px; font-weight: bold; }
+.h-father{ position: absolute; left: 140px; top: 158px; font-size: 12px; font-weight: bold; }
+.e-father{ position: absolute; left: 140px; top: 175px; font-size: 12px; font-weight: bold; }
+.h-gender{ position: absolute; left: 140px; top: 195px; font-size: 11.5px; font-weight: bold; }
+.e-gender{ position: absolute; left: 230px; top: 195px; font-size: 11.5px; font-weight: bold; }
+.h-dob{ position: absolute; left: 140px; top: 212px; font-size: 11.5px; font-weight: bold; }
+.e-dob{ position: absolute; left: 230px; top: 212px; font-size: 11.5px; font-weight: bold; }
+.address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; }
+.h-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.h-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; }
+.e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; }
+.date-section { position: absolute; left: 160px; top: 180px; font-size: 13px; font-weight: bold; color: #000; }
+.qr-area { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
+.qr-img { width: 110px; height: 110px; object-fit: contain; border: 1px solid #ddd; background: #fff; }
+.epic-back { margin-top: 20px; font-size: 13px; font-weight: bold; color: #000; padding: 2px 5px; }
+.card-label { margin-bottom: 5px; color: #666; font-size: 14px; text-align: center; width: 420px; display: none; }
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .form { grid-template-columns: 1fr; }
+    .full-width { grid-column: span 1; }
+    .card { transform: scale(0.75); margin-bottom: -50px; }
+    .card-label { width: 100%; text-align: center; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="login-screen" class="auth-container">
+    <h1>Voter ID Tool</h1>
+    <p>Login to start your 24-Hour Free Trial.</p>
+    <button id="loginBtn" class="google-btn">Login with Google</button>
+    <div id="loader" class="loader"></div>
+</div>
+
+<div id="paywall-screen" class="auth-container">
+    <h1 style="color: #d32f2f;">Free Trial Expired</h1>
+    <p>Your 24-hour trial has ended.</p>
+    <p>Subscribe to continue using the tool.</p>
+    <h3>₹49 / Month</h3>
+    <button id="payBtn" class="pay-btn">Pay ₹49 & Unlock</button>
+    <div id="payLoader" class="loader"></div>
+</div>
+
+<div id="app-screen">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px; color:#555;">
+            <span id="userEmailDisplay">User: ...</span>
+            <span id="statusDisplay" style="color:green; font-weight:bold;">Active</span>
+            <button onclick="logout()" style="background:none; border:none; color:red; cursor:pointer; text-decoration:underline;">Logout</button>
+        </div>
+
+        <h2>Voter ID Generator</h2>
+
+        <div class="form">
+            <input id="epic" placeholder="EPIC Number">
+            <input type="file" id="photo" accept="image/*">
+            
+            <input id="userName" placeholder="Name (English)">
+            <input id="nameHindi" class="hindi-input" placeholder="Name (Hindi / नाम हिंदी में)">
+            
+            <input id="fatherName" placeholder="Father's Name (English)">
+            <input id="fatherHindi" class="hindi-input" placeholder="Father Name (Hindi / पिता का नाम हिंदी में)">
+            
+            <input id="gender" placeholder="Gender (Male/Female)">
+            <input id="dob" placeholder="DOB (DD-MM-YYYY)">
+
+            <textarea id="addrHindi" class="full-width hindi-input" placeholder="Address (Write full address in Hindi / पता हिंदी में)"></textarea>
+            <textarea id="addrEng" class="full-width" placeholder="Address (Write full address in English)"></textarea>
+            
+            <input id="dlDate" class="full-width" placeholder="Download Date (e.g. 25-01-2025)">
+        </div>
+
+        <button class="gen-btn" onclick="generate()">Generate Voter ID Card</button>
+
+        <div class="card-area">
+            <div class="card-label" id="lblFront">Front Side</div>
+            <div class="card" id="cardFront">
+                <div class="epic" id="dEpic"></div>
+                <div class="photo-box"><img id="dPhoto"></div>
+                <div class="h-name" id="hName"></div>
+                <div class="e-name" id="eName"></div>
+                <div class="h-father" id="hFather"></div>
+                <div class="e-father" id="eFather"></div>
+                <div class="h-gender" id="hGender"></div>
+                <div class="e-gender" id="eGender"></div>
+                <div class="h-dob" id="hDob"></div>
+                <div class="e-dob" id="eDob"></div>
+            </div>
+
+            <div class="card-label" id="lblBack" style="margin-top: 20px;">Back Side</div>
+            <div class="card" id="cardBack">
+                <div class="address-section">
+                    <div class="h-addr-label">पता:</div>
+                    <div class="h-addr-text" id="dispAddrHindi"></div>
+                    <div class="e-addr-label">Address:</div>
+                    <div class="e-addr-text" id="dispAddrEng"></div>
+                </div>
+                <div class="date-section" id="dispDate"></div>
+                <div class="qr-area">
+                    <img src="qr.jpeg" alt="QR Code" class="qr-img">
+                    <div class="epic-back" id="dispEpicBack"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+  // 1. IMPORT FIREBASE LIBRARIES
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  // 2. CONFIGURATION
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZLakPR2A5wQ7okDL-L7nCSxJDICiMtEQ",
+    authDomain: "voter-5e759.firebaseapp.com",
+    projectId: "voter-5e759",
+    storageBucket: "voter-5e759.firebasestorage.app",
+    messagingSenderId: "118588658962",
+    appId: "1:118588658962:web:048048d4e8593e95580fcb",
+    measurementId: "G-C6BPLSF9W7"
+  };
+
+  // 3. INITIALIZE
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // 4. UI ELEMENTS
+  const loginScreen = document.getElementById("login-screen");
+  const paywallScreen = document.getElementById("paywall-screen");
+  const appScreen = document.getElementById("app-screen");
+  const loader = document.getElementById("loader");
+  const payLoader = document.getElementById("payLoader");
+
+  // 5. LOGIN FUNCTION
+  document.getElementById("loginBtn").addEventListener("click", () => {
+      loader.style.display = "block";
+      signInWithPopup(auth, provider).catch((error) => {
+          console.error(error);
+          loader.style.display = "none";
+          alert("Login Failed");
+      });
+  });
+
+  // 6. LOGOUT FUNCTION (Attached to window for onclick)
+  window.logout = () => {
+      signOut(auth).then(() => {
+          location.reload();
+      });
+  };
+
+  // 7. CHECK AUTH STATE & SUBSCRIPTION LOGIC
+  onAuthStateChanged(auth, async (user) => {
+      if (user) {
+          loader.style.display = "block";
+          document.getElementById("userEmailDisplay").innerText = "User: " + user.email;
+          await checkSubscription(user);
+      } else {
+          loginScreen.style.display = "block";
+          appScreen.style.display = "none";
+          paywallScreen.style.display = "none";
+      }
+  });
+
+  async function checkSubscription(user) {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      const now = Date.now();
+
+      if (!userSnap.exists()) {
+          // NEW USER: Create Record (Free Trial Starts)
+          await setDoc(userRef, {
+              email: user.email,
+              joinedAt: now,
+              subscriptionExpiry: 0 // No sub yet
+          });
+          openApp();
+      } else {
+          // EXISTING USER: Check Time
+          const data = userSnap.data();
+          const joinedAt = data.joinedAt;
+          const subscriptionExpiry = data.subscriptionExpiry || 0;
+          
+          const msPerHr = 1000 * 60 * 60;
+          const hoursSinceJoin = (now - joinedAt) / msPerHr;
+
+          // LOGIC: Is it within 24 hours OR Subscription Valid?
+          if (hoursSinceJoin < 24) {
+              // FREE TRIAL ACTIVE
+              document.getElementById("statusDisplay").innerText = "Free Trial Active";
+              openApp();
+          } else {
+              // TRIAL ENDED - CHECK SUB
+              if (now < subscriptionExpiry) {
+                  // PAID PLAN ACTIVE
+                  document.getElementById("statusDisplay").innerText = "Premium Active";
+                  openApp();
+              } else {
+                  // EXPIRED - PAYWALL
+                  showPaywall();
+              }
+          }
+      }
+  }
+
+  function openApp() {
+      loginScreen.style.display = "none";
+      paywallScreen.style.display = "none";
+      appScreen.style.display = "block";
+      loader.style.display = "none";
+  }
+
+  function showPaywall() {
+      loginScreen.style.display = "none";
+      appScreen.style.display = "none";
+      paywallScreen.style.display = "block";
+      loader.style.display = "none";
+  }
+
+  // 8. PAYMENT LOGIC (RAZORPAY)
+  document.getElementById("payBtn").addEventListener("click", () => {
+      const user = auth.currentUser;
+      if(!user) return;
+      
+      payLoader.style.display = "block";
+
+      // REPLACE WITH YOUR ACTUAL RAZORPAY KEY ID
+      const RZP_KEY = "YOUR_RAZORPAY_KEY_ID"; 
+
+      var options = {
+          "key": RZP_KEY, 
+          "amount": "4900", // 4900 paise = ₹49
+          "currency": "INR",
+          "name": "Voter ID Tool",
+          "description": "Premium Subscription (30 Days)",
+          "handler": async function (response) {
+              // ON SUCCESS: Update Firestore
+              const newExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // +30 Days
+              await updateDoc(doc(db, "users", user.uid), {
+                  subscriptionExpiry: newExpiry
+              });
+              alert("Payment Successful! Access Granted.");
+              location.reload();
+          },
+          "prefill": { "email": user.email },
+          "theme": { "color": "#2563eb" },
+          "modal": {
+              "ondismiss": function(){
+                  payLoader.style.display = "none";
+              }
+          }
+      };
+      
+      var rzp1 = new Razorpay(options);
+      rzp1.open();
+      rzp1.on('payment.failed', function (response){
+          alert("Payment Failed");
+          payLoader.style.display = "none";
+      });
+  });
+
+</script>
+
+<script>
+function generate(){
+    const cardFront = document.getElementById("cardFront");
+    const cardBack = document.getElementById("cardBack");
+    const lblFront = document.getElementById("lblFront");
+    const lblBack = document.getElementById("lblBack");
+
+    // Show Elements
+    cardFront.style.display = "block";
+    cardBack.style.display = "block";
+    lblFront.style.display = "block";
+    lblBack.style.display = "block";
+
+    // --- FRONT LOGIC ---
+    const epicVal     = document.getElementById("epic").value;
+    const nameVal     = document.getElementById("userName").value;
+    const nameHindi   = document.getElementById("nameHindi").value;
+    const fatherVal   = document.getElementById("fatherName").value;
+    const fatherHindi = document.getElementById("fatherHindi").value;
+    const genderVal   = document.getElementById("gender").value;
+    const dobVal      = document.getElementById("dob").value;
+
+    document.getElementById("dEpic").innerText = epicVal;
+    
+    document.getElementById("hName").innerText = "नाम : " + nameHindi;
+    document.getElementById("eName").innerText = "Name : " + nameVal;
+    
+    document.getElementById("hFather").innerText = "पिता का नाम : " + fatherHindi;
+    document.getElementById("eFather").innerText = "Father's Name : " + fatherVal;
+    
+    document.getElementById("hGender").innerText = "लिंग / Gender :";
+    document.getElementById("eGender").innerText = genderVal;
+    
+    document.getElementById("hDob").innerText = "जन्म तिथि / DOB :";
+    document.getElementById("eDob").innerText = dobVal;
+
+    // Photo Upload
+    const file = document.getElementById("photo").files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = () => document.getElementById("dPhoto").src = reader.result;
+        reader.readAsDataURL(file);
+    }
+
+    // --- BACK LOGIC ---
+    const addrHindiVal = document.getElementById("addrHindi").value;
+    const addrEngVal   = document.getElementById("addrEng").value;
+    const dateVal      = document.getElementById("dlDate").value;
+
+    document.getElementById("dispAddrHindi").innerText = addrHindiVal;
+    document.getElementById("dispAddrEng").innerText = addrEngVal;
+    
+    if(dateVal) {
+        document.getElementById("dispDate").innerText = "Date : " + dateVal;
+    } else {
+        document.getElementById("dispDate").innerText = "";
+    }
+    
+    document.getElementById("dispEpicBack").innerText = epicVal;
+}
+</script>
+
+</body>
+</html>
