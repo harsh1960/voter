@@ -14,23 +14,53 @@ body{ background: #e5e7eb; padding: 10px; min-height: 100vh; }
 /* ================= SCREENS (LOGIN / PAYWALL) ================= */
 .auth-container {
     max-width: 400px;
-    margin: 100px auto;
+    margin: 60px auto; /* Adjusted margin */
     background: white;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     text-align: center;
 }
-.auth-container h1 { margin-bottom: 10px; color: #333; }
-.auth-container p { margin-bottom: 20px; color: #666; }
+.auth-container h1 { margin-bottom: 5px; color: #333; }
+.auth-container p { margin-bottom: 20px; color: #666; font-size: 14px; }
+
+/* Auth Inputs */
+.auth-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.auth-btn {
+    background: #333; color: white; border: none; padding: 12px 20px;
+    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;
+    margin-bottom: 10px;
+}
+.auth-btn:hover { background: #555; }
+
 .google-btn {
     background: #4285F4; color: white; border: none; padding: 12px 20px;
     border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;
 }
+.google-btn:hover { background: #357ae8; }
+
 .pay-btn {
     background: #2563eb; color: white; border: none; padding: 12px 20px;
     border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;
 }
+
+.toggle-link {
+    display: block;
+    margin-top: 15px;
+    color: #2563eb;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
 .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -88,9 +118,21 @@ button.gen-btn:hover{ background: #1e40af; }
 
 <div id="login-screen" class="auth-container">
     <h1>Voter ID Tool</h1>
-    <p>Login to start your 24-Hour Free Trial.</p>
-    <button id="loginBtn" class="google-btn">Login with Google</button>
+    <p id="auth-subtext">Login to start your 24-Hour Free Trial.</p>
+
+    <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
+    <input type="password" id="passInput" class="auth-input" placeholder="Password">
+    
+    <button id="loginBtn" class="auth-btn">Login</button>
+    <button id="signupBtn" class="auth-btn" style="display:none; background-color: #059669;">Create Account</button>
+    
+    <div style="margin: 15px 0; color: #888;">OR</div>
+
+    <button id="googleBtn" class="google-btn">Continue with Google</button>
+    
     <div id="loader" class="loader"></div>
+
+    <span id="toggleAuth" class="toggle-link">New here? Create an Account</span>
 </div>
 
 <div id="paywall-screen" class="auth-container">
@@ -167,10 +209,18 @@ button.gen-btn:hover{ background: #1e40af; }
 </div>
 
 <script type="module">
-  // 1. IMPORT FIREBASE LIBRARIES
+  // 1. IMPORT FIREBASE LIBRARIES (Added Email/Password Auth)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword,
+    signOut, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   // 2. CONFIGURATION
@@ -196,19 +246,71 @@ button.gen-btn:hover{ background: #1e40af; }
   const paywallScreen = document.getElementById("paywall-screen");
   const appScreen = document.getElementById("app-screen");
   const loader = document.getElementById("loader");
-  const payLoader = document.getElementById("payLoader");
+  
+  // Auth Elements
+  const emailInput = document.getElementById("emailInput");
+  const passInput = document.getElementById("passInput");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const toggleAuth = document.getElementById("toggleAuth");
+  const googleBtn = document.getElementById("googleBtn");
 
-  // 5. LOGIN FUNCTION
-  document.getElementById("loginBtn").addEventListener("click", () => {
+  // --- TOGGLE LOGIC (LOGIN vs SIGNUP) ---
+  let isLoginMode = true;
+
+  toggleAuth.addEventListener("click", () => {
+    isLoginMode = !isLoginMode;
+    if(isLoginMode) {
+        loginBtn.style.display = "block";
+        signupBtn.style.display = "none";
+        toggleAuth.innerText = "New here? Create an Account";
+    } else {
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "block";
+        toggleAuth.innerText = "Already have an account? Login";
+    }
+  });
+
+  // --- AUTH FUNCTION: EMAIL/PASS SIGN UP ---
+  signupBtn.addEventListener("click", () => {
+    const email = emailInput.value;
+    const pass = passInput.value;
+    if(pass.length < 6) { alert("Password must be at least 6 characters"); return; }
+    
+    loader.style.display = "block";
+    createUserWithEmailAndPassword(auth, email, pass)
+        .catch((error) => {
+            console.error(error);
+            loader.style.display = "none";
+            alert("Error: " + error.message);
+        });
+  });
+
+  // --- AUTH FUNCTION: EMAIL/PASS LOGIN ---
+  loginBtn.addEventListener("click", () => {
+    const email = emailInput.value;
+    const pass = passInput.value;
+    
+    loader.style.display = "block";
+    signInWithEmailAndPassword(auth, email, pass)
+        .catch((error) => {
+            console.error(error);
+            loader.style.display = "none";
+            alert("Login Failed: " + error.message);
+        });
+  });
+
+  // --- AUTH FUNCTION: GOOGLE ---
+  googleBtn.addEventListener("click", () => {
       loader.style.display = "block";
       signInWithPopup(auth, provider).catch((error) => {
           console.error(error);
           loader.style.display = "none";
-          alert("Login Failed");
+          alert("Google Login Failed");
       });
   });
 
-  // 6. LOGOUT FUNCTION (Attached to window for onclick)
+  // 6. LOGOUT FUNCTION
   window.logout = () => {
       signOut(auth).then(() => {
           location.reload();
@@ -225,6 +327,7 @@ button.gen-btn:hover{ background: #1e40af; }
           loginScreen.style.display = "block";
           appScreen.style.display = "none";
           paywallScreen.style.display = "none";
+          loader.style.display = "none";
       }
   });
 
@@ -288,6 +391,7 @@ button.gen-btn:hover{ background: #1e40af; }
       const user = auth.currentUser;
       if(!user) return;
       
+      const payLoader = document.getElementById("payLoader");
       payLoader.style.display = "block";
 
       // REPLACE WITH YOUR ACTUAL RAZORPAY KEY ID
