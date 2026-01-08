@@ -4,85 +4,66 @@
 <meta charset="UTF-8">
 <title>Voter ID Generator (SaaS)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-/* ================= RESET & BASICS ================= */
-*{ margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-body{ background: #e5e7eb; padding: 10px; min-height: 100vh; }
+/* ================= CSS STYLES ================= */
+*{ margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body{ background: #f3f4f6; padding: 10px; min-height: 100vh; color: #333; }
 
-/* ================= SCREENS (LOGIN / PAYWALL) ================= */
+/* --- Auth & Paywall Containers --- */
 .auth-container {
-    max-width: 400px;
-    margin: 60px auto; /* Adjusted margin */
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    text-align: center;
+    max-width: 400px; margin: 60px auto; background: white; padding: 40px 30px;
+    border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;
 }
-.auth-container h1 { margin-bottom: 5px; color: #333; }
-.auth-container p { margin-bottom: 20px; color: #666; font-size: 14px; }
+.auth-container h1 { margin-bottom: 10px; color: #111827; font-size: 24px; }
+.auth-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 6px; outline: none; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
+.btn-primary { background: #2563eb; color: white; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-google { background: white; border: 1px solid #ddd; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-pay { background: #2563eb; color: white; font-size: 18px; padding: 15px; margin-top: 15px; }
 
-/* Auth Inputs */
-.auth-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.auth-btn {
-    background: #333; color: white; border: none; padding: 12px 20px;
-    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;
-    margin-bottom: 10px;
-}
-.auth-btn:hover { background: #555; }
-
-.google-btn {
-    background: #4285F4; color: white; border: none; padding: 12px 20px;
-    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;
-}
-.google-btn:hover { background: #357ae8; }
-
-.pay-btn {
-    background: #2563eb; color: white; border: none; padding: 12px 20px;
-    border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;
-}
-
-.toggle-link {
-    display: block;
-    margin-top: 15px;
-    color: #2563eb;
-    cursor: pointer;
-    font-size: 14px;
-    text-decoration: underline;
-}
-
-.loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+/* --- App Layout --- */
+.container{ max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+#app-screen, #paywall-screen { display: none; }
+#login-screen { display: block; }
+.loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* ================= APP CONTAINER (Hidden by default) ================= */
-#app-screen { display: none; }
-#login-screen { display: block; }
-#paywall-screen { display: none; }
+/* --- Dashboard / Top Bar --- */
+.top-bar {
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; font-size: 14px; background: white; 
+    padding-bottom: 15px; border-bottom: 1px solid #eee;
+}
+.timer-badge { background: #eab308; color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-family: monospace; }
+.timer-badge.premium { background: #22c55e; color: white; }
 
-/* ================= GENERATOR STYLES ================= */
-.container{ max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
-h2{ text-align: center; margin-bottom: 20px; color: #333; }
+.sub-panel {
+    background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 15px;
+    margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
+}
+.sub-details h4 { margin: 0; color: #1e40af; font-size: 16px; }
+.sub-details p { margin: 5px 0 0; color: #4b5563; font-size: 13px; }
+.upgrade-btn {
+    background: #059669; color: white; border: none; padding: 8px 16px; 
+    border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
+}
+
+/* --- Generator Form --- */
+h2{ text-align: center; margin-bottom: 25px; color: #1f2937; }
 .form{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.form input, .form textarea{ padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; width: 100%; }
+.form input, .form textarea{ padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%; outline: none; }
 .form textarea{ resize: vertical; height: 80px; }
 .full-width { grid-column: span 2; }
-.hindi-input::placeholder { color: #d946ef; font-weight: bold; }
-button.gen-btn{ margin-top: 20px; width: 100%; padding: 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-button.gen-btn:hover{ background: #1e40af; }
-.card-area { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; padding-bottom: 20px; overflow: hidden; }
-.card{ width: 420px; height: 260px; position: relative; background-color: #eee; background-size: cover; background-position: center; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,.25); display: none; flex-shrink: 0; color: #000; }
+.hindi-input::placeholder { color: #d946ef; font-weight: 600; }
+
+/* --- ID Card Design --- */
+.card-area { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; padding-bottom: 20px; }
+.card{ width: 420px; height: 260px; position: relative; background-color: #eee; background-size: cover; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: none; flex-shrink: 0; color: #000; }
 #cardFront { background-image: url("voter-bg.png"); }
 #cardBack { background-image: url("voter_back.png"); }
+
 .epic{ position: absolute; left: 12px; top: 68px; font-size: 14px; font-weight: bold; }
 .photo-box{ position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #555; background: #fff; overflow: hidden; }
 .photo-box img{ width: 100%; height: 100%; object-fit: cover; }
@@ -94,22 +75,20 @@ button.gen-btn:hover{ background: #1e40af; }
 .e-gender{ position: absolute; left: 230px; top: 195px; font-size: 11.5px; font-weight: bold; }
 .h-dob{ position: absolute; left: 140px; top: 212px; font-size: 11.5px; font-weight: bold; }
 .e-dob{ position: absolute; left: 230px; top: 212px; font-size: 11.5px; font-weight: bold; }
+
 .address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; }
-.h-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
-.h-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; }
-.e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
-.e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; }
+.h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; }
 .date-section { position: absolute; left: 160px; top: 180px; font-size: 13px; font-weight: bold; color: #000; }
 .qr-area { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
 .qr-img { width: 110px; height: 110px; object-fit: contain; border: 1px solid #ddd; background: #fff; }
 .epic-back { margin-top: 20px; font-size: 13px; font-weight: bold; color: #000; padding: 2px 5px; }
-.card-label { margin-bottom: 5px; color: #666; font-size: 14px; text-align: center; width: 420px; display: none; }
-/* Mobile Responsive */
+.card-label { margin-bottom: 5px; color: #666; font-size: 14px; text-align: center; width: 100%; display: none; }
+
 @media (max-width: 600px) {
-    .form { grid-template-columns: 1fr; }
-    .full-width { grid-column: span 1; }
+    .form { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
     .card { transform: scale(0.75); margin-bottom: -50px; }
-    .card-label { width: 100%; text-align: center; }
+    .top-bar, .sub-panel { flex-direction: column; gap: 10px; text-align: center; }
 }
 </style>
 </head>
@@ -117,39 +96,52 @@ button.gen-btn:hover{ background: #1e40af; }
 <body>
 
 <div id="login-screen" class="auth-container">
-    <h1>Voter ID Tool</h1>
-    <p id="auth-subtext">Login to start your 24-Hour Free Trial.</p>
-
+    <h1>Voter Tool</h1>
+    <p>Login to start your <strong>24-Hour Free Trial</strong></p>
+    
     <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
     <input type="password" id="passInput" class="auth-input" placeholder="Password">
     
-    <button id="loginBtn" class="auth-btn">Login</button>
-    <button id="signupBtn" class="auth-btn" style="display:none; background-color: #059669;">Create Account</button>
+    <button id="loginBtn" class="btn btn-primary">Login</button>
+    <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
     
-    <div style="margin: 15px 0; color: #888;">OR</div>
-
-    <button id="googleBtn" class="google-btn">Continue with Google</button>
+    <div style="margin: 15px 0; color: #9ca3af; font-size: 13px;">OR</div>
+    <button id="googleBtn" class="btn btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google
+    </button>
     
     <div id="loader" class="loader"></div>
-
-    <span id="toggleAuth" class="toggle-link">New here? Create an Account</span>
+    <div id="toggleAuth" style="margin-top:15px; color:#2563eb; cursor:pointer; text-decoration:underline; font-size:14px;">New here? Create an Account</div>
 </div>
 
 <div id="paywall-screen" class="auth-container">
-    <h1 style="color: #d32f2f;">Free Trial Expired</h1>
-    <p>Your 24-hour trial has ended.</p>
+    <div style="font-size: 40px;">🔒</div>
+    <h1 style="color: #d32f2f;">Trial Expired</h1>
     <p>Subscribe to continue using the tool.</p>
-    <h3>₹49 / Month</h3>
-    <button id="payBtn" class="pay-btn">Pay ₹49 & Unlock</button>
+    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h2 style="margin:5px 0; color:#b91c1c;">₹49.00 / Month</h2>
+    </div>
+    <button id="payBtnLocked" class="btn btn-pay">Pay ₹49 & Unlock</button>
     <div id="payLoader" class="loader"></div>
 </div>
 
 <div id="app-screen">
     <div class="container">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px; color:#555;">
-            <span id="userEmailDisplay">User: ...</span>
-            <span id="statusDisplay" style="color:green; font-weight:bold;">Active</span>
-            <button onclick="logout()" style="background:none; border:none; color:red; cursor:pointer; text-decoration:underline;">Logout</button>
+        <div class="top-bar">
+            <div>
+                <span id="statusDisplay" style="color:#059669; font-weight:bold;">Checking...</span>
+                <span style="color:#6b7280;" id="userEmailDisplay"></span>
+            </div>
+            <div>Time Left: <span id="timerDisplay" class="timer-badge">...</span></div>
+            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Logout</button>
+        </div>
+
+        <div id="subPanel" class="sub-panel">
+            <div class="sub-details">
+                <h4 id="subTitle">Subscription Status</h4>
+                <p id="subDesc">Loading...</p>
+            </div>
+            <button id="upgradeBtn" class="upgrade-btn" style="display:none;">Upgrade (₹49)</button>
         </div>
 
         <h2>Voter ID Generator</h2>
@@ -157,73 +149,47 @@ button.gen-btn:hover{ background: #1e40af; }
         <div class="form">
             <input id="epic" placeholder="EPIC Number">
             <input type="file" id="photo" accept="image/*">
-            
             <input id="userName" placeholder="Name (English)">
             <input id="nameHindi" class="hindi-input" placeholder="Name (Hindi / नाम हिंदी में)">
-            
             <input id="fatherName" placeholder="Father's Name (English)">
             <input id="fatherHindi" class="hindi-input" placeholder="Father Name (Hindi / पिता का नाम हिंदी में)">
-            
-            <input id="gender" placeholder="Gender (Male/Female)">
-            <input id="dob" placeholder="DOB (DD-MM-YYYY)">
-
-            <textarea id="addrHindi" class="full-width hindi-input" placeholder="Address (Write full address in Hindi / पता हिंदी में)"></textarea>
-            <textarea id="addrEng" class="full-width" placeholder="Address (Write full address in English)"></textarea>
-            
+            <input id="gender" placeholder="Gender">
+            <input id="dob" placeholder="DOB">
+            <textarea id="addrHindi" class="full-width hindi-input" placeholder="Address (Hindi / पता हिंदी में)"></textarea>
+            <textarea id="addrEng" class="full-width" placeholder="Address (English)"></textarea>
             <input id="dlDate" class="full-width" placeholder="Download Date (e.g. 25-01-2025)">
         </div>
 
-        <button class="gen-btn" onclick="generate()">Generate Voter ID Card</button>
+        <button class="btn btn-primary" style="margin-top: 20px; font-size: 18px;" onclick="generate()">Generate Voter ID Card</button>
 
         <div class="card-area">
             <div class="card-label" id="lblFront">Front Side</div>
             <div class="card" id="cardFront">
-                <div class="epic" id="dEpic"></div>
-                <div class="photo-box"><img id="dPhoto"></div>
-                <div class="h-name" id="hName"></div>
-                <div class="e-name" id="eName"></div>
-                <div class="h-father" id="hFather"></div>
-                <div class="e-father" id="eFather"></div>
-                <div class="h-gender" id="hGender"></div>
-                <div class="e-gender" id="eGender"></div>
-                <div class="h-dob" id="hDob"></div>
-                <div class="e-dob" id="eDob"></div>
+                <div class="epic" id="dEpic"></div> <div class="photo-box"><img id="dPhoto"></div>
+                <div class="h-name" id="hName"></div> <div class="e-name" id="eName"></div>
+                <div class="h-father" id="hFather"></div> <div class="e-father" id="eFather"></div>
+                <div class="h-gender" id="hGender"></div> <div class="e-gender" id="eGender"></div>
+                <div class="h-dob" id="hDob"></div> <div class="e-dob" id="eDob"></div>
             </div>
-
             <div class="card-label" id="lblBack" style="margin-top: 20px;">Back Side</div>
             <div class="card" id="cardBack">
                 <div class="address-section">
-                    <div class="h-addr-label">पता:</div>
-                    <div class="h-addr-text" id="dispAddrHindi"></div>
-                    <div class="e-addr-label">Address:</div>
-                    <div class="e-addr-text" id="dispAddrEng"></div>
+                    <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
+                    <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
                 </div>
                 <div class="date-section" id="dispDate"></div>
-                <div class="qr-area">
-                    <img src="qr.jpeg" alt="QR Code" class="qr-img">
-                    <div class="epic-back" id="dispEpicBack"></div>
-                </div>
+                <div class="qr-area"> <img src="qr.jpeg" alt="QR" class="qr-img"> <div class="epic-back" id="dispEpicBack"></div> </div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-  // 1. IMPORT FIREBASE LIBRARIES (Added Email/Password Auth)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-  import { 
-    getAuth, 
-    signInWithPopup, 
-    GoogleAuthProvider, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword,
-    signOut, 
-    onAuthStateChanged 
-  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  // 2. CONFIGURATION
+  // --- 1. PASTE YOUR FIREBASE KEYS BELOW ---
   const firebaseConfig = {
     apiKey: "AIzaSyDZLakPR2A5wQ7okDL-L7nCSxJDICiMtEQ",
     authDomain: "voter-5e759.firebaseapp.com",
@@ -234,264 +200,185 @@ button.gen-btn:hover{ background: #1e40af; }
     measurementId: "G-C6BPLSF9W7"
   };
 
-  // 3. INITIALIZE
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // 4. UI ELEMENTS
+  // Elements
   const loginScreen = document.getElementById("login-screen");
   const paywallScreen = document.getElementById("paywall-screen");
   const appScreen = document.getElementById("app-screen");
   const loader = document.getElementById("loader");
-  
-  // Auth Elements
-  const emailInput = document.getElementById("emailInput");
-  const passInput = document.getElementById("passInput");
-  const loginBtn = document.getElementById("loginBtn");
-  const signupBtn = document.getElementById("signupBtn");
-  const toggleAuth = document.getElementById("toggleAuth");
-  const googleBtn = document.getElementById("googleBtn");
 
-  // --- TOGGLE LOGIC (LOGIN vs SIGNUP) ---
+  // Auth Handlers
   let isLoginMode = true;
-
-  toggleAuth.addEventListener("click", () => {
+  document.getElementById("toggleAuth").addEventListener("click", (e) => {
     isLoginMode = !isLoginMode;
-    if(isLoginMode) {
-        loginBtn.style.display = "block";
-        signupBtn.style.display = "none";
-        toggleAuth.innerText = "New here? Create an Account";
+    document.getElementById("loginBtn").style.display = isLoginMode ? "block" : "none";
+    document.getElementById("signupBtn").style.display = isLoginMode ? "none" : "block";
+    e.target.innerText = isLoginMode ? "New here? Create an Account" : "Already have an account? Login";
+  });
+
+  const handleAuth = (method) => {
+    const email = document.getElementById("emailInput").value;
+    const pass = document.getElementById("passInput").value;
+    if(!email || !pass) return alert("Fill all fields");
+    loader.style.display="block";
+    method(auth, email, pass).catch(err => { alert(err.message); loader.style.display="none"; });
+  };
+  document.getElementById("loginBtn").addEventListener("click", () => handleAuth(signInWithEmailAndPassword));
+  document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
+  document.getElementById("googleBtn").addEventListener("click", () => {
+    loader.style.display="block";
+    signInWithPopup(auth, provider).catch(err => { alert(err.message); loader.style.display="none"; });
+  });
+
+  window.logout = () => signOut(auth).then(() => location.reload());
+
+  // --- SUBSCRIPTION LOGIC (REAL-TIME LISTENER) ---
+  let unsubscribeDoc = null; 
+  let timerInterval = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loader.style.display="block";
+        document.getElementById("userEmailDisplay").innerText = user.email;
+        // Listen to Database Updates in Real-time
+        startDocListener(user);
     } else {
-        loginBtn.style.display = "none";
-        signupBtn.style.display = "block";
-        toggleAuth.innerText = "Already have an account? Login";
+        if(unsubscribeDoc) unsubscribeDoc();
+        loginScreen.style.display="block";
+        appScreen.style.display="none";
+        paywallScreen.style.display="none";
+        loader.style.display="none";
     }
   });
 
-  // --- AUTH FUNCTION: EMAIL/PASS SIGN UP ---
-  signupBtn.addEventListener("click", () => {
-    const email = emailInput.value;
-    const pass = passInput.value;
-    if(pass.length < 6) { alert("Password must be at least 6 characters"); return; }
-    
-    loader.style.display = "block";
-    createUserWithEmailAndPassword(auth, email, pass)
-        .catch((error) => {
-            console.error(error);
-            loader.style.display = "none";
-            alert("Error: " + error.message);
-        });
-  });
-
-  // --- AUTH FUNCTION: EMAIL/PASS LOGIN ---
-  loginBtn.addEventListener("click", () => {
-    const email = emailInput.value;
-    const pass = passInput.value;
-    
-    loader.style.display = "block";
-    signInWithEmailAndPassword(auth, email, pass)
-        .catch((error) => {
-            console.error(error);
-            loader.style.display = "none";
-            alert("Login Failed: " + error.message);
-        });
-  });
-
-  // --- AUTH FUNCTION: GOOGLE ---
-  googleBtn.addEventListener("click", () => {
-      loader.style.display = "block";
-      signInWithPopup(auth, provider).catch((error) => {
-          console.error(error);
-          loader.style.display = "none";
-          alert("Google Login Failed");
-      });
-  });
-
-  // 6. LOGOUT FUNCTION
-  window.logout = () => {
-      signOut(auth).then(() => {
-          location.reload();
-      });
-  };
-
-  // 7. CHECK AUTH STATE & SUBSCRIPTION LOGIC
-  onAuthStateChanged(auth, async (user) => {
-      if (user) {
-          loader.style.display = "block";
-          document.getElementById("userEmailDisplay").innerText = "User: " + user.email;
-          await checkSubscription(user);
-      } else {
-          loginScreen.style.display = "block";
-          appScreen.style.display = "none";
-          paywallScreen.style.display = "none";
-          loader.style.display = "none";
-      }
-  });
-
-  async function checkSubscription(user) {
+  function startDocListener(user) {
       const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      const now = Date.now();
+      
+      unsubscribeDoc = onSnapshot(userRef, async (docSnap) => {
+          const now = Date.now();
 
-      if (!userSnap.exists()) {
-          // NEW USER: Create Record (Free Trial Starts)
-          await setDoc(userRef, {
-              email: user.email,
-              joinedAt: now,
-              subscriptionExpiry: 0 // No sub yet
-          });
-          openApp();
-      } else {
-          // EXISTING USER: Check Time
-          const data = userSnap.data();
-          const joinedAt = data.joinedAt;
-          const subscriptionExpiry = data.subscriptionExpiry || 0;
-          
-          const msPerHr = 1000 * 60 * 60;
-          const hoursSinceJoin = (now - joinedAt) / msPerHr;
-
-          // LOGIC: Is it within 24 hours OR Subscription Valid?
-          if (hoursSinceJoin < 24) {
-              // FREE TRIAL ACTIVE
-              document.getElementById("statusDisplay").innerText = "Free Trial Active";
-              openApp();
+          if (!docSnap.exists()) {
+              // New User: Create Trial Doc
+              await setDoc(userRef, { email: user.email, joinedAt: now, subscriptionExpiry: 0 });
+              // The snapshot will trigger again instantly after creation
           } else {
-              // TRIAL ENDED - CHECK SUB
-              if (now < subscriptionExpiry) {
-                  // PAID PLAN ACTIVE
-                  document.getElementById("statusDisplay").innerText = "Premium Active";
+              // Existing User: Check Status
+              const data = docSnap.data();
+              const trialEnd = data.joinedAt + 86400000; // 24 hours
+              const subEnd = data.subscriptionExpiry || 0;
+
+              // Priority: 1. Premium -> 2. Trial -> 3. Expired
+              if (now < subEnd) {
+                  // PREMIUM
+                  updateUI("PREMIUM", subEnd);
+                  startTimer(subEnd, "PREMIUM");
+                  openApp();
+              } else if (now < trialEnd) {
+                  // TRIAL
+                  updateUI("TRIAL", null);
+                  startTimer(trialEnd, "TRIAL");
                   openApp();
               } else {
-                  // EXPIRED - PAYWALL
+                  // EXPIRED
                   showPaywall();
               }
           }
+      });
+  }
+
+  function updateUI(status, expiry) {
+      const title = document.getElementById("subTitle");
+      const desc = document.getElementById("subDesc");
+      const btn = document.getElementById("upgradeBtn");
+      const disp = document.getElementById("statusDisplay");
+
+      if(status === "TRIAL") {
+          disp.innerText = "Free Trial"; disp.style.color = "#eab308";
+          title.innerText = "Free Trial Active";
+          desc.innerText = "Expires in 24 hours.";
+          btn.style.display = "block";
+      } else {
+          disp.innerText = "Premium"; disp.style.color = "#22c55e";
+          const dateStr = new Date(expiry).toLocaleDateString("en-IN");
+          title.innerText = "Premium Active";
+          desc.innerText = "Valid until: " + dateStr;
+          btn.style.display = "none";
       }
   }
 
+  function startTimer(endTime, type) {
+      if(timerInterval) clearInterval(timerInterval);
+      const badge = document.getElementById("timerDisplay");
+      if(type==="PREMIUM") badge.classList.add("premium"); else badge.classList.remove("premium");
+
+      timerInterval = setInterval(() => {
+          const now = Date.now();
+          const diff = endTime - now;
+          if(diff <= 0) { clearInterval(timerInterval); return; } // Snapshot will handle expiry state
+          const d = Math.floor(diff / (1000*60*60*24));
+          const h = Math.floor((diff / (1000*60*60)) % 24);
+          const m = Math.floor((diff / (1000*60)) % 60);
+          badge.innerText = type==="PREMIUM" && d>0 ? `${d}d ${h}h` : `${h}h ${m}m`;
+      }, 1000);
+  }
+
   function openApp() {
-      loginScreen.style.display = "none";
-      paywallScreen.style.display = "none";
-      appScreen.style.display = "block";
-      loader.style.display = "none";
+      loginScreen.style.display="none"; paywallScreen.style.display="none";
+      appScreen.style.display="block"; loader.style.display="none";
   }
-
   function showPaywall() {
-      loginScreen.style.display = "none";
-      appScreen.style.display = "none";
-      paywallScreen.style.display = "block";
-      loader.style.display = "none";
+      loginScreen.style.display="none"; appScreen.style.display="none";
+      paywallScreen.style.display="block"; loader.style.display="none";
   }
 
-  // 8. PAYMENT LOGIC (RAZORPAY)
-  document.getElementById("payBtn").addEventListener("click", () => {
+  // --- RAZORPAY LINK HANDLER (PRE-FILL EMAIL) ---
+  const triggerRazorpay = () => {
       const user = auth.currentUser;
-      if(!user) return;
       
-      const payLoader = document.getElementById("payLoader");
-      payLoader.style.display = "block";
-
-      // REPLACE WITH YOUR ACTUAL RAZORPAY KEY ID
-      const RZP_KEY = "YOUR_RAZORPAY_KEY_ID"; 
-
-      var options = {
-          "key": RZP_KEY, 
-          "amount": "4900", // 4900 paise = ₹49
-          "currency": "INR",
-          "name": "Voter ID Tool",
-          "description": "Premium Subscription (30 Days)",
-          "handler": async function (response) {
-              // ON SUCCESS: Update Firestore
-              const newExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // +30 Days
-              await updateDoc(doc(db, "users", user.uid), {
-                  subscriptionExpiry: newExpiry
-              });
-              alert("Payment Successful! Access Granted.");
-              location.reload();
-          },
-          "prefill": { "email": user.email },
-          "theme": { "color": "#2563eb" },
-          "modal": {
-              "ondismiss": function(){
-                  payLoader.style.display = "none";
-              }
-          }
-      };
+      // 2. PASTE YOUR RAZORPAY PAYMENT LINK HERE
+      // Example: "https://rzp.io/l/xYxYxYx"
+      const BASE_LINK = "https://rzp.io/rzp/VpoZFUQP"; 
       
-      var rzp1 = new Razorpay(options);
-      rzp1.open();
-      rzp1.on('payment.failed', function (response){
-          alert("Payment Failed");
-          payLoader.style.display = "none";
-      });
-  });
+      // Append Email automatically (Important!)
+      const finalLink = `${BASE_LINK}?email=${encodeURIComponent(user.email)}`;
+
+      // Alert & Redirect
+      if(confirm(`We will redirect you to Razorpay.\n\nPlease ensure the Email field shows:\n${user.email}\n\nDo not change this email, or your account won't unlock.`)) {
+          window.location.href = finalLink;
+      }
+  };
+
+  document.getElementById("payBtnLocked").addEventListener("click", triggerRazorpay);
+  document.getElementById("upgradeBtn").addEventListener("click", triggerRazorpay);
 
 </script>
 
 <script>
 function generate(){
-    const cardFront = document.getElementById("cardFront");
-    const cardBack = document.getElementById("cardBack");
-    const lblFront = document.getElementById("lblFront");
-    const lblBack = document.getElementById("lblBack");
-
-    // Show Elements
-    cardFront.style.display = "block";
-    cardBack.style.display = "block";
-    lblFront.style.display = "block";
-    lblBack.style.display = "block";
-
-    // --- FRONT LOGIC ---
-    const epicVal     = document.getElementById("epic").value;
-    const nameVal     = document.getElementById("userName").value;
-    const nameHindi   = document.getElementById("nameHindi").value;
-    const fatherVal   = document.getElementById("fatherName").value;
-    const fatherHindi = document.getElementById("fatherHindi").value;
-    const genderVal   = document.getElementById("gender").value;
-    const dobVal      = document.getElementById("dob").value;
-
-    document.getElementById("dEpic").innerText = epicVal;
+    document.getElementById("cardFront").style.display = "block";
+    document.getElementById("cardBack").style.display = "block";
+    document.getElementById("lblFront").style.display = "block";
+    document.getElementById("lblBack").style.display = "block";
     
-    document.getElementById("hName").innerText = "नाम : " + nameHindi;
-    document.getElementById("eName").innerText = "Name : " + nameVal;
+    const get = id => document.getElementById(id).value;
+    const set = (id, val) => document.getElementById(id).innerText = val;
     
-    document.getElementById("hFather").innerText = "पिता का नाम : " + fatherHindi;
-    document.getElementById("eFather").innerText = "Father's Name : " + fatherVal;
+    set("dEpic", get("epic"));
+    set("hName", "नाम : " + get("nameHindi")); set("eName", "Name : " + get("userName"));
+    set("hFather", "पिता का नाम : " + get("fatherHindi")); set("eFather", "Father's Name : " + get("fatherName"));
+    set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
+    set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
+    set("dispAddrHindi", get("addrHindi")); set("dispAddrEng", get("addrEng"));
+    set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
+    set("dispEpicBack", get("epic"));
     
-    document.getElementById("hGender").innerText = "लिंग / Gender :";
-    document.getElementById("eGender").innerText = genderVal;
-    
-    document.getElementById("hDob").innerText = "जन्म तिथि / DOB :";
-    document.getElementById("eDob").innerText = dobVal;
-
-    // Photo Upload
     const file = document.getElementById("photo").files[0];
-    if(file){
-        const reader = new FileReader();
-        reader.onload = () => document.getElementById("dPhoto").src = reader.result;
-        reader.readAsDataURL(file);
-    }
-
-    // --- BACK LOGIC ---
-    const addrHindiVal = document.getElementById("addrHindi").value;
-    const addrEngVal   = document.getElementById("addrEng").value;
-    const dateVal      = document.getElementById("dlDate").value;
-
-    document.getElementById("dispAddrHindi").innerText = addrHindiVal;
-    document.getElementById("dispAddrEng").innerText = addrEngVal;
-    
-    if(dateVal) {
-        document.getElementById("dispDate").innerText = "Date : " + dateVal;
-    } else {
-        document.getElementById("dispDate").innerText = "";
-    }
-    
-    document.getElementById("dispEpicBack").innerText = epicVal;
+    if(file){ const r = new FileReader(); r.onload=()=>document.getElementById("dPhoto").src=r.result; r.readAsDataURL(file); }
 }
 </script>
-
 </body>
 </html>
