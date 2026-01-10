@@ -2,7 +2,424 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Voter ID Generator (SaaS)</title><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <title>Voter ID Generator (SaaS)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ================= CSS STYLES ================= */
+*{ margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body{ background: #f3f4f6; padding: 10px; min-height: 100vh; color: #333; }
+
+/* --- Auth & Paywall & Pending --- */
+.auth-container {
+    max-width: 400px; margin: 60px auto; background: white; padding: 40px 30px;
+    border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;
+}
+.auth-container h1 { margin-bottom: 10px; color: #111827; font-size: 24px; }
+.auth-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 6px; outline: none; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
+.btn-primary { background: #2563eb; color: white; }
+.btn-google { background: white; border: 1px solid #ddd; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-pay { background: #2563eb; color: white; font-size: 16px; padding: 12px; text-decoration: none; display: block; }
+.btn-pay:hover { background: #1d4ed8; }
+
+/* --- App Layout --- */
+.container{ max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+#app-screen, #paywall-screen, #pending-screen { display: none; }
+#login-screen { display: block; }
+.loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- Top Bar & Panel --- */
+.top-bar {
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; font-size: 14px; background: white; 
+    padding-bottom: 15px; border-bottom: 1px solid #eee;
+}
+.timer-badge { background: #eab308; color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-family: monospace; }
+.timer-badge.premium { background: #22c55e; color: white; }
+
+.sub-panel {
+    background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 15px;
+    margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
+}
+.sub-details h4 { margin: 0; color: #1e40af; font-size: 16px; }
+.sub-details p { margin: 5px 0 0; color: #4b5563; font-size: 13px; }
+.upgrade-btn {
+    background: #059669; color: white; border: none; padding: 8px 16px; 
+    border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
+}
+
+/* --- Generator Form --- */
+h2{ text-align: center; margin-bottom: 25px; color: #1f2937; }
+.form{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form input, .form textarea{ padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%; outline: none; }
+.form textarea{ resize: vertical; height: 80px; }
+.full-width { grid-column: span 2; }
+.hindi-input::placeholder { color: #d946ef; font-weight: 600; }
+
+/* --- Card --- */
+.card-area { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; padding-bottom: 20px; }
+.card{ width: 420px; height: 260px; position: relative; background-color: #eee; background-size: cover; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: none; flex-shrink: 0; color: #000; }
+#cardFront { background-image: url("voter-bg.png"); }
+#cardBack { background-image: url("voter_back.png"); }
+
+/* Text Positions */
+.epic{ position: absolute; left: 12px; top: 68px; font-size: 14px; font-weight: bold; }
+.photo-box{ position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #555; background: #fff; overflow: hidden; }
+.photo-box img{ width: 100%; height: 100%; object-fit: cover; }
+.h-name{ position: absolute; left: 140px; top: 120px; font-size: 12.5px; font-weight: bold; }
+.e-name{ position: absolute; left: 140px; top: 138px; font-size: 12.5px; font-weight: bold; }
+.h-father{ position: absolute; left: 140px; top: 158px; font-size: 12px; font-weight: bold; }
+.e-father{ position: absolute; left: 140px; top: 175px; font-size: 12px; font-weight: bold; }
+.h-gender{ position: absolute; left: 140px; top: 195px; font-size: 11.5px; font-weight: bold; }
+.e-gender{ position: absolute; left: 230px; top: 195px; font-size: 11.5px; font-weight: bold; }
+.h-dob{ position: absolute; left: 140px; top: 212px; font-size: 11.5px; font-weight: bold; }
+.e-dob{ position: absolute; left: 230px; top: 212px; font-size: 11.5px; font-weight: bold; }
+
+.address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; }
+.h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; }
+.date-section { position: absolute; left: 160px; top: 180px; font-size: 13px; font-weight: bold; color: #000; }
+.qr-area { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
+.qr-img { width: 110px; height: 110px; object-fit: contain; border: 1px solid #ddd; background: #fff; }
+.epic-back { margin-top: 20px; font-size: 13px; font-weight: bold; color: #000; padding: 2px 5px; }
+.card-label { margin-bottom: 5px; color: #666; font-size: 14px; text-align: center; width: 100%; display: none; }
+
+@media (max-width: 600px) {
+    .form { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
+    .card { transform: scale(0.75); margin-bottom: -50px; }
+    .top-bar, .sub-panel { flex-direction: column; gap: 10px; text-align: center; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="login-screen" class="auth-container">
+    <h1>Voter Tool</h1>
+    <p>Login to start your <strong>24-Hour Free Trial</strong></p>
+    
+    <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
+    <input type="password" id="passInput" class="auth-input" placeholder="Password">
+    
+    <button id="loginBtn" class="btn btn-primary">Login</button>
+    <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
+    
+    <div style="margin: 15px 0; color: #9ca3af; font-size: 13px;">OR</div>
+    <button id="googleBtn" class="btn btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google
+    </button>
+    <div id="loader" class="loader"></div>
+    <div id="toggleAuth" style="margin-top:15px; color:#2563eb; cursor:pointer; text-decoration:underline; font-size:14px;">New here? Create an Account</div>
+</div>
+
+<div id="paywall-screen" class="auth-container">
+    <div style="font-size: 40px;">🔒</div>
+    <h1 style="color: #d32f2f;">Trial Expired</h1>
+    <p>Subscribe to continue (₹49/month).</p>
+    
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="margin:0 0 10px 0; color:#1e40af; font-size: 16px;">Step 1: Pay Here</h3>
+        <a href="https://topmate.io/herox_tech/1884489" target="_blank" class="btn btn-pay">
+            Pay ₹49 on Topmate
+        </a>
+        <p style="font-size:12px; color:#666; margin-top:5px;">(Copy the Transaction/UTR ID after paying)</p>
+    </div>
+
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="margin:0 0 10px 0; color:#166534; font-size: 16px;">Step 2: Verify</h3>
+        <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID">
+        <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a;">Submit Request</button>
+    </div>
+    
+    <p id="msgDisplay" style="color:#d32f2f; font-size:13px; font-weight:bold;"></p>
+</div>
+
+<div id="pending-screen" class="auth-container">
+    <div style="font-size: 40px;">⏳</div>
+    <h1 style="color: #d97706;">Verification Pending</h1>
+    <p>We have received your payment request.</p>
+    <div style="background:#f3f4f6; padding:10px; margin:15px 0; border-radius:6px; font-size:14px; text-align: left;">
+        <strong>Status:</strong> Under Review<br>
+        <strong>UTR Submitted:</strong> <span id="dispUTR" style="font-family: monospace;">...</span>
+    </div>
+    <p style="font-size:13px; color:#6b7280;">Please wait for admin approval.<br>This page will auto-refresh once approved.</p>
+    <button onclick="logout()" class="btn" style="border:1px solid #ddd; margin-top:10px;">Logout</button>
+</div>
+
+<div id="app-screen">
+    <div class="container">
+        <div class="top-bar">
+            <div>
+                <span id="statusDisplay" style="color:#059669; font-weight:bold;">Checking...</span>
+                <span style="color:#6b7280;" id="userEmailDisplay"></span>
+            </div>
+            <div>Time Left: <span id="timerDisplay" class="timer-badge">...</span></div>
+            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Logout</button>
+        </div>
+
+        <div id="subPanel" class="sub-panel">
+            <div class="sub-details">
+                <h4 id="subTitle">Subscription Status</h4>
+                <p id="subDesc">Loading...</p>
+            </div>
+            <button id="upgradeBtn" class="upgrade-btn" style="display:none;">Upgrade (₹49)</button>
+        </div>
+
+        <h2>Voter ID Generator</h2>
+
+        <div class="form">
+            <input id="epic" placeholder="EPIC Number">
+            <input type="file" id="photo" accept="image/*">
+            <input id="userName" placeholder="Name (English)">
+            <input id="nameHindi" class="hindi-input" placeholder="Name (Hindi / नाम हिंदी में)">
+            <input id="fatherName" placeholder="Father's Name (English)">
+            <input id="fatherHindi" class="hindi-input" placeholder="Father Name (Hindi / पिता का नाम हिंदी में)">
+            <input id="gender" placeholder="Gender">
+            <input id="dob" placeholder="DOB">
+            <textarea id="addrHindi" class="full-width hindi-input" placeholder="Address (Hindi / पता हिंदी में)"></textarea>
+            <textarea id="addrEng" class="full-width" placeholder="Address (English)"></textarea>
+            <input id="dlDate" class="full-width" placeholder="Download Date">
+        </div>
+
+        <button class="btn btn-primary" style="margin-top: 20px; font-size: 18px;" onclick="generate()">Generate Voter ID Card</button>
+
+        <div class="card-area">
+            <div class="card-label" id="lblFront">Front Side</div>
+            <div class="card" id="cardFront">
+                <div class="epic" id="dEpic"></div> <div class="photo-box"><img id="dPhoto"></div>
+                <div class="h-name" id="hName"></div> <div class="e-name" id="eName"></div>
+                <div class="h-father" id="hFather"></div> <div class="e-father" id="eFather"></div>
+                <div class="h-gender" id="hGender"></div> <div class="e-gender" id="eGender"></div>
+                <div class="h-dob" id="hDob"></div> <div class="e-dob" id="eDob"></div>
+            </div>
+            <div class="card-label" id="lblBack" style="margin-top: 20px;">Back Side</div>
+            <div class="card" id="cardBack">
+                <div class="address-section">
+                    <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
+                    <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
+                </div>
+                <div class="date-section" id="dispDate"></div>
+                <div class="qr-area"> <img src="qr.jpeg" alt="QR" class="qr-img"> <div class="epic-back" id="dispEpicBack"></div> </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  // --- 1. PASTE YOUR FIREBASE KEYS HERE ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZLakPR2A5wQ7okDL-L7nCSxJDICiMtEQ",
+    authDomain: "voter-5e759.firebaseapp.com",
+    projectId: "voter-5e759",
+    storageBucket: "voter-5e759.firebasestorage.app",
+    messagingSenderId: "118588658962",
+    appId: "1:118588658962:web:048048d4e8593e95580fcb",
+    measurementId: "G-C6BPLSF9W7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // Elements
+  const loginScreen = document.getElementById("login-screen");
+  const paywallScreen = document.getElementById("paywall-screen");
+  const pendingScreen = document.getElementById("pending-screen");
+  const appScreen = document.getElementById("app-screen");
+  const loader = document.getElementById("loader");
+
+  // Auth Logic
+  let isLoginMode = true;
+  document.getElementById("toggleAuth").addEventListener("click", (e) => {
+    isLoginMode = !isLoginMode;
+    document.getElementById("loginBtn").style.display = isLoginMode ? "block" : "none";
+    document.getElementById("signupBtn").style.display = isLoginMode ? "none" : "block";
+    e.target.innerText = isLoginMode ? "New here? Create an Account" : "Already have an account? Login";
+  });
+
+  const handleAuth = (method) => {
+    const email = document.getElementById("emailInput").value;
+    const pass = document.getElementById("passInput").value;
+    if(!email || !pass) return alert("Fill all fields");
+    loader.style.display="block";
+    method(auth, email, pass).catch(err => { alert(err.message); loader.style.display="none"; });
+  };
+  document.getElementById("loginBtn").addEventListener("click", () => handleAuth(signInWithEmailAndPassword));
+  document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
+  document.getElementById("googleBtn").addEventListener("click", () => {
+    loader.style.display="block";
+    signInWithPopup(auth, provider).catch(err => { alert(err.message); loader.style.display="none"; });
+  });
+
+  window.logout = () => signOut(auth).then(() => location.reload());
+
+  // --- MAIN SCREEN SWITCHING LOGIC ---
+  let unsubscribeDoc = null; 
+  let timerInterval = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loader.style.display="block";
+        document.getElementById("userEmailDisplay").innerText = user.email;
+        startDocListener(user);
+    } else {
+        if(unsubscribeDoc) unsubscribeDoc();
+        showScreen(loginScreen);
+    }
+  });
+
+  function showScreen(screen) {
+      [loginScreen, paywallScreen, pendingScreen, appScreen].forEach(s => s.style.display="none");
+      screen.style.display = "block";
+      loader.style.display = "none";
+  }
+
+  function startDocListener(user) {
+      const userRef = doc(db, "users", user.uid);
+      
+      unsubscribeDoc = onSnapshot(userRef, async (docSnap) => {
+          const now = Date.now();
+
+          if (!docSnap.exists()) {
+              await setDoc(userRef, { email: user.email, joinedAt: now, subscriptionExpiry: 0 });
+          } else {
+              const data = docSnap.data();
+              const trialEnd = data.joinedAt + 86400000; 
+              const subEnd = data.subscriptionExpiry || 0;
+              const payStatus = data.paymentStatus || "none"; 
+
+              // 1. If Premium -> Show App
+              if (subEnd > now) {
+                  updateUI("PREMIUM", subEnd);
+                  startTimer(subEnd, "PREMIUM");
+                  showScreen(appScreen);
+              } 
+              // 2. If Pending -> Show Pending Screen
+              else if (payStatus === "pending") {
+                  document.getElementById("dispUTR").innerText = data.utrNumber || "N/A";
+                  showScreen(pendingScreen);
+              }
+              // 3. If Trial -> Show App
+              else if (now < trialEnd) {
+                  updateUI("TRIAL", null);
+                  startTimer(trialEnd, "TRIAL");
+                  showScreen(appScreen);
+              } 
+              // 4. Else -> Expired (Paywall)
+              else {
+                  showScreen(paywallScreen);
+              }
+          }
+      });
+  }
+
+  function updateUI(status, expiry) {
+      const title = document.getElementById("subTitle");
+      const desc = document.getElementById("subDesc");
+      const btn = document.getElementById("upgradeBtn");
+      const disp = document.getElementById("statusDisplay");
+
+      if(status === "TRIAL") {
+          disp.innerText = "Free Trial"; disp.style.color = "#eab308";
+          title.innerText = "Free Trial Active";
+          desc.innerText = "Expires in 24 hours.";
+          btn.style.display = "block";
+      } else {
+          disp.innerText = "Premium"; disp.style.color = "#22c55e";
+          const dateStr = new Date(expiry).toLocaleDateString("en-IN");
+          title.innerText = "Premium Plan Active";
+          desc.innerText = "Valid until: " + dateStr;
+          btn.style.display = "none";
+      }
+  }
+
+  function startTimer(endTime, type) {
+      if(timerInterval) clearInterval(timerInterval);
+      const badge = document.getElementById("timerDisplay");
+      if(type==="PREMIUM") badge.classList.add("premium"); else badge.classList.remove("premium");
+
+      timerInterval = setInterval(() => {
+          const now = Date.now();
+          const diff = endTime - now;
+          if(diff <= 0) { clearInterval(timerInterval); return; } 
+          const d = Math.floor(diff / (1000*60*60*24));
+          const h = Math.floor((diff / (1000*60*60)) % 24);
+          const m = Math.floor((diff / (1000*60)) % 60);
+          badge.innerText = type==="PREMIUM" && d>0 ? `${d}d ${h}h` : `${h}h ${m}m`;
+      }, 1000);
+  }
+
+  // --- NEW: HANDLE UTR SUBMISSION ---
+  document.getElementById("submitUtrBtn").addEventListener("click", async () => {
+      const utr = document.getElementById("utrInput").value.trim();
+      const btn = document.getElementById("submitUtrBtn");
+      const msg = document.getElementById("msgDisplay");
+      
+      if(utr.length < 8) return alert("Please enter a valid UTR / Transaction ID");
+      
+      btn.innerText = "Submitting...";
+      btn.disabled = true;
+      const user = auth.currentUser;
+
+      try {
+          const userRef = doc(db, "users", user.uid);
+          
+          // Update the user document. 
+          // The onSnapshot listener above will detect "pending" and switch the screen automatically.
+          await updateDoc(userRef, {
+              paymentStatus: "pending",   
+              utrNumber: utr,             
+              submittedAt: Date.now()
+          });
+          
+      } catch (e) {
+          alert("Error: " + e.message);
+          btn.innerText = "Submit Request";
+          btn.disabled = false;
+      }
+  });
+
+  // Handle "Upgrade" button inside the app (Redirect to paywall logic)
+  document.getElementById("upgradeBtn").addEventListener("click", () => {
+      showScreen(paywallScreen);
+  });
+
+</script>
+
+<script>
+function generate(){
+    document.getElementById("cardFront").style.display = "block";
+    document.getElementById("cardBack").style.display = "block";
+    document.getElementById("lblFront").style.display = "block";
+    document.getElementById("lblBack").style.display = "block";
+    
+    const get = id => document.getElementById(id).value;
+    const set = (id, val) => document.getElementById(id).innerText = val;
+    set("dEpic", get("epic"));
+    set("hName", "नाम : " + get("nameHindi")); set("eName", "Name : " + get("userName"));
+    set("hFather", "पिता का नाम : " + get("fatherHindi")); set("eFather", "Father's Name : " + get("fatherName"));
+    set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
+    set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
+    set("dispAddrHindi", get("addrHindi")); set("dispAddrEng", get("addrEng"));
+    set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
+    set("dispEpicBack", get("epic"));
+    const file = document.getElementById("photo").files[0];
+    if(file){ const r = new FileReader(); r.onload=()=>document.getElementById("dPhoto").src=r.result; r.readAsDataURL(file); }
+}
+</script>
+</body>
+</html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
