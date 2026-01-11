@@ -3,206 +3,354 @@
 <head>
 <meta charset="UTF-8">
 <title>Voter ID Generator (SaaS)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* ================= CSS STYLES ================= */
-*{ margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body{ background: #f3f4f6; padding: 10px; min-height: 100vh; color: #333; }
-
-/* --- Auth & Paywall & Pending --- */
-.auth-container {
-    max-width: 400px; margin: 60px auto; background: white; padding: 40px 30px;
-    border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;
+/* ================= CSS VARIABLES & RESET ================= */
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --danger: #ef4444;
+    --success: #10b981;
+    --bg-color: #f8fafc;
+    --surface: #ffffff;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-.auth-container h1 { margin-bottom: 10px; color: #111827; font-size: 24px; }
-.auth-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 6px; outline: none; }
-.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
-.btn-primary { background: #2563eb; color: white; }
-.btn-google { background: white; border: 1px solid #ddd; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
-.btn-pay { background: #2563eb; color: white; font-size: 16px; padding: 12px; text-decoration: none; display: block; }
-.btn-pay:hover { background: #1d4ed8; }
 
-/* --- App Layout --- */
-.container{ max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 40px; }
+
+/* ================= AUTH CONTAINERS ================= */
+.auth-wrapper {
+    display: flex; justify-content: center; align-items: center; min-height: 90vh; padding: 20px;
+}
+.auth-box {
+    width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
+    border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
+}
+.auth-box h1 { font-size: 24px; margin-bottom: 10px; color: var(--text-main); }
+.auth-input {
+    width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #f8fafc;
+}
+.auth-input:focus { border-color: var(--primary); background: #fff; }
+
+.btn {
+    width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px;
+    font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
+
+/* ================= APP LAYOUT ================= */
 #app-screen, #paywall-screen, #pending-screen { display: none; }
-#login-screen { display: block; }
-.loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+.container { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+/* Header */
+.app-header {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); padding: 15px 20px; border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 20px; position: sticky; top: 10px; z-index: 100;
+}
+.user-info { display: flex; flex-direction: column; }
+.user-email { font-size: 12px; color: var(--text-sub); }
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.icon-btn {
+    background: #eff6ff; color: var(--primary); width: 40px; height: 40px;
+    border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: 0.2s;
+}
+.icon-btn:active { transform: scale(0.9); }
+
+/* Subscription Panel */
+.sub-panel {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: var(--radius); padding: 15px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
+}
+.sub-txt h4 { color: #1e40af; font-size: 15px; margin-bottom: 2px; }
+.sub-txt p { color: #3b82f6; font-size: 12px; }
+.timer-badge { background: #fff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+
+/* Form Grid */
+.form-card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.full-width { grid-column: span 2; }
+.input-group { position: relative; }
+.input-group label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
+.form-input {
+    width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 15px; outline: none; transition: border 0.2s;
+}
+.form-input:focus { border-color: var(--primary); }
+textarea.form-input { height: 80px; resize: none; }
+.hindi-ph::placeholder { color: #d946ef; opacity: 0.7; }
+
+/* ================= CARD PREVIEW STYLES ================= */
+.preview-section { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
+.card-wrapper {
+    width: 420px; height: 260px; position: relative; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff;
+    color: #000;
+}
+.card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+
+/* Front Elements */
+.c-text { position: absolute; font-weight: bold; color: #000; white-space: nowrap; }
+.c-photo { position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #444; background: #fff; overflow: hidden; }
+.c-photo img { width: 100%; height: 100%; object-fit: cover; }
+.qr-box { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
+.qr-img { width: 110px; height: 110px; object-fit: contain; background: #fff; }
+
+/* Positioning (Front) */
+.p-epic { left: 12px; top: 68px; font-size: 14px; }
+.p-h-name { left: 140px; top: 120px; font-size: 12.5px; }
+.p-e-name { left: 140px; top: 138px; font-size: 12.5px; }
+.p-h-fath { left: 140px; top: 158px; font-size: 12px; }
+.p-e-fath { left: 140px; top: 175px; font-size: 12px; }
+.p-h-gen { left: 140px; top: 195px; font-size: 11.5px; }
+.p-e-gen { left: 230px; top: 195px; font-size: 11.5px; }
+.p-h-dob { left: 140px; top: 212px; font-size: 11.5px; }
+.p-e-dob { left: 230px; top: 212px; font-size: 11.5px; }
+
+/* Back Side Original Styles */
+.address-section { 
+    position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10;
+}
+.h-addr-label, .e-addr-label { 
+    font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000;
+}
+.h-addr-text, .e-addr-text { 
+    font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000;
+}
+
+/* Back Elements */
+.p-date { left: 160px; top: 180px; font-size: 13px; }
+.p-epic-back { font-size: 13px; margin-top: 5px; font-weight: bold; color: #000; }
+
+/* History Modal */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: flex-end;
+}
+.modal-content {
+    background: #fff; width: 100%; max-width: 600px; margin: 0 auto;
+    border-top-left-radius: 20px; border-top-right-radius: 20px;
+    height: 80vh; display: flex; flex-direction: column; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+.history-item {
+    background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent;
+}
+.history-item:hover { border-color: var(--primary); }
+.h-ep { font-weight: bold; color: var(--primary); font-size: 14px; }
+.h-nm { font-size: 13px; color: var(--text-main); margin-top: 2px; }
+.h-dt { font-size: 11px; color: var(--text-sub); margin-top: 5px; text-align: right; }
+
+/* ================= CUSTOM TOAST POPUP ================= */
+#toast-container {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px;
+}
+.toast {
+    background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-left: 5px solid #333;
+}
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast-icon { font-size: 20px; }
+.toast.success .toast-icon { color: var(--success); }
+.toast.error .toast-icon { color: var(--danger); }
+.toast-msg { font-size: 14px; font-weight: 600; color: #333; }
+
+/* Custom Confirm Modal */
+.confirm-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+    z-index: 2000; display: none; align-items: center; justify-content: center;
+}
+.confirm-box {
+    background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease;
+}
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
+
+/* Loader */
+.loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* --- Top Bar & Panel --- */
-.top-bar {
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 15px; font-size: 14px; background: white; 
-    padding-bottom: 15px; border-bottom: 1px solid #eee;
-}
-.timer-badge { background: #eab308; color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-family: monospace; }
-.timer-badge.premium { background: #22c55e; color: white; }
-
-.sub-panel {
-    background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 15px;
-    margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
-}
-.sub-details h4 { margin: 0; color: #1e40af; font-size: 16px; }
-.sub-details p { margin: 5px 0 0; color: #4b5563; font-size: 13px; }
-.upgrade-btn {
-    background: #059669; color: white; border: none; padding: 8px 16px; 
-    border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
-}
-
-/* --- Generator Form --- */
-h2{ text-align: center; margin-bottom: 25px; color: #1f2937; }
-.form{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.form input, .form textarea{ padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%; outline: none; }
-.form textarea{ resize: vertical; height: 80px; }
-.full-width { grid-column: span 2; }
-.hindi-input::placeholder { color: #d946ef; font-weight: 600; }
-
-/* --- Card --- */
-.card-area { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; padding-bottom: 20px; }
-.card{ width: 420px; height: 260px; position: relative; background-color: #eee; background-size: cover; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: none; flex-shrink: 0; color: #000; }
-#cardFront { background-image: url("voter-bg.png"); }
-#cardBack { background-image: url("voter_back.png"); }
-
-/* Text Positions */
-.epic{ position: absolute; left: 12px; top: 68px; font-size: 14px; font-weight: bold; }
-.photo-box{ position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #555; background: #fff; overflow: hidden; }
-.photo-box img{ width: 100%; height: 100%; object-fit: cover; }
-.h-name{ position: absolute; left: 140px; top: 120px; font-size: 12.5px; font-weight: bold; }
-.e-name{ position: absolute; left: 140px; top: 138px; font-size: 12.5px; font-weight: bold; }
-.h-father{ position: absolute; left: 140px; top: 158px; font-size: 12px; font-weight: bold; }
-.e-father{ position: absolute; left: 140px; top: 175px; font-size: 12px; font-weight: bold; }
-.h-gender{ position: absolute; left: 140px; top: 195px; font-size: 11.5px; font-weight: bold; }
-.e-gender{ position: absolute; left: 230px; top: 195px; font-size: 11.5px; font-weight: bold; }
-.h-dob{ position: absolute; left: 140px; top: 212px; font-size: 11.5px; font-weight: bold; }
-.e-dob{ position: absolute; left: 230px; top: 212px; font-size: 11.5px; font-weight: bold; }
-
-.address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; }
-.h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
-.h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; }
-.date-section { position: absolute; left: 160px; top: 180px; font-size: 13px; font-weight: bold; color: #000; }
-.qr-area { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
-.qr-img { width: 110px; height: 110px; object-fit: contain; border: 1px solid #ddd; background: #fff; }
-.epic-back { margin-top: 20px; font-size: 13px; font-weight: bold; color: #000; padding: 2px 5px; }
-.card-label { margin-bottom: 5px; color: #666; font-size: 14px; text-align: center; width: 100%; display: none; }
-
 @media (max-width: 600px) {
-    .form { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
-    .card { transform: scale(0.75); margin-bottom: -50px; }
-    .top-bar, .sub-panel { flex-direction: column; gap: 10px; text-align: center; }
+    .form-grid { grid-template-columns: 1fr; } 
+    .full-width { grid-column: span 1; }
+    .card-wrapper { transform: scale(0.75); margin: -30px 0; }
+    .modal-content { height: 85vh; }
 }
 </style>
 </head>
 
 <body>
 
-<div id="login-screen" class="auth-container">
-    <h1>Voter Tool</h1>
-    <p>Login to start your <strong>24-Hour Free Trial</strong></p>
-    
-    <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
-    <input type="password" id="passInput" class="auth-input" placeholder="Password">
-    
-    <button id="loginBtn" class="btn btn-primary">Login</button>
-    <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
-    
-    <div style="margin: 15px 0; color: #9ca3af; font-size: 13px;">OR</div>
-    <button id="googleBtn" class="btn btn-google">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google
-    </button>
-    <div id="loader" class="loader"></div>
-    <div id="toggleAuth" style="margin-top:15px; color:#2563eb; cursor:pointer; text-decoration:underline; font-size:14px;">New here? Create an Account</div>
+<div id="toast-container"></div>
+
+<div id="confirmModal" class="confirm-modal">
+    <div class="confirm-box">
+        <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #f59e0b; margin-bottom: 15px;"></i>
+        <h3>Clear History?</h3>
+        <p style="color:#666; font-size:14px; margin-top:5px;">This will permanently delete all saved cards. This action cannot be undone.</p>
+        <div class="confirm-btns">
+            <button onclick="closeConfirm()" class="btn" style="background:#f3f4f6; color:#333;">Cancel</button>
+            <button onclick="confirmClearHistory()" class="btn" style="background:#ef4444; color:white;">Yes, Delete All</button>
+        </div>
+    </div>
 </div>
 
-<div id="paywall-screen" class="auth-container">
-    <div style="font-size: 40px;">🔒</div>
-    <h1 style="color: #d32f2f;">Trial Expired</h1>
-    <p>Subscribe to continue (₹49/month).</p>
-    
-    <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; margin: 15px 0;">
-        <h3 style="margin:0 0 10px 0; color:#1e40af; font-size: 16px;">Step 1: Pay Here</h3>
-        <a href="https://topmate.io/herox_tech/1884489" target="_blank" class="btn btn-pay">
-            Pay ₹49 on Topmate
-        </a>
-        <p style="font-size:12px; color:#666; margin-top:5px;">(Copy the Transaction/UTR ID after paying)</p>
+<div id="login-screen" class="auth-wrapper">
+    <div class="auth-box">
+        <h1>Voter Tool</h1>
+        <p style="color:var(--text-sub); margin-bottom:20px;">Sign in to manage your cards</p>
+        
+        <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
+        <input type="password" id="passInput" class="auth-input" placeholder="Password">
+        
+        <button id="loginBtn" class="btn btn-primary">Login</button>
+        <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
+        
+        <button id="googleBtn" class="btn btn-google">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Google
+        </button>
+        
+        <div id="loader" class="loader"></div>
+        <div id="toggleAuth" style="margin-top:20px; color:var(--primary); cursor:pointer; font-size:14px; text-decoration: underline;">Create an Account</div>
     </div>
-
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-        <h3 style="margin:0 0 10px 0; color:#166534; font-size: 16px;">Step 2: Verify</h3>
-        <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID">
-        <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a;">Submit Request</button>
-    </div>
-    
-    <p id="msgDisplay" style="color:#d32f2f; font-size:13px; font-weight:bold;"></p>
-</div>
-
-<div id="pending-screen" class="auth-container">
-    <div style="font-size: 40px;">⏳</div>
-    <h1 style="color: #d97706;">Verification Pending</h1>
-    <p>We have received your payment request.</p>
-    <div style="background:#f3f4f6; padding:10px; margin:15px 0; border-radius:6px; font-size:14px; text-align: left;">
-        <strong>Status:</strong> Under Review<br>
-        <strong>UTR Submitted:</strong> <span id="dispUTR" style="font-family: monospace;">...</span>
-    </div>
-    <p style="font-size:13px; color:#6b7280;">Please wait for admin approval.<br>This page will auto-refresh once approved.</p>
-    <button onclick="logout()" class="btn" style="border:1px solid #ddd; margin-top:10px;">Logout</button>
 </div>
 
 <div id="app-screen">
     <div class="container">
-        <div class="top-bar">
-            <div>
-                <span id="statusDisplay" style="color:#059669; font-weight:bold;">Checking...</span>
-                <span style="color:#6b7280;" id="userEmailDisplay"></span>
+        <div class="app-header">
+            <div class="user-info">
+                <span style="font-weight:bold; font-size:16px;">Voter ID Maker</span>
+                <span id="userEmailDisplay" class="user-email"></span>
             </div>
-            <div>Time Left: <span id="timerDisplay" class="timer-badge">...</span></div>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Logout</button>
+            <div class="header-actions">
+                <button onclick="openHistory()" class="icon-btn"><i class="fas fa-history"></i></button>
+                <button onclick="logout()" class="icon-btn" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
         </div>
 
-        <div id="subPanel" class="sub-panel">
-            <div class="sub-details">
-                <h4 id="subTitle">Subscription Status</h4>
-                <p id="subDesc">Loading...</p>
+        <div class="sub-panel">
+            <div class="sub-txt">
+                <h4 id="subTitle">Checking Status...</h4>
+                <p id="subDesc">Please wait</p>
             </div>
-            <button id="upgradeBtn" class="upgrade-btn" style="display:none;">Upgrade (₹49)</button>
+            <div id="timerDisplay" class="timer-badge">--:--</div>
+        </div>
+        <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:20px; background:#059669; display:none;">Upgrade Plan</button>
+
+        <div class="form-card">
+            <h3 style="margin-bottom:15px;">Enter Details</h3>
+            <div class="form-grid">
+                <div class="input-group"><label>EPIC No.</label><input id="epic" class="form-input" placeholder="ABC1234567"></div>
+                <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*"></div>
+                
+                <div class="input-group"><label>Name (English)</label><input id="userName" class="form-input" placeholder="Rahul Kumar"></div>
+                <div class="input-group"><label>Name (Hindi)</label><input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार"></div>
+                
+                <div class="input-group"><label>Father (English)</label><input id="fatherName" class="form-input" placeholder="Sohan Kumar"></div>
+                <div class="input-group"><label>Father (Hindi)</label><input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार"></div>
+                
+                <div class="input-group"><label>Gender</label><input id="gender" class="form-input" placeholder="Male / Female"></div>
+                <div class="input-group"><label>DOB</label><input id="dob" class="form-input" placeholder="01/01/1990"></div>
+                
+                <div class="full-width input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
+                <div class="full-width input-group"><label>Address (English)</label><textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea></div>
+                
+                <div class="full-width input-group"><label>Download Date</label><input id="dlDate" class="form-input" placeholder="XX/XX/XXXX"></div>
+            </div>
+            
+            <button class="btn btn-primary" style="margin-top: 20px;" onclick="generateAndSave()">
+                <i class="fas fa-magic"></i> Generate Card
+            </button>
+            
+            <button id="dlPdfBtn" class="btn btn-primary" style="margin-top: 10px; background: #ef4444; display:none;" onclick="downloadPDF()">
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
         </div>
 
-        <h2>Voter ID Generator</h2>
-
-        <div class="form">
-            <input id="epic" placeholder="EPIC Number">
-            <input type="file" id="photo" accept="image/*">
-            <input id="userName" placeholder="Name (English)">
-            <input id="nameHindi" class="hindi-input" placeholder="Name (Hindi / नाम हिंदी में)">
-            <input id="fatherName" placeholder="Father's Name (English)">
-            <input id="fatherHindi" class="hindi-input" placeholder="Father Name (Hindi / पिता का नाम हिंदी में)">
-            <input id="gender" placeholder="Gender">
-            <input id="dob" placeholder="DOB">
-            <textarea id="addrHindi" class="full-width hindi-input" placeholder="Address (Hindi / पता हिंदी में)"></textarea>
-            <textarea id="addrEng" class="full-width" placeholder="Address (English)"></textarea>
-            <input id="dlDate" class="full-width" placeholder="Download Date">
-        </div>
-
-        <button class="btn btn-primary" style="margin-top: 20px; font-size: 18px;" onclick="generate()">Generate Voter ID Card</button>
-
-        <div class="card-area">
-            <div class="card-label" id="lblFront">Front Side</div>
-            <div class="card" id="cardFront">
-                <div class="epic" id="dEpic"></div> <div class="photo-box"><img id="dPhoto"></div>
-                <div class="h-name" id="hName"></div> <div class="e-name" id="eName"></div>
-                <div class="h-father" id="hFather"></div> <div class="e-father" id="eFather"></div>
-                <div class="h-gender" id="hGender"></div> <div class="e-gender" id="eGender"></div>
-                <div class="h-dob" id="hDob"></div> <div class="e-dob" id="eDob"></div>
+        <div class="preview-section" id="previewArea" style="display:none;">
+            <div style="font-weight:bold; color:var(--text-sub);">Preview</div>
+            <div class="card-wrapper" id="cardFront">
+                <img src="voter-bg.png" class="card-bg">
+                <div class="c-text p-epic" id="dEpic"></div>
+                <div class="c-photo"><img id="dPhoto"></div>
+                <div class="c-text p-h-name" id="hName"></div>
+                <div class="c-text p-e-name" id="eName"></div>
+                <div class="c-text p-h-fath" id="hFather"></div>
+                <div class="c-text p-e-fath" id="eFather"></div>
+                <div class="c-text p-h-gen" id="hGender"></div>
+                <div class="c-text p-e-gen" id="eGender"></div>
+                <div class="c-text p-h-dob" id="hDob"></div>
+                <div class="c-text p-e-dob" id="eDob"></div>
             </div>
-            <div class="card-label" id="lblBack" style="margin-top: 20px;">Back Side</div>
-            <div class="card" id="cardBack">
+            <div class="card-wrapper" id="cardBack">
+                <img src="voter_back.png" class="card-bg">
                 <div class="address-section">
                     <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
                     <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
                 </div>
-                <div class="date-section" id="dispDate"></div>
-                <div class="qr-area"> <img src="qr.jpeg" alt="QR" class="qr-img"> <div class="epic-back" id="dispEpicBack"></div> </div>
+                <div class="c-text p-date" id="dispDate"></div>
+                <div class="qr-box"> <img src="qr.jpeg" class="qr-img"> <div class="c-text p-epic-back" id="dispEpicBack"></div> </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="paywall-screen" class="auth-wrapper">
+    <div class="auth-box">
+        <i class="fas fa-lock" style="font-size:40px; color:#ef4444; margin-bottom:10px;"></i>
+        <h1 style="color:#ef4444;">Plan Expired</h1>
+        <p>Subscribe to continue (₹49/month).</p>
+        <a href="https://topmate.io/herox_tech/1884489" target="_blank" class="btn btn-primary" style="margin:20px 0; text-decoration:none;">Pay Now</a>
+        <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID">
+        <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a;">Verify Payment</button>
+    </div>
+</div>
+
+<div id="pending-screen" class="auth-wrapper">
+    <div class="auth-box">
+        <i class="fas fa-hourglass-half" style="font-size:40px; color:#f59e0b; margin-bottom:10px;"></i>
+        <h1>Verification Pending</h1>
+        <p>Your payment is being reviewed.</p>
+        <button onclick="logout()" class="btn" style="margin-top:20px; border:1px solid #ddd;">Logout</button>
+    </div>
+</div>
+
+<div id="historyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Saved Cards</h3>
+            <div style="display:flex; gap:10px;">
+                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+                <button onclick="closeHistory()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" id="historyList">
+            <div style="text-align:center; color:#999; margin-top:20px;">Loading history...</div>
         </div>
     </div>
 </div>
@@ -210,9 +358,8 @@ h2{ text-align: center; margin-bottom: 25px; color: #1f2937; }
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, addDoc, query, orderBy, limit, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  // --- 1. PASTE YOUR FIREBASE KEYS HERE ---
   const firebaseConfig = {
     apiKey: "AIzaSyDZLakPR2A5wQ7okDL-L7nCSxJDICiMtEQ",
     authDomain: "voter-5e759.firebaseapp.com",
@@ -228,191 +375,349 @@ h2{ text-align: center; margin-bottom: 25px; color: #1f2937; }
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // Elements
-  const loginScreen = document.getElementById("login-screen");
-  const paywallScreen = document.getElementById("paywall-screen");
-  const pendingScreen = document.getElementById("pending-screen");
-  const appScreen = document.getElementById("app-screen");
+  // --- GLOBAL VARIABLES ---
+  window.currentUserID = null;
+  let historyData = [];
+
+  // --- CUSTOM TOAST FUNCTION ---
+  window.showToast = (msg, type='info') => {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      
+      let icon = 'fa-info-circle';
+      if(type==='success') icon = 'fa-check-circle';
+      if(type==='error') icon = 'fa-exclamation-circle';
+      
+      toast.innerHTML = `
+          <div class="toast-icon"><i class="fas ${icon}"></i></div>
+          <div class="toast-msg">${msg}</div>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Auto remove
+      setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(-20px)';
+          setTimeout(() => toast.remove(), 300);
+      }, 3000);
+  }
+
+  // --- AUTH LOGIC ---
   const loader = document.getElementById("loader");
-
-  // Auth Logic
-  let isLoginMode = true;
-  document.getElementById("toggleAuth").addEventListener("click", (e) => {
-    isLoginMode = !isLoginMode;
-    document.getElementById("loginBtn").style.display = isLoginMode ? "block" : "none";
-    document.getElementById("signupBtn").style.display = isLoginMode ? "none" : "block";
-    e.target.innerText = isLoginMode ? "New here? Create an Account" : "Already have an account? Login";
-  });
-
   const handleAuth = (method) => {
     const email = document.getElementById("emailInput").value;
     const pass = document.getElementById("passInput").value;
-    if(!email || !pass) return alert("Fill all fields");
+    if(!email || !pass) return showToast("Please fill all fields", "error");
     loader.style.display="block";
-    method(auth, email, pass).catch(err => { alert(err.message); loader.style.display="none"; });
+    method(auth, email, pass).catch(err => { 
+        showToast(err.message, "error"); 
+        loader.style.display="none"; 
+    });
   };
+
   document.getElementById("loginBtn").addEventListener("click", () => handleAuth(signInWithEmailAndPassword));
   document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
   document.getElementById("googleBtn").addEventListener("click", () => {
     loader.style.display="block";
-    signInWithPopup(auth, provider).catch(err => { alert(err.message); loader.style.display="none"; });
+    signInWithPopup(auth, provider).catch(err => { 
+        showToast(err.message, "error"); 
+        loader.style.display="none"; 
+    });
+  });
+
+  document.getElementById("toggleAuth").addEventListener("click", (e) => {
+      let isLogin = document.getElementById("loginBtn").style.display !== "none";
+      document.getElementById("loginBtn").style.display = !isLogin ? "flex" : "none";
+      document.getElementById("signupBtn").style.display = !isLogin ? "none" : "flex";
+      e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
   });
 
   window.logout = () => signOut(auth).then(() => location.reload());
 
-  // --- MAIN SCREEN SWITCHING LOGIC ---
-  let unsubscribeDoc = null; 
-  let timerInterval = null;
-
+  // --- STATE MANAGEMENT ---
   onAuthStateChanged(auth, (user) => {
     if (user) {
-        loader.style.display="block";
+        window.currentUserID = user.uid;
         document.getElementById("userEmailDisplay").innerText = user.email;
         startDocListener(user);
     } else {
-        if(unsubscribeDoc) unsubscribeDoc();
-        showScreen(loginScreen);
+        showScreen("login-screen");
     }
   });
 
-  function showScreen(screen) {
-      [loginScreen, paywallScreen, pendingScreen, appScreen].forEach(s => s.style.display="none");
-      screen.style.display = "block";
+  function showScreen(id) {
+      document.querySelectorAll('.auth-wrapper, #app-screen').forEach(el => el.style.display = 'none');
+      document.getElementById(id).style.display = id === "app-screen" ? "block" : "flex";
       loader.style.display = "none";
   }
 
   function startDocListener(user) {
       const userRef = doc(db, "users", user.uid);
-      
-      unsubscribeDoc = onSnapshot(userRef, async (docSnap) => {
+      onSnapshot(userRef, async (docSnap) => {
           const now = Date.now();
-
           if (!docSnap.exists()) {
               await setDoc(userRef, { email: user.email, joinedAt: now, subscriptionExpiry: 0 });
           } else {
               const data = docSnap.data();
               const trialEnd = data.joinedAt + 86400000; 
               const subEnd = data.subscriptionExpiry || 0;
-              const payStatus = data.paymentStatus || "none"; 
+              const payStatus = data.paymentStatus || "none";
 
-              // 1. If Premium -> Show App
               if (subEnd > now) {
-                  updateUI("PREMIUM", subEnd);
-                  startTimer(subEnd, "PREMIUM");
-                  showScreen(appScreen);
-              } 
-              // 2. If Pending -> Show Pending Screen
-              else if (payStatus === "pending") {
-                  document.getElementById("dispUTR").innerText = data.utrNumber || "N/A";
-                  showScreen(pendingScreen);
-              }
-              // 3. If Trial -> Show App
-              else if (now < trialEnd) {
-                  updateUI("TRIAL", null);
-                  startTimer(trialEnd, "TRIAL");
-                  showScreen(appScreen);
-              } 
-              // 4. Else -> Expired (Paywall)
-              else {
-                  showScreen(paywallScreen);
+                  updateStatus("Premium Active", subEnd, "PREMIUM");
+                  showScreen("app-screen");
+              } else if (payStatus === "pending") {
+                  showScreen("pending-screen");
+              } else if (now < trialEnd) {
+                  updateStatus("Free Trial", trialEnd, "TRIAL");
+                  showScreen("app-screen");
+              } else {
+                  showScreen("paywall-screen");
               }
           }
       });
   }
 
-  function updateUI(status, expiry) {
-      const title = document.getElementById("subTitle");
-      const desc = document.getElementById("subDesc");
-      const btn = document.getElementById("upgradeBtn");
-      const disp = document.getElementById("statusDisplay");
-
-      if(status === "TRIAL") {
-          disp.innerText = "Free Trial"; disp.style.color = "#eab308";
-          title.innerText = "Free Trial Active";
-          desc.innerText = "Expires in 24 hours.";
-          btn.style.display = "block";
-      } else {
-          disp.innerText = "Premium"; disp.style.color = "#22c55e";
-          const dateStr = new Date(expiry).toLocaleDateString("en-IN");
-          title.innerText = "Premium Plan Active";
-          desc.innerText = "Valid until: " + dateStr;
-          btn.style.display = "none";
-      }
-  }
-
-  function startTimer(endTime, type) {
-      if(timerInterval) clearInterval(timerInterval);
+  function updateStatus(text, time, type) {
+      document.getElementById("subTitle").innerText = text;
+      document.getElementById("subDesc").innerText = type === "PREMIUM" ? "Full Access" : "Expires in 24h";
+      document.getElementById("upgradeBtn").style.display = type === "TRIAL" ? "block" : "none";
+      
       const badge = document.getElementById("timerDisplay");
-      if(type==="PREMIUM") badge.classList.add("premium"); else badge.classList.remove("premium");
-
-      timerInterval = setInterval(() => {
-          const now = Date.now();
-          const diff = endTime - now;
-          if(diff <= 0) { clearInterval(timerInterval); return; } 
-          const d = Math.floor(diff / (1000*60*60*24));
+      setInterval(() => {
+          const diff = time - Date.now();
+          if(diff <= 0) return badge.innerText = "Expired";
           const h = Math.floor((diff / (1000*60*60)) % 24);
           const m = Math.floor((diff / (1000*60)) % 60);
-          badge.innerText = type==="PREMIUM" && d>0 ? `${d}d ${h}h` : `${h}h ${m}m`;
+          const d = Math.floor(diff / (1000*60*60*24));
+          badge.innerText = d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
+          badge.style.color = type === "PREMIUM" ? "#16a34a" : "#ca8a04";
       }, 1000);
   }
 
-  // --- NEW: HANDLE UTR SUBMISSION ---
+  // --- UTR SUBMISSION ---
   document.getElementById("submitUtrBtn").addEventListener("click", async () => {
-      const utr = document.getElementById("utrInput").value.trim();
-      const btn = document.getElementById("submitUtrBtn");
-      const msg = document.getElementById("msgDisplay");
+      const utr = document.getElementById("utrInput").value;
+      if(utr.length < 5) return showToast("Invalid UTR", "error");
       
-      if(utr.length < 8) return alert("Please enter a valid UTR / Transaction ID");
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          paymentStatus: "pending", utrNumber: utr, submittedAt: Date.now()
+      });
+      showToast("Payment submitted for review", "success");
+  });
+  document.getElementById("upgradeBtn").addEventListener("click", () => showScreen("paywall-screen"));
+
+  // --- HISTORY LOGIC ---
+  window.generateAndSave = async function() {
+      generateCardUI();
+      if(!window.currentUserID) return;
       
-      btn.innerText = "Submitting...";
-      btn.disabled = true;
-      const user = auth.currentUser;
+      const formData = {
+          epic: document.getElementById("epic").value,
+          userName: document.getElementById("userName").value,
+          nameHindi: document.getElementById("nameHindi").value,
+          fatherName: document.getElementById("fatherName").value,
+          fatherHindi: document.getElementById("fatherHindi").value,
+          gender: document.getElementById("gender").value,
+          dob: document.getElementById("dob").value,
+          addrHindi: document.getElementById("addrHindi").value,
+          addrEng: document.getElementById("addrEng").value,
+          dlDate: document.getElementById("dlDate").value,
+          timestamp: Date.now()
+      };
 
       try {
-          const userRef = doc(db, "users", user.uid);
+          const histRef = collection(db, `users/${window.currentUserID}/history`);
+          await addDoc(histRef, formData);
+          showToast("Card saved to history", "success");
+      } catch(e) {
+          console.error("Save error", e);
+      }
+  };
+
+  window.openHistory = async function() {
+      document.getElementById("historyModal").style.display = "flex";
+      const listDiv = document.getElementById("historyList");
+      listDiv.innerHTML = '<div class="loader" style="display:block"></div>';
+
+      if(!window.currentUserID) return;
+
+      try {
+          const q = query(collection(db, `users/${window.currentUserID}/history`), orderBy("timestamp", "desc"));
+          const snap = await getDocs(q);
           
-          // Update the user document. 
-          // The onSnapshot listener above will detect "pending" and switch the screen automatically.
-          await updateDoc(userRef, {
-              paymentStatus: "pending",   
-              utrNumber: utr,             
-              submittedAt: Date.now()
+          listDiv.innerHTML = "";
+          window.historyData = []; 
+
+          if(snap.empty) {
+              listDiv.innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>";
+              return;
+          }
+
+          snap.forEach(doc => {
+              const d = doc.data();
+              const id = doc.id;
+              window.historyData[id] = d; 
+              
+              const dateStr = new Date(d.timestamp).toLocaleDateString();
+              const item = document.createElement("div");
+              item.className = "history-item";
+              item.innerHTML = `
+                  <div class="h-ep">${d.epic || "No EPIC"}</div>
+                  <div class="h-nm">${d.userName}</div>
+                  <div class="h-dt">${dateStr}</div>
+              `;
+              item.onclick = () => fillFormFromHistory(id);
+              listDiv.appendChild(item);
+          });
+
+      } catch(e) {
+          listDiv.innerHTML = "Error loading history.";
+      }
+  }
+
+  // --- NEW: DELETE ALL HISTORY LOGIC ---
+  window.confirmClearHistory = async function() {
+      if(!window.currentUserID) return;
+      const btn = document.querySelector("#confirmModal .btn[onclick*='confirmClearHistory']");
+      btn.innerHTML = "Deleting...";
+      
+      try {
+          const batch = writeBatch(db);
+          const q = query(collection(db, `users/${window.currentUserID}/history`));
+          const snap = await getDocs(q);
+          
+          snap.forEach(doc => {
+              batch.delete(doc.ref);
           });
           
-      } catch (e) {
-          alert("Error: " + e.message);
-          btn.innerText = "Submit Request";
-          btn.disabled = false;
+          await batch.commit();
+          
+          showToast("History deleted successfully", "success");
+          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>";
+          closeConfirm();
+          
+      } catch(e) {
+          showToast("Failed to delete history", "error");
+      } finally {
+          btn.innerHTML = "Yes, Delete All";
       }
-  });
-
-  // Handle "Upgrade" button inside the app (Redirect to paywall logic)
-  document.getElementById("upgradeBtn").addEventListener("click", () => {
-      showScreen(paywallScreen);
-  });
+  }
 
 </script>
 
 <script>
-function generate(){
-    document.getElementById("cardFront").style.display = "block";
-    document.getElementById("cardBack").style.display = "block";
-    document.getElementById("lblFront").style.display = "block";
-    document.getElementById("lblBack").style.display = "block";
+// --- UI, PDF & MODAL LOGIC (Standard JS) ---
+
+function closeHistory() {
+    document.getElementById("historyModal").style.display = "none";
+}
+
+function showConfirm() {
+    document.getElementById("confirmModal").style.display = "flex";
+}
+
+function closeConfirm() {
+    document.getElementById("confirmModal").style.display = "none";
+}
+
+function fillFormFromHistory(id) {
+    const data = window.historyData[id];
+    if(!data) return;
+
+    document.getElementById("epic").value = data.epic || "";
+    document.getElementById("userName").value = data.userName || "";
+    document.getElementById("nameHindi").value = data.nameHindi || "";
+    document.getElementById("fatherName").value = data.fatherName || "";
+    document.getElementById("fatherHindi").value = data.fatherHindi || "";
+    document.getElementById("gender").value = data.gender || "";
+    document.getElementById("dob").value = data.dob || "";
+    document.getElementById("addrHindi").value = data.addrHindi || "";
+    document.getElementById("addrEng").value = data.addrEng || "";
+    document.getElementById("dlDate").value = data.dlDate || "";
+
+    closeHistory();
+    generateCardUI(); 
+    window.showToast("Data restored from history", "success");
+}
+
+function generateCardUI(){
+    document.getElementById("previewArea").style.display = "flex";
+    document.getElementById("dlPdfBtn").style.display = "flex";
     
     const get = id => document.getElementById(id).value;
     const set = (id, val) => document.getElementById(id).innerText = val;
+    
     set("dEpic", get("epic"));
-    set("hName", "नाम : " + get("nameHindi")); set("eName", "Name : " + get("userName"));
-    set("hFather", "पिता का नाम : " + get("fatherHindi")); set("eFather", "Father's Name : " + get("fatherName"));
+    set("hName", "नाम : " + get("nameHindi")); 
+    set("eName", "Name : " + get("userName"));
+    set("hFather", "पिता का नाम : " + get("fatherHindi")); 
+    set("eFather", "Father's Name : " + get("fatherName"));
     set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
     set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
-    set("dispAddrHindi", get("addrHindi")); set("dispAddrEng", get("addrEng"));
+    
+    set("dispAddrHindi", get("addrHindi")); 
+    set("dispAddrEng", get("addrEng"));
+    
     set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
     set("dispEpicBack", get("epic"));
+
     const file = document.getElementById("photo").files[0];
-    if(file){ const r = new FileReader(); r.onload=()=>document.getElementById("dPhoto").src=r.result; r.readAsDataURL(file); }
+    if(file){ 
+        const r = new FileReader(); 
+        r.onload = () => document.getElementById("dPhoto").src = r.result; 
+        r.readAsDataURL(file); 
+    }
+    
+    if(window.innerWidth < 600) {
+        document.getElementById("previewArea").scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+async function downloadPDF() {
+    const btn = document.getElementById("dlPdfBtn");
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    btn.disabled = true;
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const front = document.getElementById('cardFront');
+        const back = document.getElementById('cardBack');
+
+        // Capture settings
+        const opts = { scale: 3, useCORS: true, backgroundColor: null };
+        
+        // Reset transform for clean capture
+        const orgTransform = front.style.transform;
+        const orgMargin = front.style.margin;
+        
+        front.style.transform = "scale(1)"; front.style.margin = "0";
+        back.style.transform = "scale(1)"; back.style.margin = "0";
+
+        const canvas1 = await html2canvas(front, opts);
+        const canvas2 = await html2canvas(back, opts);
+
+        // Restore styles
+        front.style.transform = orgTransform; front.style.margin = orgMargin;
+        back.style.transform = orgTransform; back.style.margin = orgMargin;
+
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
+        pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+        pdf.addPage();
+        pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+        
+        pdf.save('voter-id-card.pdf');
+        window.showToast("PDF downloaded successfully", "success");
+    } catch (error) {
+        window.showToast("Error generating PDF", "error");
+    }
+
+    btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
+    btn.disabled = false;
 }
 </script>
+
 </body>
 </html>
