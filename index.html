@@ -17,6 +17,7 @@
     --primary-dark: #1d4ed8;
     --danger: #ef4444;
     --success: #10b981;
+    --whatsapp: #25D366;
     --bg-color: #f8fafc;
     --surface: #ffffff;
     --text-main: #1e293b;
@@ -137,19 +138,22 @@ textarea.form-input { height: 80px; resize: none; }
 .p-date { left: 160px; top: 180px; font-size: 13px; }
 .p-epic-back { font-size: 14px; margin-top: -25px; font-weight: bold; color: #000; }
 
-/* History Modal */
+/* History Modal & Refer Modal */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: flex-end;
+    background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 .modal-content {
-    background: #fff; width: 100%; max-width: 600px; margin: 0 auto;
-    border-top-left-radius: 20px; border-top-right-radius: 20px;
-    height: 80vh; display: flex; flex-direction: column; animation: slideUp 0.3s ease;
+    background: #fff; width: 90%; max-width: 600px; 
+    border-radius: 20px;
+    max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s ease;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
 .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-.modal-body { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+.modal-body { flex: 1; overflow-y: auto; padding: 25px; }
+
 .history-item {
     background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent;
@@ -158,6 +162,22 @@ textarea.form-input { height: 80px; resize: none; }
 .h-ep { font-weight: bold; color: var(--primary); font-size: 14px; }
 .h-nm { font-size: 13px; color: var(--text-main); margin-top: 2px; }
 .h-dt { font-size: 11px; color: var(--text-sub); margin-top: 5px; text-align: right; }
+
+/* Refer Popup Styles */
+.refer-highlight {
+    background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px;
+    border-radius: 12px; text-align: center; margin-bottom: 15px;
+}
+.refer-title { font-size: 20px; font-weight: bold; color: #b45309; margin-bottom: 5px; }
+.refer-text { font-size: 14px; color: #4b5563; margin-bottom: 10px; line-height: 1.5; }
+.refer-hindi { font-size: 15px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
+.refer-link-box {
+    background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace;
+    font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb;
+}
+
+/* New Buttons Grid for Refer */
+.refer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
 
 /* ================= CUSTOM TOAST POPUP ================= */
 #toast-container {
@@ -197,7 +217,8 @@ textarea.form-input { height: 80px; resize: none; }
     .form-grid { grid-template-columns: 1fr; } 
     .full-width { grid-column: span 1; }
     .card-wrapper { transform: scale(0.75); margin: -30px 0; }
-    .modal-content { height: 85vh; }
+    .modal-content { width: 95%; max-height: 80vh; }
+    .refer-btns { grid-template-columns: 1fr; } /* Stack buttons on mobile */
 }
 </style>
 </head>
@@ -246,6 +267,7 @@ textarea.form-input { height: 80px; resize: none; }
                 <span id="userEmailDisplay" class="user-email"></span>
             </div>
             <div class="header-actions">
+                <button onclick="openReferModal()" class="icon-btn" style="color: #f59e0b; background: #fffbeb;"><i class="fas fa-gift"></i></button>
                 <button onclick="openHistory()" class="icon-btn"><i class="fas fa-history"></i></button>
                 <button onclick="logout()" class="icon-btn" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-sign-out-alt"></i></button>
             </div>
@@ -355,6 +377,39 @@ textarea.form-input { height: 80px; resize: none; }
     </div>
 </div>
 
+<div id="referModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Refer & Earn</h3>
+            <button onclick="closeReferModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="refer-highlight">
+                <i class="fas fa-gift" style="font-size:40px; color:#f59e0b; margin-bottom:10px;"></i>
+                <div class="refer-title">Get 7 Days Free!</div>
+                <div class="refer-text">
+                    Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!
+                </div>
+                <span class="refer-hindi">
+                   अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!
+                </span>
+            </div>
+            
+            <p style="font-size:13px; font-weight:bold; color:#333; margin-bottom:5px;">Your Referral Link:</p>
+            <div class="refer-link-box" id="myReferLink">Loading link...</div>
+            
+            <div class="refer-btns">
+                <button onclick="shareOnWhatsApp()" class="btn btn-primary" style="background:#25D366; border:none;">
+                    <i class="fab fa-whatsapp" style="font-size:18px;"></i> Share on WhatsApp
+                </button>
+                <button onclick="copyReferLink()" class="btn btn-primary" style="background:#f59e0b; border:none;">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
@@ -374,6 +429,14 @@ textarea.form-input { height: 80px; resize: none; }
   const auth = getAuth(app);
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
+
+  // --- 1. CAPTURE REFERRAL CODE ON LOAD ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (refCode) {
+      localStorage.setItem('referredByCode', refCode);
+      window.history.replaceState({}, document.title, window.location.pathname);
+  }
 
   // --- GLOBAL VARIABLES ---
   window.currentUserID = null;
@@ -395,8 +458,6 @@ textarea.form-input { height: 80px; resize: none; }
       `;
       
       container.appendChild(toast);
-      
-      // Auto remove
       setTimeout(() => {
           toast.style.opacity = '0';
           toast.style.transform = 'translateY(-20px)';
@@ -434,7 +495,10 @@ textarea.form-input { height: 80px; resize: none; }
       e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
   });
 
-  window.logout = () => signOut(auth).then(() => location.reload());
+  window.logout = () => signOut(auth).then(() => {
+      sessionStorage.removeItem('seenLoginPopup');
+      location.reload();
+  });
 
   // --- STATE MANAGEMENT ---
   onAuthStateChanged(auth, (user) => {
@@ -458,7 +522,19 @@ textarea.form-input { height: 80px; resize: none; }
       onSnapshot(userRef, async (docSnap) => {
           const now = Date.now();
           if (!docSnap.exists()) {
-              await setDoc(userRef, { email: user.email, joinedAt: now, subscriptionExpiry: 0 });
+              const referredBy = localStorage.getItem('referredByCode');
+              const newUserData = { 
+                  email: user.email, 
+                  joinedAt: now, 
+                  subscriptionExpiry: 0 
+              };
+
+              if(referredBy && referredBy !== user.uid) {
+                  newUserData.referredBy = referredBy;
+              }
+
+              await setDoc(userRef, newUserData);
+              localStorage.removeItem('referredByCode');
           } else {
               const data = docSnap.data();
               const trialEnd = data.joinedAt + 86400000; 
@@ -468,16 +544,29 @@ textarea.form-input { height: 80px; resize: none; }
               if (subEnd > now) {
                   updateStatus("Premium Active", subEnd, "PREMIUM");
                   showScreen("app-screen");
+                  checkAutoPopup(); 
               } else if (payStatus === "pending") {
                   showScreen("pending-screen");
               } else if (now < trialEnd) {
                   updateStatus("Free Trial", trialEnd, "TRIAL");
                   showScreen("app-screen");
+                  checkAutoPopup(); 
               } else {
                   showScreen("paywall-screen");
               }
           }
       });
+  }
+
+  // --- AUTO POPUP LOGIC ---
+  function checkAutoPopup() {
+      const seen = sessionStorage.getItem('seenLoginPopup');
+      if(!seen) {
+          setTimeout(() => {
+              openReferModal();
+              sessionStorage.setItem('seenLoginPopup', 'true');
+          }, 1500); 
+      }
   }
 
   function updateStatus(text, time, type) {
@@ -578,7 +667,7 @@ textarea.form-input { height: 80px; resize: none; }
       }
   }
 
-  // --- NEW: DELETE ALL HISTORY LOGIC ---
+  // --- DELETE ALL HISTORY LOGIC ---
   window.confirmClearHistory = async function() {
       if(!window.currentUserID) return;
       const btn = document.querySelector("#confirmModal .btn[onclick*='confirmClearHistory']");
@@ -621,6 +710,45 @@ function showConfirm() {
 
 function closeConfirm() {
     document.getElementById("confirmModal").style.display = "none";
+}
+
+// --- UPDATED REFERRAL FUNCTIONS ---
+function openReferModal() {
+    document.getElementById("referModal").style.display = "flex";
+    if(window.currentUserID) {
+        // Construct link based on current domain + user ID
+        const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
+        document.getElementById("myReferLink").innerText = link;
+    }
+}
+
+function closeReferModal() {
+    document.getElementById("referModal").style.display = "none";
+}
+
+// 1. WhatsApp Share Function
+function shareOnWhatsApp() {
+    const link = document.getElementById("myReferLink").innerText;
+    if(link.includes("Loading")) return;
+    
+    // Message in English + Hindi for better reach
+    const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link to get special benefits:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
+    
+    // Open WhatsApp (Web or App)
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+}
+
+// 2. Copy Link Function
+function copyReferLink() {
+    const txt = document.getElementById("myReferLink").innerText;
+    if(txt === "Loading..." || txt === "Loading link...") return;
+    
+    navigator.clipboard.writeText(txt).then(() => {
+        window.showToast("Link copied to clipboard!", "success");
+    }).catch(() => {
+        window.showToast("Failed to copy link", "error");
+    });
 }
 
 function fillFormFromHistory(id) {
