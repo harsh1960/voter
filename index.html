@@ -329,7 +329,7 @@ textarea.form-input { height: 80px; resize: none; }
             </div>
             <div class="card-wrapper" id="cardBack">
                 <img src="voter_back.png" class="card-bg">
-                <div class="address-section">
+                <div class="address-section"> 
                     <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
                     <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
                 </div>
@@ -348,6 +348,10 @@ textarea.form-input { height: 80px; resize: none; }
         <a href="https://topmate.io/herox_tech/1884489" target="_blank" class="btn btn-primary" style="margin:20px 0; text-decoration:none;">Pay Now</a>
         <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID">
         <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a;">Verify Payment</button>
+        
+        <button id="backToTrialBtn" class="btn" style="background:#64748b; color:white; margin-top:10px; display:none;">
+            <i class="fas fa-arrow-left"></i> Back to App
+        </button>
     </div>
 </div>
 
@@ -391,7 +395,7 @@ textarea.form-input { height: 80px; resize: none; }
                     Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!
                 </div>
                 <span class="refer-hindi">
-                   अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!
+                    अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!
                 </span>
             </div>
             
@@ -581,6 +585,8 @@ textarea.form-input { height: 80px; resize: none; }
                   checkAutoPopup(); 
               } else {
                   showScreen("paywall-screen");
+                  // STRICT MODE: Trial expired, ensure "Back" button is hidden
+                  document.getElementById("backToTrialBtn").style.display = "none";
               }
           }
       });
@@ -624,7 +630,18 @@ textarea.form-input { height: 80px; resize: none; }
       });
       showToast("Payment submitted for review", "success");
   });
-  document.getElementById("upgradeBtn").addEventListener("click", () => showScreen("paywall-screen"));
+
+  // --- MODIFIED UPGRADE BUTTON LOGIC ---
+  document.getElementById("upgradeBtn").addEventListener("click", () => {
+      showScreen("paywall-screen");
+      // Since user clicked this manually, they are in trial. Enable Back button.
+      document.getElementById("backToTrialBtn").style.display = "flex";
+  });
+
+  // --- NEW BACK BUTTON LOGIC ---
+  document.getElementById("backToTrialBtn").addEventListener("click", () => {
+      showScreen("app-screen");
+  });
 
   // --- HISTORY LOGIC ---
   window.generateAndSave = async function() {
