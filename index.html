@@ -497,6 +497,7 @@ textarea.form-input { height: 80px; resize: none; }
 
   window.logout = () => signOut(auth).then(() => {
       sessionStorage.removeItem('seenLoginPopup');
+      localStorage.removeItem("mySessionId"); // Clear Session Logic
       location.reload();
   });
 
@@ -521,12 +522,18 @@ textarea.form-input { height: 80px; resize: none; }
       const userRef = doc(db, "users", user.uid);
       onSnapshot(userRef, async (docSnap) => {
           const now = Date.now();
+          
           if (!docSnap.exists()) {
               const referredBy = localStorage.getItem('referredByCode');
+              // Create new session ID for new user
+              const newSession = Date.now().toString();
+              localStorage.setItem("mySessionId", newSession);
+
               const newUserData = { 
                   email: user.email, 
                   joinedAt: now, 
-                  subscriptionExpiry: 0 
+                  subscriptionExpiry: 0,
+                  sessionId: newSession // Save to DB
               };
 
               if(referredBy && referredBy !== user.uid) {
@@ -535,8 +542,29 @@ textarea.form-input { height: 80px; resize: none; }
 
               await setDoc(userRef, newUserData);
               localStorage.removeItem('referredByCode');
-          } else {
+          } 
+          else {
               const data = docSnap.data();
+
+              // --- SINGLE DEVICE ENFORCEMENT START ---
+              const dbSession = data.sessionId;
+              let localSession = localStorage.getItem("mySessionId");
+
+              // 1. If this is a new login on this browser/device
+              if (!localSession) {
+                  localSession = Date.now().toString();
+                  localStorage.setItem("mySessionId", localSession);
+                  // Update DB with this new session (This kicks out old sessions!)
+                  await updateDoc(userRef, { sessionId: localSession });
+              } 
+              // 2. If session exists but mismatch -> You are the old session
+              else if (dbSession && dbSession !== localSession) {
+                  alert("Security Alert:\n\nYour account was accessed from another device.\nYou have been logged out.");
+                  window.logout();
+                  return; 
+              }
+              // --- SINGLE DEVICE ENFORCEMENT END ---
+
               const trialEnd = data.joinedAt + 86400000; 
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
