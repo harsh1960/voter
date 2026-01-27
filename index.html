@@ -553,9 +553,9 @@ textarea.form-input { height: 80px; resize: none; }
 
   // PASTE YOUR PAYMENT LINKS HERE
   const planLinks = {
-      "quarterly_3": "https://payments.cashfree.com/forms/voterpremium179", // e.g., https://payments.cashfree.com/forms/xyz3
-      "half_yearly_6": "https://payments.cashfree.com/forms/voter329",
-      "yearly_12": "https://payments.cashfree.com/forms/voter599",
+      "quarterly_3": "YOUR_3_MONTH_LINK_HERE", // e.g., https://payments.cashfree.com/forms/xyz3
+      "half_yearly_6": "YOUR_6_MONTH_LINK_HERE",
+      "yearly_12": "YOUR_12_MONTH_LINK_HERE",
       "monthly_1": "https://payments.cashfree.com/forms/votermaker" // Current Basic Link
   };
 
@@ -753,7 +753,8 @@ textarea.form-input { height: 80px; resize: none; }
               }
               // --- SINGLE DEVICE ENFORCEMENT END ---
 
-              const trialEnd = data.joinedAt + 86400000; 
+              // UPDATED: Changed from 86400000 (24h) to 21600000 (6h)
+              const trialEnd = data.joinedAt + 21600000; 
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
 
@@ -789,7 +790,8 @@ textarea.form-input { height: 80px; resize: none; }
 
   function updateStatus(text, time, type) {
       document.getElementById("subTitle").innerText = text;
-      document.getElementById("subDesc").innerText = type === "PREMIUM" ? "Full Access" : "Expires in 24h";
+      // UPDATED: Changed "Expires in 24h" to "Expires in 6h"
+      document.getElementById("subDesc").innerText = type === "PREMIUM" ? "Full Access" : "Expires in 6h";
       document.getElementById("upgradeBtn").style.display = type === "TRIAL" ? "block" : "none";
       
       const badge = document.getElementById("timerDisplay");
