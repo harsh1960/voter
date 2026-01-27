@@ -13,18 +13,18 @@
 <style>
 /* ================= CSS VARIABLES & RESET ================= */
 :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --danger: #ef4444;
-    --success: #10b981;
-    --whatsapp: #25D366;
-    --bg-color: #f8fafc;
-    --surface: #ffffff;
-    --text-main: #1e293b;
-    --text-sub: #64748b;
-    --border: #e2e8f0;
-    --radius: 12px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --danger: #ef4444;
+  --success: #10b981;
+  --whatsapp: #25D366;
+  --bg-color: #f8fafc;
+  --surface: #ffffff;
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+  --border: #e2e8f0;
+  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -32,26 +32,81 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 
 /* ================= AUTH CONTAINERS ================= */
 .auth-wrapper {
-    display: flex; justify-content: center; align-items: center; min-height: 90vh; padding: 20px;
+  display: flex; justify-content: center; align-items: center; min-height: 90vh; padding: 20px;
 }
 .auth-box {
-    width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
-    border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
+  width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
+  border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
 }
+/* Extended width for the Plan Selection screen */
+.auth-box.plan-mode {
+    max-width: 500px;
+}
+
 .auth-box h1 { font-size: 24px; margin-bottom: 10px; color: var(--text-main); }
 .auth-input {
-    width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
-    border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #f8fafc;
+  width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #f8fafc;
 }
 .auth-input:focus { border-color: var(--primary); background: #fff; }
 
 .btn {
-    width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px;
-    font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px;
+  font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
 .btn-primary:active { transform: scale(0.98); }
 .btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
+
+/* ================= PLAN CARD STYLES (NEW) ================= */
+.plans-container {
+    display: flex; flex-direction: column; gap: 12px; margin: 20px 0;
+}
+.plan-card {
+    position: relative;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    background: #fff;
+}
+.plan-card:hover { border-color: #93c5fd; }
+.plan-card.selected {
+    border-color: var(--primary);
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.plan-card.recommended { border-color: #f59e0b; }
+.plan-card.recommended.selected { border-color: #f59e0b; background: #fffbeb; }
+
+.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.plan-name { font-weight: bold; font-size: 16px; color: var(--text-main); }
+.plan-price { font-weight: 800; font-size: 18px; color: var(--primary); }
+.plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 13px; margin-right: 5px; }
+
+.plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.plan-months { color: var(--text-sub); }
+.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+
+.plan-tag {
+    position: absolute;
+    top: -10px; right: 10px;
+    background: #f59e0b; color: white;
+    font-size: 10px; font-weight: bold;
+    padding: 2px 8px; border-radius: 10px;
+    text-transform: uppercase;
+}
+.radio-circle {
+    width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%;
+    display: grid; place-items: center; margin-right: 10px;
+}
+.plan-card.selected .radio-circle { border-color: var(--primary); }
+.plan-card.selected .radio-circle::after {
+    content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%;
+}
+
 
 /* ================= APP LAYOUT ================= */
 #app-screen, #paywall-screen, #pending-screen { display: none; }
@@ -59,24 +114,24 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 
 /* Header */
 .app-header {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--surface); padding: 15px 20px; border-radius: var(--radius);
-    box-shadow: var(--shadow); margin-bottom: 20px; position: sticky; top: 10px; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); padding: 15px 20px; border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 20px; position: sticky; top: 10px; z-index: 100;
 }
 .user-info { display: flex; flex-direction: column; }
 .user-email { font-size: 12px; color: var(--text-sub); }
 .header-actions { display: flex; gap: 10px; align-items: center; }
 .icon-btn {
-    background: #eff6ff; color: var(--primary); width: 40px; height: 40px;
-    border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: 0.2s;
+  background: #eff6ff; color: var(--primary); width: 40px; height: 40px;
+  border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: 0.2s;
 }
 .icon-btn:active { transform: scale(0.9); }
 
 /* Subscription Panel */
 .sub-panel {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-radius: var(--radius); padding: 15px; margin-bottom: 20px;
-    display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-radius: var(--radius); padding: 15px; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
 }
 .sub-txt h4 { color: #1e40af; font-size: 15px; margin-bottom: 2px; }
 .sub-txt p { color: #3b82f6; font-size: 12px; }
@@ -89,8 +144,8 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .input-group { position: relative; }
 .input-group label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
 .form-input {
-    width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 15px; outline: none; transition: border 0.2s;
+  width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; outline: none; transition: border 0.2s;
 }
 .form-input:focus { border-color: var(--primary); }
 textarea.form-input { height: 80px; resize: none; }
@@ -99,9 +154,9 @@ textarea.form-input { height: 80px; resize: none; }
 /* ================= CARD PREVIEW STYLES ================= */
 .preview-section { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
 .card-wrapper {
-    width: 420px; height: 260px; position: relative; border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff;
-    color: #000;
+  width: 420px; height: 260px; position: relative; border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff;
+  color: #000;
 }
 .card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
@@ -125,13 +180,13 @@ textarea.form-input { height: 80px; resize: none; }
 
 /* Back Side Original Styles */
 .address-section { 
-    position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10;
+  position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10;
 }
 .h-addr-label, .e-addr-label { 
-    font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000;
+  font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000;
 }
 .h-addr-text, .e-addr-text { 
-    font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000;
+  font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000;
 }
 
 /* Back Elements */
@@ -140,14 +195,14 @@ textarea.form-input { height: 80px; resize: none; }
 
 /* History Modal & Refer Modal */
 .modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 .modal-content {
-    background: #fff; width: 90%; max-width: 600px; 
-    border-radius: 20px;
-    max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s ease;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: #fff; width: 90%; max-width: 600px; 
+  border-radius: 20px;
+  max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s ease;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -155,8 +210,8 @@ textarea.form-input { height: 80px; resize: none; }
 .modal-body { flex: 1; overflow-y: auto; padding: 25px; }
 
 .history-item {
-    background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent;
+  background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent;
 }
 .history-item:hover { border-color: var(--primary); }
 .h-ep { font-weight: bold; color: var(--primary); font-size: 14px; }
@@ -165,15 +220,15 @@ textarea.form-input { height: 80px; resize: none; }
 
 /* Refer Popup Styles */
 .refer-highlight {
-    background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px;
-    border-radius: 12px; text-align: center; margin-bottom: 15px;
+  background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px;
+  border-radius: 12px; text-align: center; margin-bottom: 15px;
 }
 .refer-title { font-size: 20px; font-weight: bold; color: #b45309; margin-bottom: 5px; }
 .refer-text { font-size: 14px; color: #4b5563; margin-bottom: 10px; line-height: 1.5; }
 .refer-hindi { font-size: 15px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
 .refer-link-box {
-    background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace;
-    font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb;
+  background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace;
+  font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb;
 }
 
 /* New Buttons Grid for Refer */
@@ -181,13 +236,13 @@ textarea.form-input { height: 80px; resize: none; }
 
 /* ================= CUSTOM TOAST POPUP ================= */
 #toast-container {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px;
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px;
 }
 .toast {
-    background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-left: 5px solid #333;
+  background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-left: 5px solid #333;
 }
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .toast.success { border-left-color: var(--success); }
@@ -199,12 +254,12 @@ textarea.form-input { height: 80px; resize: none; }
 
 /* Custom Confirm Modal */
 .confirm-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-    z-index: 2000; display: none; align-items: center; justify-content: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+  z-index: 2000; display: none; align-items: center; justify-content: center;
 }
 .confirm-box {
-    background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease;
+  background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease;
 }
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
@@ -214,11 +269,11 @@ textarea.form-input { height: 80px; resize: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
-    .form-grid { grid-template-columns: 1fr; } 
-    .full-width { grid-column: span 1; }
-    .card-wrapper { transform: scale(0.75); margin: -30px 0; }
-    .modal-content { width: 95%; max-height: 80vh; }
-    .refer-btns { grid-template-columns: 1fr; } /* Stack buttons on mobile */
+  .form-grid { grid-template-columns: 1fr; } 
+  .full-width { grid-column: span 1; }
+  .card-wrapper { transform: scale(0.75); margin: -30px 0; }
+  .modal-content { width: 95%; max-height: 80vh; }
+  .refer-btns { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -341,13 +396,23 @@ textarea.form-input { height: 80px; resize: none; }
 </div>
 
 <div id="paywall-screen" class="auth-wrapper">
-    <div class="auth-box">
-        <i class="fas fa-lock" style="font-size:40px; color:#ef4444; margin-bottom:10px;"></i>
-        <h1 style="color:#ef4444;">Plan Expired</h1>
-        <p>Subscribe to continue (₹65/month).</p>
-        <a href="https://payments.cashfree.com/forms/votermaker" target="_blank" class="btn btn-primary" style="margin:20px 0; text-decoration:none;">Pay Now</a>
-        <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID">
-        <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a;">Verify Payment</button>
+    <div class="auth-box plan-mode">
+        <i class="fas fa-crown" style="font-size:30px; color:#f59e0b; margin-bottom:5px;"></i>
+        <h2 style="color:#1e293b; margin-bottom: 5px;">Go Premium</h2>
+        <p style="font-size:13px; color:#64748b;">Select a plan to remove limits</p>
+
+        <div id="plansContainer" class="plans-container">
+            </div>
+
+        <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="margin:10px 0; text-decoration:none;">
+            Select a Plan
+        </a>
+        
+        <div style="border-top:1px solid #eee; margin:15px 0; padding-top:15px;">
+             <p style="font-size:12px; margin-bottom:5px; font-weight:bold;">Have you paid?</p>
+             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:5px;">
+             <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a; font-size:14px; padding:10px;">Verify Payment</button>
+        </div>
         
         <button id="backToTrialBtn" class="btn" style="background:#64748b; color:white; margin-top:10px; display:none;">
             <i class="fas fa-arrow-left"></i> Back to App
@@ -446,6 +511,120 @@ textarea.form-input { height: 80px; resize: none; }
   window.currentUserID = null;
   let historyData = [];
 
+  // --- PLAN CONFIGURATION (ADD YOUR LINKS HERE) ---
+  const planData = [
+    {
+       id: "quarterly_3",
+       duration: "3 Months",
+       price: 179,
+       original: 195,
+       savings: "Save ₹16",
+       tag: "Most Popular",
+       recommended: true
+    },
+    {
+       id: "half_yearly_6",
+       duration: "6 Months",
+       price: 329,
+       original: 390,
+       savings: "Save ₹61",
+       tag: "Best Value",
+       recommended: false
+    },
+    {
+       id: "yearly_12",
+       duration: "1 Year",
+       price: 599,
+       original: 780,
+       savings: "Save ₹181",
+       tag: "Super Saver",
+       recommended: false
+    },
+    {
+       id: "monthly_1",
+       duration: "1 Month",
+       price: 65,
+       original: 65,
+       savings: "",
+       tag: "",
+       recommended: false
+    }
+  ];
+
+  // PASTE YOUR PAYMENT LINKS HERE
+  const planLinks = {
+      "quarterly_3": "https://payments.cashfree.com/forms/voterpremium179", // e.g., https://payments.cashfree.com/forms/xyz3
+      "half_yearly_6": "https://payments.cashfree.com/forms/voter329",
+      "yearly_12": "https://payments.cashfree.com/forms/voter599",
+      "monthly_1": "https://payments.cashfree.com/forms/votermaker" // Current Basic Link
+  };
+
+  // --- RENDER PLANS FUNCTION ---
+  function renderPlans() {
+      const container = document.getElementById("plansContainer");
+      container.innerHTML = ""; // Clear existing
+
+      planData.forEach((plan, index) => {
+          const div = document.createElement("div");
+          const isSelected = plan.recommended; 
+          
+          div.className = `plan-card ${isSelected ? 'selected' : ''} ${plan.recommended ? 'recommended' : ''}`;
+          div.onclick = () => selectPlan(plan.id, div);
+          div.id = `plan-${plan.id}`;
+
+          let tagHtml = plan.tag ? `<div class="plan-tag">${plan.tag}</div>` : '';
+          let savingsHtml = plan.savings ? `<div class="plan-savings">${plan.savings}</div>` : '';
+          let origPriceHtml = plan.original > plan.price ? `<span class="plan-original">₹${plan.original}</span>` : '';
+
+          div.innerHTML = `
+              ${tagHtml}
+              <div class="plan-header">
+                  <div style="display:flex; align-items:center;">
+                    <div class="radio-circle"></div>
+                    <span class="plan-name">${plan.duration}</span>
+                  </div>
+                  <span class="plan-price">₹${plan.price}</span>
+              </div>
+              <div class="plan-details">
+                  <span class="plan-months">Full Access</span>
+                  <div style="text-align:right;">
+                      ${origPriceHtml}
+                      ${savingsHtml}
+                  </div>
+              </div>
+          `;
+          container.appendChild(div);
+
+          // Set default link if recommended
+          if(isSelected) {
+             updatePayLink(plan.id);
+          }
+      });
+  }
+
+  window.selectPlan = (id, element) => {
+      // Remove selected class from all
+      document.querySelectorAll('.plan-card').forEach(el => {
+          el.classList.remove('selected');
+          // Keep recommended border color if it has it, but remove the blue BG
+          if(el.classList.contains('recommended') && el !== element) {
+              // no extra logic needed, CSS handles base recommended style
+          }
+      });
+      // Add to clicked
+      element.classList.add('selected');
+      updatePayLink(id);
+  }
+
+  function updatePayLink(id) {
+      const btn = document.getElementById("payNowBtn");
+      const url = planLinks[id] || "#";
+      const plan = planData.find(p => p.id === id);
+      
+      btn.href = url;
+      btn.innerHTML = `Pay ₹${plan.price} <i class="fas fa-arrow-right" style="margin-left:5px"></i>`;
+  }
+
   // --- CUSTOM TOAST FUNCTION ---
   window.showToast = (msg, type='info') => {
       const container = document.getElementById("toast-container");
@@ -520,6 +699,11 @@ textarea.form-input { height: 80px; resize: none; }
       document.querySelectorAll('.auth-wrapper, #app-screen').forEach(el => el.style.display = 'none');
       document.getElementById(id).style.display = id === "app-screen" ? "block" : "flex";
       loader.style.display = "none";
+      
+      // If showing paywall, render plans
+      if(id === "paywall-screen") {
+          renderPlans();
+      }
   }
 
   function startDocListener(user) {
@@ -746,149 +930,149 @@ textarea.form-input { height: 80px; resize: none; }
 // --- UI, PDF & MODAL LOGIC (Standard JS) ---
 
 function closeHistory() {
-    document.getElementById("historyModal").style.display = "none";
+  document.getElementById("historyModal").style.display = "none";
 }
 
 function showConfirm() {
-    document.getElementById("confirmModal").style.display = "flex";
+  document.getElementById("confirmModal").style.display = "flex";
 }
 
 function closeConfirm() {
-    document.getElementById("confirmModal").style.display = "none";
+  document.getElementById("confirmModal").style.display = "none";
 }
 
 // --- UPDATED REFERRAL FUNCTIONS ---
 function openReferModal() {
-    document.getElementById("referModal").style.display = "flex";
-    if(window.currentUserID) {
-        // Construct link based on current domain + user ID
-        const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
-        document.getElementById("myReferLink").innerText = link;
-    }
+  document.getElementById("referModal").style.display = "flex";
+  if(window.currentUserID) {
+      // Construct link based on current domain + user ID
+      const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
+      document.getElementById("myReferLink").innerText = link;
+  }
 }
 
 function closeReferModal() {
-    document.getElementById("referModal").style.display = "none";
+  document.getElementById("referModal").style.display = "none";
 }
 
 // 1. WhatsApp Share Function
 function shareOnWhatsApp() {
-    const link = document.getElementById("myReferLink").innerText;
-    if(link.includes("Loading")) return;
-    
-    // Message in English + Hindi for better reach
-    const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link to get special benefits:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
-    
-    // Open WhatsApp (Web or App)
-    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+  const link = document.getElementById("myReferLink").innerText;
+  if(link.includes("Loading")) return;
+  
+  // Message in English + Hindi for better reach
+  const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link to get special benefits:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
+  
+  // Open WhatsApp (Web or App)
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 // 2. Copy Link Function
 function copyReferLink() {
-    const txt = document.getElementById("myReferLink").innerText;
-    if(txt === "Loading..." || txt === "Loading link...") return;
-    
-    navigator.clipboard.writeText(txt).then(() => {
-        window.showToast("Link copied to clipboard!", "success");
-    }).catch(() => {
-        window.showToast("Failed to copy link", "error");
-    });
+  const txt = document.getElementById("myReferLink").innerText;
+  if(txt === "Loading..." || txt === "Loading link...") return;
+  
+  navigator.clipboard.writeText(txt).then(() => {
+      window.showToast("Link copied to clipboard!", "success");
+  }).catch(() => {
+      window.showToast("Failed to copy link", "error");
+  });
 }
 
 function fillFormFromHistory(id) {
-    const data = window.historyData[id];
-    if(!data) return;
+  const data = window.historyData[id];
+  if(!data) return;
 
-    document.getElementById("epic").value = data.epic || "";
-    document.getElementById("userName").value = data.userName || "";
-    document.getElementById("nameHindi").value = data.nameHindi || "";
-    document.getElementById("fatherName").value = data.fatherName || "";
-    document.getElementById("fatherHindi").value = data.fatherHindi || "";
-    document.getElementById("gender").value = data.gender || "";
-    document.getElementById("dob").value = data.dob || "";
-    document.getElementById("addrHindi").value = data.addrHindi || "";
-    document.getElementById("addrEng").value = data.addrEng || "";
-    document.getElementById("dlDate").value = data.dlDate || "";
+  document.getElementById("epic").value = data.epic || "";
+  document.getElementById("userName").value = data.userName || "";
+  document.getElementById("nameHindi").value = data.nameHindi || "";
+  document.getElementById("fatherName").value = data.fatherName || "";
+  document.getElementById("fatherHindi").value = data.fatherHindi || "";
+  document.getElementById("gender").value = data.gender || "";
+  document.getElementById("dob").value = data.dob || "";
+  document.getElementById("addrHindi").value = data.addrHindi || "";
+  document.getElementById("addrEng").value = data.addrEng || "";
+  document.getElementById("dlDate").value = data.dlDate || "";
 
-    closeHistory();
-    generateCardUI(); 
-    window.showToast("Data restored from history", "success");
+  closeHistory();
+  generateCardUI(); 
+  window.showToast("Data restored from history", "success");
 }
 
 function generateCardUI(){
-    document.getElementById("previewArea").style.display = "flex";
-    document.getElementById("dlPdfBtn").style.display = "flex";
-    
-    const get = id => document.getElementById(id).value;
-    const set = (id, val) => document.getElementById(id).innerText = val;
-    
-    set("dEpic", get("epic"));
-    set("hName", "नाम : " + get("nameHindi")); 
-    set("eName", "Name : " + get("userName"));
-    set("hFather", "पिता का नाम : " + get("fatherHindi")); 
-    set("eFather", "Father's Name : " + get("fatherName"));
-    set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
-    set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
-    
-    set("dispAddrHindi", get("addrHindi")); 
-    set("dispAddrEng", get("addrEng"));
-    
-    set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
-    set("dispEpicBack", get("epic"));
+  document.getElementById("previewArea").style.display = "flex";
+  document.getElementById("dlPdfBtn").style.display = "flex";
+  
+  const get = id => document.getElementById(id).value;
+  const set = (id, val) => document.getElementById(id).innerText = val;
+  
+  set("dEpic", get("epic"));
+  set("hName", "नाम : " + get("nameHindi")); 
+  set("eName", "Name : " + get("userName"));
+  set("hFather", "पिता का नाम : " + get("fatherHindi")); 
+  set("eFather", "Father's Name : " + get("fatherName"));
+  set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
+  set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
+  
+  set("dispAddrHindi", get("addrHindi")); 
+  set("dispAddrEng", get("addrEng"));
+  
+  set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
+  set("dispEpicBack", get("epic"));
 
-    const file = document.getElementById("photo").files[0];
-    if(file){ 
-        const r = new FileReader(); 
-        r.onload = () => document.getElementById("dPhoto").src = r.result; 
-        r.readAsDataURL(file); 
-    }
-    
-    if(window.innerWidth < 600) {
-        document.getElementById("previewArea").scrollIntoView({ behavior: 'smooth' });
-    }
+  const file = document.getElementById("photo").files[0];
+  if(file){ 
+      const r = new FileReader(); 
+      r.onload = () => document.getElementById("dPhoto").src = r.result; 
+      r.readAsDataURL(file); 
+  }
+  
+  if(window.innerWidth < 600) {
+      document.getElementById("previewArea").scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 async function downloadPDF() {
-    const btn = document.getElementById("dlPdfBtn");
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-    btn.disabled = true;
+  const btn = document.getElementById("dlPdfBtn");
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  btn.disabled = true;
 
-    try {
-        const { jsPDF } = window.jspdf;
-        const front = document.getElementById('cardFront');
-        const back = document.getElementById('cardBack');
+  try {
+      const { jsPDF } = window.jspdf;
+      const front = document.getElementById('cardFront');
+      const back = document.getElementById('cardBack');
 
-        // Capture settings
-        const opts = { scale: 3, useCORS: true, backgroundColor: null };
-        
-        // Reset transform for clean capture
-        const orgTransform = front.style.transform;
-        const orgMargin = front.style.margin;
-        
-        front.style.transform = "scale(1)"; front.style.margin = "0";
-        back.style.transform = "scale(1)"; back.style.margin = "0";
+      // Capture settings
+      const opts = { scale: 3, useCORS: true, backgroundColor: null };
+      
+      // Reset transform for clean capture
+      const orgTransform = front.style.transform;
+      const orgMargin = front.style.margin;
+      
+      front.style.transform = "scale(1)"; front.style.margin = "0";
+      back.style.transform = "scale(1)"; back.style.margin = "0";
 
-        const canvas1 = await html2canvas(front, opts);
-        const canvas2 = await html2canvas(back, opts);
+      const canvas1 = await html2canvas(front, opts);
+      const canvas2 = await html2canvas(back, opts);
 
-        // Restore styles
-        front.style.transform = orgTransform; front.style.margin = orgMargin;
-        back.style.transform = orgTransform; back.style.margin = orgMargin;
+      // Restore styles
+      front.style.transform = orgTransform; front.style.margin = orgMargin;
+      back.style.transform = orgTransform; back.style.margin = orgMargin;
 
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
-        pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
-        pdf.addPage();
-        pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
-        
-        pdf.save('voter-id-card.pdf');
-        window.showToast("PDF downloaded successfully", "success");
-    } catch (error) {
-        window.showToast("Error generating PDF", "error");
-    }
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
+      pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+      pdf.addPage();
+      pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+      
+      pdf.save('voter-id-card.pdf');
+      window.showToast("PDF downloaded successfully", "success");
+  } catch (error) {
+      window.showToast("Error generating PDF", "error");
+  }
 
-    btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
-    btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
+  btn.disabled = false;
 }
 </script>
 
