@@ -6,9 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <style>
 /* ================= CSS VARIABLES & RESET ================= */
@@ -38,10 +40,7 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
   width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
   border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
 }
-/* Extended width for the Plan Selection screen */
-.auth-box.plan-mode {
-    max-width: 500px;
-}
+.auth-box.plan-mode { max-width: 500px; }
 
 .auth-box h1 { font-size: 24px; margin-bottom: 10px; color: var(--text-main); }
 .auth-input {
@@ -58,26 +57,14 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .btn-primary:active { transform: scale(0.98); }
 .btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
 
-/* ================= PLAN CARD STYLES (NEW) ================= */
-.plans-container {
-    display: flex; flex-direction: column; gap: 12px; margin: 20px 0;
-}
+/* ================= PLAN CARD STYLES ================= */
+.plans-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
 .plan-card {
-    position: relative;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 15px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
-    background: #fff;
+    position: relative; border: 2px solid var(--border); border-radius: 10px; padding: 15px;
+    cursor: pointer; text-align: left; transition: all 0.2s; background: #fff;
 }
 .plan-card:hover { border-color: #93c5fd; }
-.plan-card.selected {
-    border-color: var(--primary);
-    background: #eff6ff;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
+.plan-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
 .plan-card.recommended { border-color: #f59e0b; }
 .plan-card.recommended.selected { border-color: #f59e0b; background: #fffbeb; }
 
@@ -85,28 +72,18 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .plan-name { font-weight: bold; font-size: 16px; color: var(--text-main); }
 .plan-price { font-weight: 800; font-size: 18px; color: var(--primary); }
 .plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 13px; margin-right: 5px; }
-
 .plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 .plan-months { color: var(--text-sub); }
 .plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-
 .plan-tag {
-    position: absolute;
-    top: -10px; right: 10px;
-    background: #f59e0b; color: white;
-    font-size: 10px; font-weight: bold;
-    padding: 2px 8px; border-radius: 10px;
-    text-transform: uppercase;
+    position: absolute; top: -10px; right: 10px; background: #f59e0b; color: white;
+    font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
 }
 .radio-circle {
-    width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%;
-    display: grid; place-items: center; margin-right: 10px;
+    width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 10px;
 }
 .plan-card.selected .radio-circle { border-color: var(--primary); }
-.plan-card.selected .radio-circle::after {
-    content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%;
-}
-
+.plan-card.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
 
 /* ================= APP LAYOUT ================= */
 #app-screen, #paywall-screen, #pending-screen { display: none; }
@@ -155,8 +132,7 @@ textarea.form-input { height: 80px; resize: none; }
 .preview-section { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
 .card-wrapper {
   width: 420px; height: 260px; position: relative; border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff;
-  color: #000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
 }
 .card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
@@ -178,29 +154,20 @@ textarea.form-input { height: 80px; resize: none; }
 .p-h-dob { left: 140px; top: 212px; font-size: 11.5px; }
 .p-e-dob { left: 230px; top: 212px; font-size: 11.5px; }
 
-/* Back Side Original Styles */
-.address-section { 
-  position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10;
-}
-.h-addr-label, .e-addr-label { 
-  font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000;
-}
-.h-addr-text, .e-addr-text { 
-  font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000;
-}
-
 /* Back Elements */
+.address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10; }
+.h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000; }
+.h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000; }
 .p-date { left: 160px; top: 180px; font-size: 13px; }
 .p-epic-back { font-size: 14px; margin-top: -25px; font-weight: bold; color: #000; }
 
-/* History Modal & Refer Modal */
+/* Modals */
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 .modal-content {
-  background: #fff; width: 90%; max-width: 600px; 
-  border-radius: 20px;
+  background: #fff; width: 90%; max-width: 600px; border-radius: 20px;
   max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s ease;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
@@ -208,6 +175,10 @@ textarea.form-input { height: 80px; resize: none; }
 
 .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 .modal-body { flex: 1; overflow-y: auto; padding: 25px; }
+
+/* Crop Modal Specifics */
+#cropModal .modal-body { padding: 0; background: #333; display: flex; align-items: center; justify-content: center; height: 400px; }
+#imageToCrop { max-width: 100%; max-height: 100%; display: block; }
 
 .history-item {
   background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
@@ -218,49 +189,24 @@ textarea.form-input { height: 80px; resize: none; }
 .h-nm { font-size: 13px; color: var(--text-main); margin-top: 2px; }
 .h-dt { font-size: 11px; color: var(--text-sub); margin-top: 5px; text-align: right; }
 
-/* Refer Popup Styles */
-.refer-highlight {
-  background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px;
-  border-radius: 12px; text-align: center; margin-bottom: 15px;
-}
+/* Toast & Refer */
+.refer-highlight { background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
 .refer-title { font-size: 20px; font-weight: bold; color: #b45309; margin-bottom: 5px; }
 .refer-text { font-size: 14px; color: #4b5563; margin-bottom: 10px; line-height: 1.5; }
 .refer-hindi { font-size: 15px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
-.refer-link-box {
-  background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace;
-  font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb;
-}
-
-/* New Buttons Grid for Refer */
+.refer-link-box { background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb; }
 .refer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
 
-/* ================= CUSTOM TOAST POPUP ================= */
-#toast-container {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-  z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px;
-}
-.toast {
-  background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-left: 5px solid #333;
-}
+#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
+.toast { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid #333; }
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.toast.success { border-left-color: var(--success); }
-.toast.error { border-left-color: var(--danger); }
-.toast-icon { font-size: 20px; }
-.toast.success .toast-icon { color: var(--success); }
-.toast.error .toast-icon { color: var(--danger); }
+.toast.success { border-left-color: var(--success); } .toast.error { border-left-color: var(--danger); }
+.toast-icon { font-size: 20px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
 .toast-msg { font-size: 14px; font-weight: 600; color: #333; }
 
-/* Custom Confirm Modal */
-.confirm-modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-  z-index: 2000; display: none; align-items: center; justify-content: center;
-}
-.confirm-box {
-  background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease;
-}
+/* Confirm Modal */
+.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.confirm-box { background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
 
@@ -269,10 +215,8 @@ textarea.form-input { height: 80px; resize: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
-  .form-grid { grid-template-columns: 1fr; } 
-  .full-width { grid-column: span 1; }
-  .card-wrapper { transform: scale(0.75); margin: -30px 0; }
-  .modal-content { width: 95%; max-height: 80vh; }
+  .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
+  .card-wrapper { transform: scale(0.75); margin: -30px 0; } .modal-content { width: 95%; max-height: 80vh; }
   .refer-btns { grid-template-columns: 1fr; }
 }
 </style>
@@ -282,11 +226,29 @@ textarea.form-input { height: 80px; resize: none; }
 
 <div id="toast-container"></div>
 
+<div id="cropModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3>Crop Photo</h3>
+            <button onclick="closeCropModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body">
+            <img id="imageToCrop">
+        </div>
+        <div style="padding: 15px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #eee;">
+             <button onclick="closeCropModal()" class="btn" style="background: #e2e8f0; color: #333; width: auto; padding: 8px 20px;">Cancel</button>
+             <button onclick="performCrop()" class="btn btn-primary" style="width: auto; padding: 8px 20px; background: #2563eb;">
+                <i class="fas fa-crop-alt"></i> Crop & Save
+             </button>
+        </div>
+    </div>
+</div>
+
 <div id="confirmModal" class="confirm-modal">
     <div class="confirm-box">
         <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #f59e0b; margin-bottom: 15px;"></i>
         <h3>Clear History?</h3>
-        <p style="color:#666; font-size:14px; margin-top:5px;">This will permanently delete all saved cards. This action cannot be undone.</p>
+        <p style="color:#666; font-size:14px; margin-top:5px;">This will permanently delete all saved cards.</p>
         <div class="confirm-btns">
             <button onclick="closeConfirm()" class="btn" style="background:#f3f4f6; color:#333;">Cancel</button>
             <button onclick="confirmClearHistory()" class="btn" style="background:#ef4444; color:white;">Yes, Delete All</button>
@@ -400,20 +362,13 @@ textarea.form-input { height: 80px; resize: none; }
         <i class="fas fa-crown" style="font-size:30px; color:#f59e0b; margin-bottom:5px;"></i>
         <h2 style="color:#1e293b; margin-bottom: 5px;">Go Premium</h2>
         <p style="font-size:13px; color:#64748b;">Select a plan to remove limits</p>
-
-        <div id="plansContainer" class="plans-container">
-            </div>
-
-        <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="margin:10px 0; text-decoration:none;">
-            Select a Plan
-        </a>
-        
+        <div id="plansContainer" class="plans-container"></div>
+        <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="margin:10px 0; text-decoration:none;">Select a Plan</a>
         <div style="border-top:1px solid #eee; margin:15px 0; padding-top:15px;">
              <p style="font-size:12px; margin-bottom:5px; font-weight:bold;">Have you paid?</p>
              <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:5px;">
              <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a; font-size:14px; padding:10px;">Verify Payment</button>
         </div>
-        
         <button id="backToTrialBtn" class="btn" style="background:#64748b; color:white; margin-top:10px; display:none;">
             <i class="fas fa-arrow-left"></i> Back to App
         </button>
@@ -434,9 +389,7 @@ textarea.form-input { height: 80px; resize: none; }
         <div class="modal-header">
             <h3>Saved Cards</h3>
             <div style="display:flex; gap:10px;">
-                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;">
-                    <i class="fas fa-trash"></i> Clear All
-                </button>
+                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash"></i> Clear All</button>
                 <button onclick="closeHistory()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
             </div>
         </div>
@@ -456,24 +409,14 @@ textarea.form-input { height: 80px; resize: none; }
             <div class="refer-highlight">
                 <i class="fas fa-gift" style="font-size:40px; color:#f59e0b; margin-bottom:10px;"></i>
                 <div class="refer-title">Get 7 Days Free!</div>
-                <div class="refer-text">
-                    Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!
-                </div>
-                <span class="refer-hindi">
-                    अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!
-                </span>
+                <div class="refer-text">Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!</div>
+                <span class="refer-hindi">अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!</span>
             </div>
-            
             <p style="font-size:13px; font-weight:bold; color:#333; margin-bottom:5px;">Your Referral Link:</p>
             <div class="refer-link-box" id="myReferLink">Loading link...</div>
-            
             <div class="refer-btns">
-                <button onclick="shareOnWhatsApp()" class="btn btn-primary" style="background:#25D366; border:none;">
-                    <i class="fab fa-whatsapp" style="font-size:18px;"></i> Share on WhatsApp
-                </button>
-                <button onclick="copyReferLink()" class="btn btn-primary" style="background:#f59e0b; border:none;">
-                    <i class="fas fa-copy"></i> Copy Link
-                </button>
+                <button onclick="shareOnWhatsApp()" class="btn btn-primary" style="background:#25D366; border:none;"><i class="fab fa-whatsapp" style="font-size:18px;"></i> Share on WhatsApp</button>
+                <button onclick="copyReferLink()" class="btn btn-primary" style="background:#f59e0b; border:none;"><i class="fas fa-copy"></i> Copy Link</button>
             </div>
         </div>
     </div>
@@ -499,7 +442,7 @@ textarea.form-input { height: 80px; resize: none; }
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // --- 1. CAPTURE REFERRAL CODE ON LOAD ---
+  // --- 1. CAPTURE REFERRAL CODE ---
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
   if (refCode) {
@@ -510,68 +453,32 @@ textarea.form-input { height: 80px; resize: none; }
   // --- GLOBAL VARIABLES ---
   window.currentUserID = null;
   let historyData = [];
-
-  // --- PLAN CONFIGURATION (ADD YOUR LINKS HERE) ---
+  
+  // --- PLANS ---
   const planData = [
-    {
-       id: "quarterly_3",
-       duration: "3 Months",
-       price: 179,
-       original: 195,
-       savings: "Save ₹16",
-       tag: "Most Popular",
-       recommended: true
-    },
-    {
-       id: "half_yearly_6",
-       duration: "6 Months",
-       price: 329,
-       original: 390,
-       savings: "Save ₹61",
-       tag: "Best Value",
-       recommended: false
-    },
-    {
-       id: "yearly_12",
-       duration: "1 Year",
-       price: 599,
-       original: 780,
-       savings: "Save ₹181",
-       tag: "Super Saver",
-       recommended: false
-    },
-    {
-       id: "monthly_1",
-       duration: "1 Month",
-       price: 65,
-       original: 65,
-       savings: "",
-       tag: "",
-       recommended: false
-    }
+    { id: "quarterly_3", duration: "3 Months", price: 179, original: 195, savings: "Save ₹16", tag: "Most Popular", recommended: true },
+    { id: "half_yearly_6", duration: "6 Months", price: 329, original: 390, savings: "Save ₹61", tag: "Best Value", recommended: false },
+    { id: "yearly_12", duration: "1 Year", price: 599, original: 780, savings: "Save ₹181", tag: "Super Saver", recommended: false },
+    { id: "monthly_1", duration: "1 Month", price: 65, original: 65, savings: "", tag: "", recommended: false }
   ];
 
-  // PASTE YOUR PAYMENT LINKS HERE
   const planLinks = {
-      "quarterly_3": "YOUR_3_MONTH_LINK_HERE", // e.g., https://payments.cashfree.com/forms/xyz3
-      "half_yearly_6": "YOUR_6_MONTH_LINK_HERE",
-      "yearly_12": "YOUR_12_MONTH_LINK_HERE",
-      "monthly_1": "https://payments.cashfree.com/forms/votermaker" // Current Basic Link
+      "quarterly_3": "https://payments.cashfree.com/forms/voterpremium179",
+      "half_yearly_6": "https://payments.cashfree.com/forms/voter329",
+      "yearly_12": "https://payments.cashfree.com/forms/voter599",
+      "monthly_1": "https://payments.cashfree.com/forms/votermaker"
   };
 
-  // --- RENDER PLANS FUNCTION ---
   function renderPlans() {
       const container = document.getElementById("plansContainer");
-      container.innerHTML = ""; // Clear existing
-
-      planData.forEach((plan, index) => {
+      container.innerHTML = "";
+      planData.forEach((plan) => {
           const div = document.createElement("div");
           const isSelected = plan.recommended; 
-          
           div.className = `plan-card ${isSelected ? 'selected' : ''} ${plan.recommended ? 'recommended' : ''}`;
           div.onclick = () => selectPlan(plan.id, div);
           div.id = `plan-${plan.id}`;
-
+          
           let tagHtml = plan.tag ? `<div class="plan-tag">${plan.tag}</div>` : '';
           let savingsHtml = plan.savings ? `<div class="plan-savings">${plan.savings}</div>` : '';
           let origPriceHtml = plan.original > plan.price ? `<span class="plan-original">₹${plan.original}</span>` : '';
@@ -587,31 +494,16 @@ textarea.form-input { height: 80px; resize: none; }
               </div>
               <div class="plan-details">
                   <span class="plan-months">Full Access</span>
-                  <div style="text-align:right;">
-                      ${origPriceHtml}
-                      ${savingsHtml}
-                  </div>
+                  <div style="text-align:right;">${origPriceHtml} ${savingsHtml}</div>
               </div>
           `;
           container.appendChild(div);
-
-          // Set default link if recommended
-          if(isSelected) {
-             updatePayLink(plan.id);
-          }
+          if(isSelected) updatePayLink(plan.id);
       });
   }
 
   window.selectPlan = (id, element) => {
-      // Remove selected class from all
-      document.querySelectorAll('.plan-card').forEach(el => {
-          el.classList.remove('selected');
-          // Keep recommended border color if it has it, but remove the blue BG
-          if(el.classList.contains('recommended') && el !== element) {
-              // no extra logic needed, CSS handles base recommended style
-          }
-      });
-      // Add to clicked
+      document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('selected'));
       element.classList.add('selected');
       updatePayLink(id);
   }
@@ -620,144 +512,92 @@ textarea.form-input { height: 80px; resize: none; }
       const btn = document.getElementById("payNowBtn");
       const url = planLinks[id] || "#";
       const plan = planData.find(p => p.id === id);
-      
       btn.href = url;
       btn.innerHTML = `Pay ₹${plan.price} <i class="fas fa-arrow-right" style="margin-left:5px"></i>`;
   }
 
-  // --- CUSTOM TOAST FUNCTION ---
+  // --- CUSTOM TOAST ---
   window.showToast = (msg, type='info') => {
       const container = document.getElementById("toast-container");
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
-      
-      let icon = 'fa-info-circle';
-      if(type==='success') icon = 'fa-check-circle';
-      if(type==='error') icon = 'fa-exclamation-circle';
-      
-      toast.innerHTML = `
-          <div class="toast-icon"><i class="fas ${icon}"></i></div>
-          <div class="toast-msg">${msg}</div>
-      `;
-      
+      let icon = type==='success' ? 'fa-check-circle' : type==='error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      toast.innerHTML = `<div class="toast-icon"><i class="fas ${icon}"></i></div><div class="toast-msg">${msg}</div>`;
       container.appendChild(toast);
       setTimeout(() => {
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateY(-20px)';
+          toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)';
           setTimeout(() => toast.remove(), 300);
       }, 3000);
   }
 
-  // --- AUTH LOGIC ---
+  // --- AUTH ---
   const loader = document.getElementById("loader");
   const handleAuth = (method) => {
     const email = document.getElementById("emailInput").value;
     const pass = document.getElementById("passInput").value;
     if(!email || !pass) return showToast("Please fill all fields", "error");
     loader.style.display="block";
-    method(auth, email, pass).catch(err => { 
-        showToast(err.message, "error"); 
-        loader.style.display="none"; 
-    });
+    method(auth, email, pass).catch(err => { showToast(err.message, "error"); loader.style.display="none"; });
   };
-
   document.getElementById("loginBtn").addEventListener("click", () => handleAuth(signInWithEmailAndPassword));
   document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
   document.getElementById("googleBtn").addEventListener("click", () => {
     loader.style.display="block";
-    signInWithPopup(auth, provider).catch(err => { 
-        showToast(err.message, "error"); 
-        loader.style.display="none"; 
-    });
+    signInWithPopup(auth, provider).catch(err => { showToast(err.message, "error"); loader.style.display="none"; });
   });
-
   document.getElementById("toggleAuth").addEventListener("click", (e) => {
       let isLogin = document.getElementById("loginBtn").style.display !== "none";
       document.getElementById("loginBtn").style.display = !isLogin ? "flex" : "none";
       document.getElementById("signupBtn").style.display = !isLogin ? "none" : "flex";
       e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
   });
-
   window.logout = () => signOut(auth).then(() => {
-      sessionStorage.removeItem('seenLoginPopup');
-      localStorage.removeItem("mySessionId"); // Clear Session Logic
-      location.reload();
+      sessionStorage.removeItem('seenLoginPopup'); localStorage.removeItem("mySessionId"); location.reload();
   });
 
-  // --- STATE MANAGEMENT ---
   onAuthStateChanged(auth, (user) => {
     if (user) {
         window.currentUserID = user.uid;
         document.getElementById("userEmailDisplay").innerText = user.email;
         startDocListener(user);
-    } else {
-        showScreen("login-screen");
-    }
+    } else { showScreen("login-screen"); }
   });
 
   function showScreen(id) {
       document.querySelectorAll('.auth-wrapper, #app-screen').forEach(el => el.style.display = 'none');
       document.getElementById(id).style.display = id === "app-screen" ? "block" : "flex";
       loader.style.display = "none";
-      
-      // If showing paywall, render plans
-      if(id === "paywall-screen") {
-          renderPlans();
-      }
+      if(id === "paywall-screen") renderPlans();
   }
 
   function startDocListener(user) {
       const userRef = doc(db, "users", user.uid);
       onSnapshot(userRef, async (docSnap) => {
           const now = Date.now();
-          
           if (!docSnap.exists()) {
               const referredBy = localStorage.getItem('referredByCode');
-              // Create new session ID for new user
               const newSession = Date.now().toString();
               localStorage.setItem("mySessionId", newSession);
-
-              const newUserData = { 
-                  email: user.email, 
-                  joinedAt: now, 
-                  subscriptionExpiry: 0,
-                  sessionId: newSession // Save to DB
-              };
-
-              if(referredBy && referredBy !== user.uid) {
-                  newUserData.referredBy = referredBy;
-              }
-
+              const newUserData = { email: user.email, joinedAt: now, subscriptionExpiry: 0, sessionId: newSession };
+              if(referredBy && referredBy !== user.uid) newUserData.referredBy = referredBy;
               await setDoc(userRef, newUserData);
               localStorage.removeItem('referredByCode');
-          } 
-          else {
+          } else {
               const data = docSnap.data();
-
-              // --- SINGLE DEVICE ENFORCEMENT START ---
               const dbSession = data.sessionId;
               let localSession = localStorage.getItem("mySessionId");
-
-              // 1. If this is a new login on this browser/device
               if (!localSession) {
                   localSession = Date.now().toString();
                   localStorage.setItem("mySessionId", localSession);
-                  // Update DB with this new session (This kicks out old sessions!)
                   await updateDoc(userRef, { sessionId: localSession });
-              } 
-              // 2. If session exists but mismatch -> You are the old session
-              else if (dbSession && dbSession !== localSession) {
+              } else if (dbSession && dbSession !== localSession) {
                   alert("Security Alert:\n\nYour account was accessed from another device.\nYou have been logged out.");
                   window.logout();
                   return; 
               }
-              // --- SINGLE DEVICE ENFORCEMENT END ---
-
-              // UPDATED: Changed from 86400000 (24h) to 21600000 (6h)
-              const trialEnd = data.joinedAt + 21600000; 
+              const trialEnd = data.joinedAt + 21600000; // 6 Hours
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
-
               if (subEnd > now) {
                   updateStatus("Premium Active", subEnd, "PREMIUM");
                   showScreen("app-screen");
@@ -770,30 +610,21 @@ textarea.form-input { height: 80px; resize: none; }
                   checkAutoPopup(); 
               } else {
                   showScreen("paywall-screen");
-                  // STRICT MODE: Trial expired, ensure "Back" button is hidden
                   document.getElementById("backToTrialBtn").style.display = "none";
               }
           }
       });
   }
 
-  // --- AUTO POPUP LOGIC ---
   function checkAutoPopup() {
       const seen = sessionStorage.getItem('seenLoginPopup');
-      if(!seen) {
-          setTimeout(() => {
-              openReferModal();
-              sessionStorage.setItem('seenLoginPopup', 'true');
-          }, 1500); 
-      }
+      if(!seen) { setTimeout(() => { openReferModal(); sessionStorage.setItem('seenLoginPopup', 'true'); }, 1500); }
   }
 
   function updateStatus(text, time, type) {
       document.getElementById("subTitle").innerText = text;
-      // UPDATED: Changed "Expires in 24h" to "Expires in 6h"
       document.getElementById("subDesc").innerText = type === "PREMIUM" ? "Full Access" : "Expires in 6h";
       document.getElementById("upgradeBtn").style.display = type === "TRIAL" ? "block" : "none";
-      
       const badge = document.getElementById("timerDisplay");
       setInterval(() => {
           const diff = time - Date.now();
@@ -806,34 +637,23 @@ textarea.form-input { height: 80px; resize: none; }
       }, 1000);
   }
 
-  // --- UTR SUBMISSION ---
   document.getElementById("submitUtrBtn").addEventListener("click", async () => {
       const utr = document.getElementById("utrInput").value;
       if(utr.length < 5) return showToast("Invalid UTR", "error");
-      
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
-          paymentStatus: "pending", utrNumber: utr, submittedAt: Date.now()
-      });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { paymentStatus: "pending", utrNumber: utr, submittedAt: Date.now() });
       showToast("Payment submitted for review", "success");
   });
 
-  // --- MODIFIED UPGRADE BUTTON LOGIC ---
   document.getElementById("upgradeBtn").addEventListener("click", () => {
       showScreen("paywall-screen");
-      // Since user clicked this manually, they are in trial. Enable Back button.
       document.getElementById("backToTrialBtn").style.display = "flex";
   });
+  document.getElementById("backToTrialBtn").addEventListener("click", () => showScreen("app-screen"));
 
-  // --- NEW BACK BUTTON LOGIC ---
-  document.getElementById("backToTrialBtn").addEventListener("click", () => {
-      showScreen("app-screen");
-  });
-
-  // --- HISTORY LOGIC ---
+  // --- SAVE HISTORY ---
   window.generateAndSave = async function() {
       generateCardUI();
       if(!window.currentUserID) return;
-      
       const formData = {
           epic: document.getElementById("epic").value,
           userName: document.getElementById("userName").value,
@@ -847,145 +667,146 @@ textarea.form-input { height: 80px; resize: none; }
           dlDate: document.getElementById("dlDate").value,
           timestamp: Date.now()
       };
-
       try {
           const histRef = collection(db, `users/${window.currentUserID}/history`);
           await addDoc(histRef, formData);
           showToast("Card saved to history", "success");
-      } catch(e) {
-          console.error("Save error", e);
-      }
+      } catch(e) { console.error("Save error", e); }
   };
 
   window.openHistory = async function() {
       document.getElementById("historyModal").style.display = "flex";
       const listDiv = document.getElementById("historyList");
       listDiv.innerHTML = '<div class="loader" style="display:block"></div>';
-
       if(!window.currentUserID) return;
-
       try {
           const q = query(collection(db, `users/${window.currentUserID}/history`), orderBy("timestamp", "desc"));
           const snap = await getDocs(q);
-          
           listDiv.innerHTML = "";
           window.historyData = []; 
-
-          if(snap.empty) {
-              listDiv.innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>";
-              return;
-          }
-
+          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>"; return; }
           snap.forEach(doc => {
               const d = doc.data();
               const id = doc.id;
               window.historyData[id] = d; 
-              
               const dateStr = new Date(d.timestamp).toLocaleDateString();
               const item = document.createElement("div");
               item.className = "history-item";
-              item.innerHTML = `
-                  <div class="h-ep">${d.epic || "No EPIC"}</div>
-                  <div class="h-nm">${d.userName}</div>
-                  <div class="h-dt">${dateStr}</div>
-              `;
+              item.innerHTML = `<div class="h-ep">${d.epic || "No EPIC"}</div><div class="h-nm">${d.userName}</div><div class="h-dt">${dateStr}</div>`;
               item.onclick = () => fillFormFromHistory(id);
               listDiv.appendChild(item);
           });
-
-      } catch(e) {
-          listDiv.innerHTML = "Error loading history.";
-      }
+      } catch(e) { listDiv.innerHTML = "Error loading history."; }
   }
 
-  // --- DELETE ALL HISTORY LOGIC ---
   window.confirmClearHistory = async function() {
       if(!window.currentUserID) return;
       const btn = document.querySelector("#confirmModal .btn[onclick*='confirmClearHistory']");
       btn.innerHTML = "Deleting...";
-      
       try {
           const batch = writeBatch(db);
           const q = query(collection(db, `users/${window.currentUserID}/history`));
           const snap = await getDocs(q);
-          
-          snap.forEach(doc => {
-              batch.delete(doc.ref);
-          });
-          
+          snap.forEach(doc => { batch.delete(doc.ref); });
           await batch.commit();
-          
           showToast("History deleted successfully", "success");
           document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>";
           closeConfirm();
-          
-      } catch(e) {
-          showToast("Failed to delete history", "error");
-      } finally {
-          btn.innerHTML = "Yes, Delete All";
-      }
+      } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Yes, Delete All"; }
   }
 
 </script>
 
 <script>
-// --- UI, PDF & MODAL LOGIC (Standard JS) ---
+// --- GLOBAL VARS FOR CROPPER ---
+let cropper;
+window.croppedPhotoData = null; // Store final base64 image here
 
-function closeHistory() {
-  document.getElementById("historyModal").style.display = "none";
+// --- JS FOR CROPPER ---
+const photoInput = document.getElementById('photo');
+const cropModal = document.getElementById('cropModal');
+const imageToCrop = document.getElementById('imageToCrop');
+
+photoInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            imageToCrop.src = evt.target.result;
+            cropModal.style.display = 'flex';
+            
+            // Destroy old instance if exists
+            if(cropper) cropper.destroy();
+            
+            // Init new cropper with aspect ratio 4:5 (Approx 120x150)
+            cropper = new Cropper(imageToCrop, {
+                aspectRatio: 120 / 150, 
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+window.performCrop = function() {
+    if(!cropper) return;
+    
+    // Get high quality cropped data
+    window.croppedPhotoData = cropper.getCroppedCanvas({
+        width: 300, 
+        height: 375, // Keeps high res (2.5x of display)
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    }).toDataURL('image/jpeg', 0.95);
+    
+    // Immediate Feedback
+    document.getElementById("dPhoto").src = window.croppedPhotoData;
+    
+    closeCropModal();
+    // Do NOT clear input so file stays selected in UI
+    window.showToast("Photo cropped successfully", "success");
 }
 
-function showConfirm() {
-  document.getElementById("confirmModal").style.display = "flex";
+window.closeCropModal = function() {
+    cropModal.style.display = 'none';
+    if(cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    // If they cancel without cropping, clear input so they can select again
+    if(!window.croppedPhotoData) {
+        photoInput.value = ""; 
+    }
 }
 
-function closeConfirm() {
-  document.getElementById("confirmModal").style.display = "none";
-}
-
-// --- UPDATED REFERRAL FUNCTIONS ---
+// --- STANDARD UI LOGIC ---
+function closeHistory() { document.getElementById("historyModal").style.display = "none"; }
+function showConfirm() { document.getElementById("confirmModal").style.display = "flex"; }
+function closeConfirm() { document.getElementById("confirmModal").style.display = "none"; }
 function openReferModal() {
   document.getElementById("referModal").style.display = "flex";
   if(window.currentUserID) {
-      // Construct link based on current domain + user ID
       const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
       document.getElementById("myReferLink").innerText = link;
   }
 }
-
-function closeReferModal() {
-  document.getElementById("referModal").style.display = "none";
-}
-
-// 1. WhatsApp Share Function
+function closeReferModal() { document.getElementById("referModal").style.display = "none"; }
 function shareOnWhatsApp() {
   const link = document.getElementById("myReferLink").innerText;
   if(link.includes("Loading")) return;
-  
-  // Message in English + Hindi for better reach
   const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link to get special benefits:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
-  
-  // Open WhatsApp (Web or App)
-  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
-
-// 2. Copy Link Function
 function copyReferLink() {
   const txt = document.getElementById("myReferLink").innerText;
-  if(txt === "Loading..." || txt === "Loading link...") return;
-  
-  navigator.clipboard.writeText(txt).then(() => {
-      window.showToast("Link copied to clipboard!", "success");
-  }).catch(() => {
-      window.showToast("Failed to copy link", "error");
-  });
+  if(txt.includes("Loading")) return;
+  navigator.clipboard.writeText(txt).then(() => window.showToast("Link copied!", "success"));
 }
 
 function fillFormFromHistory(id) {
   const data = window.historyData[id];
   if(!data) return;
-
   document.getElementById("epic").value = data.epic || "";
   document.getElementById("userName").value = data.userName || "";
   document.getElementById("nameHindi").value = data.nameHindi || "";
@@ -996,7 +817,6 @@ function fillFormFromHistory(id) {
   document.getElementById("addrHindi").value = data.addrHindi || "";
   document.getElementById("addrEng").value = data.addrEng || "";
   document.getElementById("dlDate").value = data.dlDate || "";
-
   closeHistory();
   generateCardUI(); 
   window.showToast("Data restored from history", "success");
@@ -1005,10 +825,8 @@ function fillFormFromHistory(id) {
 function generateCardUI(){
   document.getElementById("previewArea").style.display = "flex";
   document.getElementById("dlPdfBtn").style.display = "flex";
-  
   const get = id => document.getElementById(id).value;
   const set = (id, val) => document.getElementById(id).innerText = val;
-  
   set("dEpic", get("epic"));
   set("hName", "नाम : " + get("nameHindi")); 
   set("eName", "Name : " + get("userName"));
@@ -1016,18 +834,21 @@ function generateCardUI(){
   set("eFather", "Father's Name : " + get("fatherName"));
   set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
   set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
-  
   set("dispAddrHindi", get("addrHindi")); 
   set("dispAddrEng", get("addrEng"));
-  
   set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
   set("dispEpicBack", get("epic"));
 
-  const file = document.getElementById("photo").files[0];
-  if(file){ 
-      const r = new FileReader(); 
-      r.onload = () => document.getElementById("dPhoto").src = r.result; 
-      r.readAsDataURL(file); 
+  // PHOTO LOGIC: Prefer cropped data, fallback to raw file
+  if(window.croppedPhotoData) {
+      document.getElementById("dPhoto").src = window.croppedPhotoData;
+  } else {
+      const file = document.getElementById("photo").files[0];
+      if(file){ 
+          const r = new FileReader(); 
+          r.onload = () => document.getElementById("dPhoto").src = r.result; 
+          r.readAsDataURL(file); 
+      }
   }
   
   if(window.innerWidth < 600) {
@@ -1039,40 +860,26 @@ async function downloadPDF() {
   const btn = document.getElementById("dlPdfBtn");
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
   btn.disabled = true;
-
   try {
       const { jsPDF } = window.jspdf;
       const front = document.getElementById('cardFront');
       const back = document.getElementById('cardBack');
-
-      // Capture settings
       const opts = { scale: 3, useCORS: true, backgroundColor: null };
-      
-      // Reset transform for clean capture
       const orgTransform = front.style.transform;
       const orgMargin = front.style.margin;
-      
       front.style.transform = "scale(1)"; front.style.margin = "0";
       back.style.transform = "scale(1)"; back.style.margin = "0";
-
       const canvas1 = await html2canvas(front, opts);
       const canvas2 = await html2canvas(back, opts);
-
-      // Restore styles
       front.style.transform = orgTransform; front.style.margin = orgMargin;
       back.style.transform = orgTransform; back.style.margin = orgMargin;
-
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
       pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
       pdf.addPage();
       pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
-      
       pdf.save('voter-id-card.pdf');
       window.showToast("PDF downloaded successfully", "success");
-  } catch (error) {
-      window.showToast("Error generating PDF", "error");
-  }
-
+  } catch (error) { window.showToast("Error generating PDF", "error"); }
   btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
   btn.disabled = false;
 }
