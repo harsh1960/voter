@@ -463,9 +463,9 @@ textarea.form-input { height: 80px; resize: none; }
   ];
 
   const planLinks = {
-      "quarterly_3": "https://payments.cashfree.com/forms/voterpremium179",
-      "half_yearly_6": "https://payments.cashfree.com/forms/voter329",
-      "yearly_12": "https://payments.cashfree.com/forms/voter599",
+      "quarterly_3": "YOUR_3_MONTH_LINK_HERE",
+      "half_yearly_6": "YOUR_6_MONTH_LINK_HERE",
+      "yearly_12": "YOUR_12_MONTH_LINK_HERE",
       "monthly_1": "https://payments.cashfree.com/forms/votermaker"
   };
 
@@ -578,12 +578,22 @@ textarea.form-input { height: 80px; resize: none; }
               const referredBy = localStorage.getItem('referredByCode');
               const newSession = Date.now().toString();
               localStorage.setItem("mySessionId", newSession);
-              const newUserData = { email: user.email, joinedAt: now, subscriptionExpiry: 0, sessionId: newSession };
+              const newUserData = { 
+                  email: user.email, 
+                  joinedAt: now, 
+                  lastActiveAt: now, 
+                  subscriptionExpiry: 0, 
+                  sessionId: newSession 
+              };
               if(referredBy && referredBy !== user.uid) newUserData.referredBy = referredBy;
               await setDoc(userRef, newUserData);
               localStorage.removeItem('referredByCode');
           } else {
               const data = docSnap.data();
+              const lastActive = data.lastActiveAt || 0;
+              if (now - lastActive > 5 * 60 * 1000) {
+                  updateDoc(userRef, { lastActiveAt: now }).catch(e => console.log("Active update skipped"));
+              }
               const dbSession = data.sessionId;
               let localSession = localStorage.getItem("mySessionId");
               if (!localSession) {
@@ -654,6 +664,13 @@ textarea.form-input { height: 80px; resize: none; }
   window.generateAndSave = async function() {
       generateCardUI();
       if(!window.currentUserID) return;
+      
+      const now = Date.now();
+      try {
+        const userRef = doc(db, "users", window.currentUserID);
+        updateDoc(userRef, { lastActiveAt: now });
+      } catch(e) { console.log("Active update error", e); }
+
       const formData = {
           epic: document.getElementById("epic").value,
           userName: document.getElementById("userName").value,
@@ -665,7 +682,7 @@ textarea.form-input { height: 80px; resize: none; }
           addrHindi: document.getElementById("addrHindi").value,
           addrEng: document.getElementById("addrEng").value,
           dlDate: document.getElementById("dlDate").value,
-          timestamp: Date.now()
+          timestamp: now
       };
       try {
           const histRef = collection(db, `users/${window.currentUserID}/history`);
