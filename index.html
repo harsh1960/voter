@@ -122,7 +122,7 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .input-group label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
 .form-input {
   width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-  font-size: 15px; outline: none; transition: border 0.2s;
+  font-size: 15px; outline: none; transition: border 0.2s; background: #fff;
 }
 .form-input:focus { border-color: var(--primary); }
 textarea.form-input { height: 80px; resize: none; }
@@ -311,11 +311,20 @@ textarea.form-input { height: 80px; resize: none; }
                 <div class="input-group"><label>Father (English)</label><input id="fatherName" class="form-input" placeholder="Sohan Kumar"></div>
                 <div class="input-group"><label>Father (Hindi)</label><input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार"></div>
                 
-                <div class="input-group"><label>Gender</label><input id="gender" class="form-input" placeholder="Male / Female"></div>
+                <div class="input-group">
+                    <label>Gender</label>
+                    <select id="gender" class="form-input">
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
                 <div class="input-group"><label>DOB</label><input id="dob" class="form-input" placeholder="01/01/1990"></div>
                 
-                <div class="full-width input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
                 <div class="full-width input-group"><label>Address (English)</label><textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea></div>
+                <div class="full-width input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
                 
                 <div class="full-width input-group"><label>Download Date</label><input id="dlDate" class="form-input" placeholder="XX/XX/XXXX"></div>
             </div>
@@ -453,7 +462,7 @@ textarea.form-input { height: 80px; resize: none; }
   // --- GLOBAL VARIABLES ---
   window.currentUserID = null;
   let historyData = [];
-  
+   
   // --- PLANS ---
   const planData = [
     { id: "quarterly_3", duration: "3 Months", price: 179, original: 195, savings: "Save ₹16", tag: "Most Popular", recommended: true },
@@ -900,6 +909,61 @@ async function downloadPDF() {
   btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
   btn.disabled = false;
 }
+</script>
+
+<script>
+    // Debounce function to limit API calls
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    // Function to call Google Input Tools
+    async function transliterate(text, targetId) {
+        if (!text.trim()) {
+            document.getElementById(targetId).value = "";
+            return;
+        }
+        
+        try {
+            // Using Google Input Tools API for English -> Hindi Transliteration
+            const url = `https://www.google.com/inputtools/request?text=${encodeURIComponent(text)}&ime=transliteration_en_hi&num=1`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            // The API response is nested: [ "SUCCESS", [ [ "sourceWord", [ "suggestion1", "suggestion2" ] ] ] ]
+            if (data && data[1] && data[1].length > 0) {
+                let resultText = "";
+                data[1].forEach(word => {
+                    // Append the first suggestion for each word
+                    if(word[1] && word[1].length > 0) {
+                        resultText += word[1][0] + " "; 
+                    }
+                });
+                document.getElementById(targetId).value = resultText.trim();
+            }
+        } catch (error) {
+            console.error("Transliteration Error:", error);
+        }
+    }
+
+    // Attach listeners with debounce
+    const delay = 300; // 300ms delay
+
+    document.getElementById('userName').addEventListener('keyup', debounce(function() {
+        transliterate(this.value, 'nameHindi');
+    }, delay));
+
+    document.getElementById('fatherName').addEventListener('keyup', debounce(function() {
+        transliterate(this.value, 'fatherHindi');
+    }, delay));
+
+    document.getElementById('addrEng').addEventListener('keyup', debounce(function() {
+        transliterate(this.value, 'addrHindi');
+    }, delay));
 </script>
 
 </body>
