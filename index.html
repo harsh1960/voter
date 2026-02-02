@@ -210,6 +210,21 @@ textarea.form-input { height: 80px; resize: none; }
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
 
+/* --- EXPIRY MODAL STYLES --- */
+.expiry-modal-content {
+    background: #fff; width: 90%; max-width: 450px; border-radius: 20px;
+    padding: 25px; text-align: center; border-top: 6px solid #ef4444;
+    animation: bounceIn 0.5s ease;
+}
+@keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+.expiry-icon { font-size: 50px; color: #ef4444; margin-bottom: 15px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.expiry-title { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
+.expiry-msg { font-size: 14px; color: #64748b; margin-bottom: 8px; }
+.expiry-msg-hindi { font-size: 15px; color: #b91c1c; font-weight: 600; margin-bottom: 20px; }
+.btn-urgent { background: #ef4444; color: white; border: none; font-size: 16px; padding: 14px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); animation: btnPulse 2s infinite; }
+@keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
 /* Loader */
 .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -225,6 +240,28 @@ textarea.form-input { height: 80px; resize: none; }
 <body>
 
 <div id="toast-container"></div>
+
+<div id="expiryModal" class="modal" style="z-index: 1001;"> <div class="expiry-modal-content">
+        <div class="expiry-icon"><i class="fas fa-exclamation-circle"></i></div>
+        
+        <h2 class="expiry-title">Action Required!</h2>
+        <p class="expiry-msg">Your premium subscription is expiring in <span id="expDaysEn" style="font-weight:bold; color:#ef4444;">5</span> days.</p>
+        <p class="expiry-msg-hindi">ध्यान दें! आपका प्लान <span id="expDaysHi" style="font-weight:bold; color:#b91c1c;">5</span> दिनों में समाप्त हो रहा है।</p>
+        
+        <div style="margin: 25px 0 15px 0;">
+            <p class="expiry-msg" style="margin-bottom:2px">Renew now to avoid interruption.</p>
+            <p class="expiry-msg-hindi" style="font-weight:normal; color:#444;">सेवा जारी रखने के लिए अभी रिन्यू करें।</p>
+        </div>
+
+        <button onclick="handleUrgentUpgrade()" class="btn-urgent">
+            <i class="fas fa-arrow-circle-up"></i> Renew Now / अभी रिन्यू करें
+        </button>
+        
+        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:14px;">
+            Remind Me Later / बाद में याद दिलाएं
+        </button>
+    </div>
+</div>
 
 <div id="cropModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
@@ -561,7 +598,10 @@ textarea.form-input { height: 80px; resize: none; }
       e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
   });
   window.logout = () => signOut(auth).then(() => {
-      sessionStorage.removeItem('seenLoginPopup'); localStorage.removeItem("mySessionId"); location.reload();
+      sessionStorage.removeItem('seenLoginPopup'); 
+      sessionStorage.removeItem('seenExpiryPopup'); 
+      localStorage.removeItem("mySessionId"); 
+      location.reload();
   });
 
   onAuthStateChanged(auth, (user) => {
@@ -603,24 +643,24 @@ textarea.form-input { height: 80px; resize: none; }
               if (now - lastActive > 5 * 60 * 1000) {
                   updateDoc(userRef, { lastActiveAt: now }).catch(e => console.log("Active update skipped"));
               }
-              const dbSession = data.sessionId;
-              let localSession = localStorage.getItem("mySessionId");
-              if (!localSession) {
-                  localSession = Date.now().toString();
-                  localStorage.setItem("mySessionId", localSession);
-                  await updateDoc(userRef, { sessionId: localSession });
-              } else if (dbSession && dbSession !== localSession) {
-                  alert("Security Alert:\n\nYour account was accessed from another device.\nYou have been logged out.");
-                  window.logout();
-                  return; 
-              }
+              
               const trialEnd = data.joinedAt + 21600000; // 6 Hours
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
+              
+              // Calculate Time Left for Expiry Check
+              const msPerDay = 24 * 60 * 60 * 1000;
+              const daysLeft = (subEnd - now) / msPerDay;
+
               if (subEnd > now) {
-                  updateStatus("Premium Active", subEnd, "PREMIUM");
+                  // --- CHECK EXPIRY ---
+                  if (daysLeft <= 5) {
+                      updateStatus("Plan Expiring", subEnd, "EXPIRING");
+                      handlePopupSequence(subEnd); 
+                  } else {
+                      updateStatus("Premium Active", subEnd, "PREMIUM");
+                  }
                   showScreen("app-screen");
-                  checkAutoPopup(); 
               } else if (payStatus === "pending") {
                   showScreen("pending-screen");
               } else if (now < trialEnd) {
@@ -635,15 +675,49 @@ textarea.form-input { height: 80px; resize: none; }
       });
   }
 
+  // --- LOGIC TO HANDLE URGENT VS REFERRAL POPUPS ---
+  function handlePopupSequence(expiryTime) {
+      const now = Date.now();
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const daysLeft = (expiryTime - now) / msPerDay;
+      const daysLeftInt = Math.ceil(daysLeft);
+
+      // Update text in Modal
+      document.getElementById('expDaysEn').innerText = daysLeftInt;
+      document.getElementById('expDaysHi').innerText = daysLeftInt;
+
+      const seenExpiry = sessionStorage.getItem('seenExpiryPopup');
+      
+      if (daysLeft <= 5 && daysLeft > 0 && !seenExpiry) {
+          // Open Urgent Modal
+          document.getElementById('expiryModal').style.display = 'flex';
+          sessionStorage.setItem('seenExpiryPopup', 'true');
+          
+          // --- DISABLE REFER POPUP FOR THESE USERS ---
+          sessionStorage.setItem('seenLoginPopup', 'true'); 
+      } else {
+          // Normal flow for non-expiring
+          checkAutoPopup();
+      }
+  }
+
   function checkAutoPopup() {
       const seen = sessionStorage.getItem('seenLoginPopup');
-      if(!seen) { setTimeout(() => { openReferModal(); sessionStorage.setItem('seenLoginPopup', 'true'); }, 1500); }
+      if(!seen) { 
+          setTimeout(() => { 
+              openReferModal(); 
+              sessionStorage.setItem('seenLoginPopup', 'true'); 
+          }, 1500); 
+      }
   }
 
   function updateStatus(text, time, type) {
       document.getElementById("subTitle").innerText = text;
-      document.getElementById("subDesc").innerText = type === "PREMIUM" ? "Full Access" : "Expires in 6h";
-      document.getElementById("upgradeBtn").style.display = type === "TRIAL" ? "block" : "none";
+      document.getElementById("subDesc").innerText = (type === "PREMIUM") ? "Full Access" : (type === "EXPIRING") ? "Renew Soon" : "Expires in 6h";
+      
+      // --- MODIFIED: SHOW UPGRADE BUTTON IF TRIAL *OR* EXPIRING ---
+      document.getElementById("upgradeBtn").style.display = (type === "TRIAL" || type === "EXPIRING") ? "block" : "none";
+      
       const badge = document.getElementById("timerDisplay");
       setInterval(() => {
           const diff = time - Date.now();
@@ -652,7 +726,8 @@ textarea.form-input { height: 80px; resize: none; }
           const m = Math.floor((diff / (1000*60)) % 60);
           const d = Math.floor(diff / (1000*60*60*24));
           badge.innerText = d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
-          badge.style.color = type === "PREMIUM" ? "#16a34a" : "#ca8a04";
+          // Color logic: Green for safe premium, Orange for expiring/trial
+          badge.style.color = (type === "PREMIUM" && diff > 5*24*60*60*1000) ? "#16a34a" : "#ea580c";
       }, 1000);
   }
 
@@ -740,6 +815,20 @@ textarea.form-input { height: 80px; resize: none; }
           closeConfirm();
       } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Yes, Delete All"; }
   }
+
+  // --- NEW: HANDLER FUNCTIONS FOR EXPIRY MODAL ---
+  // Moved inside module so they can access 'showScreen'
+  window.handleUrgentUpgrade = () => {
+      document.getElementById('expiryModal').style.display = 'none';
+      showScreen("paywall-screen"); // Calls renderPlans() internally
+      document.getElementById("backToTrialBtn").style.display = "flex";
+      sessionStorage.setItem('seenLoginPopup', 'true');
+  };
+
+  window.closeExpiry = () => {
+      document.getElementById('expiryModal').style.display = 'none';
+      sessionStorage.setItem('seenLoginPopup', 'true'); // Disable Refer popup
+  };
 
 </script>
 
@@ -876,7 +965,7 @@ function generateCardUI(){
           r.readAsDataURL(file); 
       }
   }
-  
+   
   if(window.innerWidth < 600) {
       document.getElementById("previewArea").scrollIntoView({ behavior: 'smooth' });
   }
@@ -929,16 +1018,13 @@ async function downloadPDF() {
         }
         
         try {
-            // Using Google Input Tools API for English -> Hindi Transliteration
             const url = `https://www.google.com/inputtools/request?text=${encodeURIComponent(text)}&ime=transliteration_en_hi&num=1`;
             const response = await fetch(url);
             const data = await response.json();
             
-            // The API response is nested: [ "SUCCESS", [ [ "sourceWord", [ "suggestion1", "suggestion2" ] ] ] ]
             if (data && data[1] && data[1].length > 0) {
                 let resultText = "";
                 data[1].forEach(word => {
-                    // Append the first suggestion for each word
                     if(word[1] && word[1].length > 0) {
                         resultText += word[1][0] + " "; 
                     }
@@ -950,8 +1036,7 @@ async function downloadPDF() {
         }
     }
 
-    // Attach listeners with debounce
-    const delay = 300; // 300ms delay
+    const delay = 300; 
 
     document.getElementById('userName').addEventListener('keyup', debounce(function() {
         transliterate(this.value, 'nameHindi');
