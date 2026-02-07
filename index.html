@@ -39,8 +39,33 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .auth-box {
   width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
   border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
+  position: relative; /* Added for absolute positioning of logout button */
 }
 .auth-box.plan-mode { max-width: 500px; }
+
+/* NEW STYLE FOR LOGOUT BUTTON ON PAYWALL */
+.logout-corner-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    font-size: 14px;
+    z-index: 10;
+}
+.logout-corner-btn:hover {
+    background: #fecaca;
+    transform: scale(1.1);
+}
 
 .auth-box h1 { font-size: 24px; margin-bottom: 10px; color: var(--text-main); }
 .auth-input {
@@ -405,6 +430,10 @@ textarea.form-input { height: 80px; resize: none; }
 
 <div id="paywall-screen" class="auth-wrapper">
     <div class="auth-box plan-mode">
+        <button onclick="logout()" class="logout-corner-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+
         <i class="fas fa-crown" style="font-size:30px; color:#f59e0b; margin-bottom:5px;"></i>
         <h2 style="color:#1e293b; margin-bottom: 5px;">Go Premium</h2>
         <p style="font-size:13px; color:#64748b;">Select a plan to remove limits</p>
@@ -687,7 +716,7 @@ textarea.form-input { height: 80px; resize: none; }
       document.getElementById('expDaysHi').innerText = daysLeftInt;
 
       const seenExpiry = sessionStorage.getItem('seenExpiryPopup');
-      
+       
       if (daysLeft <= 5 && daysLeft > 0 && !seenExpiry) {
           // Open Urgent Modal
           document.getElementById('expiryModal').style.display = 'flex';
