@@ -39,11 +39,11 @@ body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; 
 .auth-box {
   width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
   border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
-  position: relative; /* Added for absolute positioning of logout button */
+  position: relative;
 }
 .auth-box.plan-mode { max-width: 500px; }
 
-/* NEW STYLE FOR LOGOUT BUTTON ON PAYWALL */
+/* LOGOUT BUTTON ON PAYWALL */
 .logout-corner-btn {
     position: absolute;
     top: 15px;
@@ -673,7 +673,7 @@ textarea.form-input { height: 80px; resize: none; }
                   updateDoc(userRef, { lastActiveAt: now }).catch(e => console.log("Active update skipped"));
               }
               
-              const trialEnd = data.joinedAt + 21600000; // 6 Hours
+              const trialEnd = data.joinedAt + 7200000; // 2 Hours
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
               
@@ -742,7 +742,7 @@ textarea.form-input { height: 80px; resize: none; }
 
   function updateStatus(text, time, type) {
       document.getElementById("subTitle").innerText = text;
-      document.getElementById("subDesc").innerText = (type === "PREMIUM") ? "Full Access" : (type === "EXPIRING") ? "Renew Soon" : "Expires in 6h";
+      document.getElementById("subDesc").innerText = (type === "PREMIUM") ? "Full Access" : (type === "EXPIRING") ? "Renew Soon" : "Expires in 2h";
       
       // --- MODIFIED: SHOW UPGRADE BUTTON IF TRIAL *OR* EXPIRING ---
       document.getElementById("upgradeBtn").style.display = (type === "TRIAL" || type === "EXPIRING") ? "block" : "none";
