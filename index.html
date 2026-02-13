@@ -25,150 +25,194 @@
   --text-main: #1e293b;
   --text-sub: #64748b;
   --border: #e2e8f0;
-  --radius: 12px;
+  --radius: 16px; 
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 40px; }
+
+body { 
+    background: #cbd5e1; 
+    color: var(--text-main); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh;
+}
+
+/* ================= MOBILE APP LAYOUT WRAPPERS ================= */
+/* Added #splash-screen to the main wrappers */
+#splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen {
+    width: 100%;
+    max-width: 480px; 
+    min-height: 100vh;
+    background: var(--bg-color);
+    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+    position: relative;
+    overflow-x: hidden;
+    display: none; /* All hidden by default initially */
+    flex-direction: column;
+}
+
+/* ================= SPLASH SCREEN SPECIFICS ================= */
+/* Force splash screen to show on load */
+#splash-screen {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    background: var(--primary); /* Brand color background */
+    color: white;
+    z-index: 9999;
+}
+
+.splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: pulseLogo 2s infinite ease-in-out;
+}
+
+.splash-icon {
+    font-size: 70px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+}
+
+.splash-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+}
+
+/* Custom minimal spinner for splash */
+.splash-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulseLogo {
+    0% { transform: scale(0.98); opacity: 0.9; }
+    50% { transform: scale(1.02); opacity: 1; }
+    100% { transform: scale(0.98); opacity: 0.9; }
+}
 
 /* ================= AUTH CONTAINERS ================= */
-.auth-wrapper {
-  display: flex; justify-content: center; align-items: center; min-height: 90vh; padding: 20px;
-}
-.auth-box {
-  width: 100%; max-width: 400px; background: var(--surface); padding: 30px;
-  border-radius: var(--radius); box-shadow: var(--shadow); text-align: center;
-  position: relative;
-}
-.auth-box.plan-mode { max-width: 500px; }
+.auth-wrapper { justify-content: center; align-items: center; padding: 20px; }
+.auth-box { width: 100%; background: transparent; padding: 20px; text-align: center; position: relative; }
 
-/* LOGOUT BUTTON ON PAYWALL */
 .logout-corner-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #fee2e2;
-    color: #ef4444;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.2s;
-    font-size: 14px;
-    z-index: 10;
+    position: absolute; top: 10px; right: 10px;
+    background: #fee2e2; color: #ef4444; border: none;
+    width: 36px; height: 36px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; font-size: 16px; z-index: 10;
 }
-.logout-corner-btn:hover {
-    background: #fecaca;
-    transform: scale(1.1);
-}
+.logout-corner-btn:hover { background: #fecaca; transform: scale(1.1); }
 
-.auth-box h1 { font-size: 24px; margin-bottom: 10px; color: var(--text-main); }
+.auth-box h1 { font-size: 28px; margin-bottom: 10px; color: var(--text-main); font-weight: 800; }
 .auth-input {
-  width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
-  border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #f8fafc;
+  width: 100%; padding: 16px; margin-bottom: 15px; border: none;
+  border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s; background: #e2e8f0;
 }
-.auth-input:focus { border-color: var(--primary); background: #fff; }
+.auth-input:focus { background: #fff; box-shadow: 0 0 0 2px var(--primary); }
 
 .btn {
-  width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px;
-  font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px;
+  font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
-.btn-primary:active { transform: scale(0.98); }
-.btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
+.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 15px; box-shadow: var(--shadow); }
 
 /* ================= PLAN CARD STYLES ================= */
 .plans-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
 .plan-card {
-    position: relative; border: 2px solid var(--border); border-radius: 10px; padding: 15px;
-    cursor: pointer; text-align: left; transition: all 0.2s; background: #fff;
+    position: relative; border: 2px solid transparent; border-radius: 16px; padding: 18px;
+    cursor: pointer; text-align: left; transition: all 0.2s; background: #fff; box-shadow: var(--shadow);
 }
-.plan-card:hover { border-color: #93c5fd; }
-.plan-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+.plan-card.selected { border-color: var(--primary); background: #eff6ff; }
 .plan-card.recommended { border-color: #f59e0b; }
-.plan-card.recommended.selected { border-color: #f59e0b; background: #fffbeb; }
+.plan-card.recommended.selected { background: #fffbeb; }
 
 .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .plan-name { font-weight: bold; font-size: 16px; color: var(--text-main); }
-.plan-price { font-weight: 800; font-size: 18px; color: var(--primary); }
+.plan-price { font-weight: 800; font-size: 20px; color: var(--primary); }
 .plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 13px; margin-right: 5px; }
 .plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 .plan-months { color: var(--text-sub); }
-.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; font-size: 11px; }
 .plan-tag {
-    position: absolute; top: -10px; right: 10px; background: #f59e0b; color: white;
-    font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+    position: absolute; top: -12px; right: 15px; background: #f59e0b; color: white;
+    font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
 }
-.radio-circle {
-    width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 10px;
-}
+.radio-circle { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 12px; }
 .plan-card.selected .radio-circle { border-color: var(--primary); }
 .plan-card.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
 
 /* ================= APP LAYOUT ================= */
-#app-screen, #paywall-screen, #pending-screen { display: none; }
-.container { max-width: 800px; margin: 0 auto; padding: 15px; }
-
-/* Header */
+.container { padding-bottom: 0; flex: 1; display: flex; flex-direction: column; }
 .app-header {
   display: flex; justify-content: space-between; align-items: center;
-  background: var(--surface); padding: 15px 20px; border-radius: var(--radius);
-  box-shadow: var(--shadow); margin-bottom: 20px; position: sticky; top: 10px; z-index: 100;
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+  padding: 15px 20px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
 }
 .user-info { display: flex; flex-direction: column; }
 .user-email { font-size: 12px; color: var(--text-sub); }
-.header-actions { display: flex; gap: 10px; align-items: center; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 .icon-btn {
-  background: #eff6ff; color: var(--primary); width: 40px; height: 40px;
-  border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: 0.2s;
+  background: #f1f5f9; color: var(--text-main); width: 38px; height: 38px;
+  border-radius: 50%; border: none; cursor: pointer; font-size: 16px; display: grid; place-items: center; transition: 0.2s;
 }
-.icon-btn:active { transform: scale(0.9); }
-
-/* Subscription Panel */
+.icon-btn:active { transform: scale(0.9); background: #e2e8f0; }
+.app-content { padding: 15px; flex: 1; }
 .sub-panel {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-radius: var(--radius); padding: 15px; margin-bottom: 20px;
+  border-radius: var(--radius); padding: 18px; margin-bottom: 20px;
   display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
 }
-.sub-txt h4 { color: #1e40af; font-size: 15px; margin-bottom: 2px; }
-.sub-txt p { color: #3b82f6; font-size: 12px; }
-.timer-badge { background: #fff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+.sub-txt h4 { color: #1e40af; font-size: 16px; margin-bottom: 4px; }
+.sub-txt p { color: #3b82f6; font-size: 13px; font-weight: 500; }
+.timer-badge { background: #fff; color: #1e40af; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-/* Form Grid */
-.form-card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.full-width { grid-column: span 2; }
+.form-card { background: transparent; padding: 0; margin-bottom: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; } 
 .input-group { position: relative; }
-.input-group label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
+.input-group label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 6px; font-weight: 600; margin-left: 4px; }
 .form-input {
-  width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-  font-size: 15px; outline: none; transition: border 0.2s; background: #fff;
+  width: 100%; padding: 15px; border: none; border-radius: 12px;
+  font-size: 15px; outline: none; transition: all 0.2s; background: #e2e8f0; color: #1e293b;
 }
-.form-input:focus { border-color: var(--primary); }
-textarea.form-input { height: 80px; resize: none; }
+.form-input:focus { background: #fff; box-shadow: 0 0 0 2px var(--primary); }
+textarea.form-input { height: 90px; resize: none; }
 .hindi-ph::placeholder { color: #d946ef; opacity: 0.7; }
 
-/* ================= CARD PREVIEW STYLES ================= */
-.preview-section { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
+.action-bottom-bar {
+    position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px; z-index: 90;
+}
+
+/* ================= CARD PREVIEW STYLES (STRICTLY UNTOUCHED) ================= */
+.preview-section { margin-top: 10px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
 .card-wrapper {
   width: 420px; height: 260px; position: relative; border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
+  transform-origin: top center; 
 }
 .card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
-/* Front Elements */
 .c-text { position: absolute; font-weight: bold; color: #000; white-space: nowrap; }
 .c-photo { position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #444; background: #fff; overflow: hidden; }
 .c-photo img { width: 100%; height: 100%; object-fit: cover; }
 .qr-box { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
 .qr-img { width: 110px; height: 110px; object-fit: contain; background: #fff; }
 
-/* Positioning (Front) */
 .p-epic { left: 12px; top: 68px; font-size: 14px; }
 .p-h-name { left: 140px; top: 120px; font-size: 12.5px; }
 .p-e-name { left: 140px; top: 138px; font-size: 12.5px; }
@@ -179,7 +223,6 @@ textarea.form-input { height: 80px; resize: none; }
 .p-h-dob { left: 140px; top: 212px; font-size: 11.5px; }
 .p-e-dob { left: 230px; top: 212px; font-size: 11.5px; }
 
-/* Back Elements */
 .address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10; }
 .h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000; }
 .h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000; }
@@ -189,75 +232,72 @@ textarea.form-input { height: 80px; resize: none; }
 /* Modals */
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 .modal-content {
-  background: #fff; width: 90%; max-width: 600px; border-radius: 20px;
-  max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s ease;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: #fff; width: 92%; max-width: 400px; border-radius: 24px;
+  max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
 }
-@keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 18px; font-weight: 700; }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px; }
 
-.modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-.modal-body { flex: 1; overflow-y: auto; padding: 25px; }
-
-/* Crop Modal Specifics */
-#cropModal .modal-body { padding: 0; background: #333; display: flex; align-items: center; justify-content: center; height: 400px; }
+#cropModal .modal-body { padding: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 400px; border-radius: 0; }
 #imageToCrop { max-width: 100%; max-height: 100%; display: block; }
 
 .history-item {
-  background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent;
+  background: #f8fafc; padding: 16px; border-radius: 12px; margin-bottom: 12px;
+  cursor: pointer; border: 1px solid var(--border); transition: 0.2s;
 }
-.history-item:hover { border-color: var(--primary); }
-.h-ep { font-weight: bold; color: var(--primary); font-size: 14px; }
-.h-nm { font-size: 13px; color: var(--text-main); margin-top: 2px; }
-.h-dt { font-size: 11px; color: var(--text-sub); margin-top: 5px; text-align: right; }
+.history-item:active { background: #e2e8f0; transform: scale(0.98); }
+.h-ep { font-weight: 800; color: var(--primary); font-size: 15px; }
+.h-nm { font-size: 14px; color: var(--text-main); margin-top: 4px; font-weight: 500; }
+.h-dt { font-size: 12px; color: var(--text-sub); margin-top: 8px; text-align: right; }
 
-/* Toast & Refer */
-.refer-highlight { background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-.refer-title { font-size: 20px; font-weight: bold; color: #b45309; margin-bottom: 5px; }
+.refer-highlight { background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 15px; }
+.refer-title { font-size: 20px; font-weight: 800; color: #b45309; margin-bottom: 8px; }
 .refer-text { font-size: 14px; color: #4b5563; margin-bottom: 10px; line-height: 1.5; }
-.refer-hindi { font-size: 15px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
-.refer-link-box { background: #f3f4f6; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid #e5e7eb; }
-.refer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.refer-hindi { font-size: 14px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
+.refer-link-box { background: #f1f5f9; padding: 14px; border-radius: 10px; font-family: monospace; font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid var(--border); }
+.refer-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
 
-#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-.toast { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid #333; }
+#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
+.toast { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.toast.success { border-left-color: var(--success); } .toast.error { border-left-color: var(--danger); }
-.toast-icon { font-size: 20px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
-.toast-msg { font-size: 14px; font-weight: 600; color: #333; }
+.toast-icon { font-size: 22px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
+.toast-msg { font-size: 14px; font-weight: 600; color: #1e293b; }
 
-/* Confirm Modal */
-.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; }
-.confirm-box { background: white; width: 90%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
-@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
+.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.confirm-box { background: white; width: 90%; max-width: 340px; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confirm-btns { display: flex; gap: 12px; margin-top: 25px; }
 
-/* --- EXPIRY MODAL STYLES --- */
 .expiry-modal-content {
-    background: #fff; width: 90%; max-width: 450px; border-radius: 20px;
-    padding: 25px; text-align: center; border-top: 6px solid #ef4444;
-    animation: bounceIn 0.5s ease;
+    background: #fff; width: 92%; max-width: 400px; border-radius: 24px;
+    padding: 30px 20px; text-align: center; border-top: 8px solid #ef4444;
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-@keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
-.expiry-icon { font-size: 50px; color: #ef4444; margin-bottom: 15px; animation: pulse 1.5s infinite; }
+@keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.expiry-icon { font-size: 54px; color: #ef4444; margin-bottom: 15px; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-.expiry-title { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
-.expiry-msg { font-size: 14px; color: #64748b; margin-bottom: 8px; }
-.expiry-msg-hindi { font-size: 15px; color: #b91c1c; font-weight: 600; margin-bottom: 20px; }
-.btn-urgent { background: #ef4444; color: white; border: none; font-size: 16px; padding: 14px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); animation: btnPulse 2s infinite; }
+.expiry-title { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+.expiry-msg { font-size: 15px; color: #64748b; margin-bottom: 8px; }
+.expiry-msg-hindi { font-size: 15px; color: #b91c1c; font-weight: 700; margin-bottom: 20px; }
+.btn-urgent { background: #ef4444; color: white; border: none; font-size: 16px; padding: 16px; width: 100%; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); animation: btnPulse 2s infinite; }
 @keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-/* Loader */
-.loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+.loader { border: 3px solid #f1f5f9; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-@media (max-width: 600px) {
-  .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
-  .card-wrapper { transform: scale(0.75); margin: -30px 0; } .modal-content { width: 95%; max-height: 80vh; }
-  .refer-btns { grid-template-columns: 1fr; }
+@media (max-width: 480px) {
+  body { background: var(--bg-color); }
+  #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen { box-shadow: none; border-radius: 0; }
+  .card-wrapper { transform: scale(0.8); margin: -20px 0; } 
+}
+@media (max-width: 380px) {
+  .card-wrapper { transform: scale(0.7); margin: -40px 0; } 
 }
 </style>
 </head>
@@ -265,6 +305,14 @@ textarea.form-input { height: 80px; resize: none; }
 <body>
 
 <div id="toast-container"></div>
+
+<div id="splash-screen">
+    <div class="splash-content">
+        <i class="fas fa-id-card splash-icon"></i>
+        <h1 class="splash-title">Voter Tool</h1>
+        <div class="splash-spinner"></div>
+    </div>
+</div>
 
 <div id="expiryModal" class="modal" style="z-index: 1001;"> <div class="expiry-modal-content">
         <div class="expiry-icon"><i class="fas fa-exclamation-circle"></i></div>
@@ -282,25 +330,25 @@ textarea.form-input { height: 80px; resize: none; }
             <i class="fas fa-arrow-circle-up"></i> Renew Now / अभी रिन्यू करें
         </button>
         
-        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:14px;">
+        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:15px;">
             Remind Me Later / बाद में याद दिलाएं
         </button>
     </div>
 </div>
 
 <div id="cropModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content">
         <div class="modal-header">
             <h3>Crop Photo</h3>
-            <button onclick="closeCropModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            <button onclick="closeCropModal()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
         </div>
         <div class="modal-body">
             <img id="imageToCrop">
         </div>
-        <div style="padding: 15px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #eee;">
-             <button onclick="closeCropModal()" class="btn" style="background: #e2e8f0; color: #333; width: auto; padding: 8px 20px;">Cancel</button>
-             <button onclick="performCrop()" class="btn btn-primary" style="width: auto; padding: 8px 20px; background: #2563eb;">
-                <i class="fas fa-crop-alt"></i> Crop & Save
+        <div style="padding: 15px; display: flex; gap: 10px; border-top: 1px solid #f1f5f9;">
+             <button onclick="closeCropModal()" class="btn" style="background: #f1f5f9; color: #1e293b; flex: 1;">Cancel</button>
+             <button onclick="performCrop()" class="btn btn-primary" style="flex: 1;">
+                <i class="fas fa-crop-alt"></i> Crop
              </button>
         </div>
     </div>
@@ -308,20 +356,23 @@ textarea.form-input { height: 80px; resize: none; }
 
 <div id="confirmModal" class="confirm-modal">
     <div class="confirm-box">
-        <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #f59e0b; margin-bottom: 15px;"></i>
-        <h3>Clear History?</h3>
-        <p style="color:#666; font-size:14px; margin-top:5px;">This will permanently delete all saved cards.</p>
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 20px;"></i>
+        <h3 style="font-size:20px; color:#1e293b;">Clear History?</h3>
+        <p style="color:#64748b; font-size:15px; margin-top:8px;">This will permanently delete all saved cards.</p>
         <div class="confirm-btns">
-            <button onclick="closeConfirm()" class="btn" style="background:#f3f4f6; color:#333;">Cancel</button>
-            <button onclick="confirmClearHistory()" class="btn" style="background:#ef4444; color:white;">Yes, Delete All</button>
+            <button onclick="closeConfirm()" class="btn" style="background:#f1f5f9; color:#1e293b; flex:1;">Cancel</button>
+            <button onclick="confirmClearHistory()" class="btn" style="background:#ef4444; color:white; flex:1;">Delete All</button>
         </div>
     </div>
 </div>
 
 <div id="login-screen" class="auth-wrapper">
     <div class="auth-box">
+        <div style="width: 70px; height: 70px; background: #eff6ff; border-radius: 20px; display: grid; place-items: center; margin: 0 auto 20px;">
+             <i class="fas fa-id-card" style="font-size: 32px; color: var(--primary);"></i>
+        </div>
         <h1>Voter Tool</h1>
-        <p style="color:var(--text-sub); margin-bottom:20px;">Sign in to manage your cards</p>
+        <p style="color:var(--text-sub); margin-bottom:30px; font-size: 15px;">Sign in to manage your cards</p>
         
         <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
         <input type="password" id="passInput" class="auth-input" placeholder="Password">
@@ -329,12 +380,17 @@ textarea.form-input { height: 80px; resize: none; }
         <button id="loginBtn" class="btn btn-primary">Login</button>
         <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
         
+        <div style="position:relative; margin: 25px 0; text-align:center;">
+             <hr style="border:none; border-top:1px solid #e2e8f0;">
+             <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--bg-color); padding:0 10px; font-size:13px; color:#94a3b8;">OR</span>
+        </div>
+
         <button id="googleBtn" class="btn btn-google">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Google
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Continue with Google
         </button>
         
         <div id="loader" class="loader"></div>
-        <div id="toggleAuth" style="margin-top:20px; color:var(--primary); cursor:pointer; font-size:14px; text-decoration: underline;">Create an Account</div>
+        <div id="toggleAuth" style="margin-top:30px; color:var(--primary); cursor:pointer; font-size:15px; font-weight: 600;">Create an Account</div>
     </div>
 </div>
 
@@ -342,7 +398,7 @@ textarea.form-input { height: 80px; resize: none; }
     <div class="container">
         <div class="app-header">
             <div class="user-info">
-                <span style="font-weight:bold; font-size:16px;">Voter ID Maker</span>
+                <span style="font-weight:800; font-size:18px; color:#1e293b;">Voter ID Maker</span>
                 <span id="userEmailDisplay" class="user-email"></span>
             </div>
             <div class="header-actions">
@@ -352,78 +408,83 @@ textarea.form-input { height: 80px; resize: none; }
             </div>
         </div>
 
-        <div class="sub-panel">
-            <div class="sub-txt">
-                <h4 id="subTitle">Checking Status...</h4>
-                <p id="subDesc">Please wait</p>
-            </div>
-            <div id="timerDisplay" class="timer-badge">--:--</div>
-        </div>
-        <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:20px; background:#059669; display:none;">Upgrade Plan</button>
-
-        <div class="form-card">
-            <h3 style="margin-bottom:15px;">Enter Details</h3>
-            <div class="form-grid">
-                <div class="input-group"><label>EPIC No.</label><input id="epic" class="form-input" placeholder="ABC1234567"></div>
-                <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*"></div>
-                
-                <div class="input-group"><label>Name (English)</label><input id="userName" class="form-input" placeholder="Rahul Kumar"></div>
-                <div class="input-group"><label>Name (Hindi)</label><input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार"></div>
-                
-                <div class="input-group"><label>Father (English)</label><input id="fatherName" class="form-input" placeholder="Sohan Kumar"></div>
-                <div class="input-group"><label>Father (Hindi)</label><input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार"></div>
-                
-                <div class="input-group">
-                    <label>Gender</label>
-                    <select id="gender" class="form-input">
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
+        <div class="app-content">
+            <div class="sub-panel">
+                <div class="sub-txt">
+                    <h4 id="subTitle">Checking Status...</h4>
+                    <p id="subDesc">Please wait</p>
                 </div>
-
-                <div class="input-group"><label>DOB</label><input id="dob" class="form-input" placeholder="01/01/1990"></div>
-                
-                <div class="full-width input-group"><label>Address (English)</label><textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea></div>
-                <div class="full-width input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
-                
-                <div class="full-width input-group"><label>Download Date</label><input id="dlDate" class="form-input" placeholder="XX/XX/XXXX"></div>
+                <div id="timerDisplay" class="timer-badge">--:--</div>
             </div>
-            
-            <button class="btn btn-primary" style="margin-top: 20px;" onclick="generateAndSave()">
+            <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:25px; background:#059669; display:none;">
+                <i class="fas fa-crown"></i> Upgrade Plan
+            </button>
+
+            <div class="form-card">
+                <h3 style="margin-bottom:15px; font-size: 18px; padding-left: 5px;">Enter Details</h3>
+                <div class="form-grid">
+                    <div class="input-group"><label>EPIC No.</label><input id="epic" class="form-input" placeholder="ABC1234567"></div>
+                    <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*" style="background:#fff; border: 1px solid var(--border);"></div>
+                    
+                    <div class="input-group"><label>Name (English)</label><input id="userName" class="form-input" placeholder="Rahul Kumar"></div>
+                    <div class="input-group"><label>Name (Hindi)</label><input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार"></div>
+                    
+                    <div class="input-group"><label>Father (English)</label><input id="fatherName" class="form-input" placeholder="Sohan Kumar"></div>
+                    <div class="input-group"><label>Father (Hindi)</label><input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार"></div>
+                    
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select id="gender" class="form-input">
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group"><label>DOB</label><input id="dob" class="form-input" placeholder="01/01/1990"></div>
+                    
+                    <div class="input-group"><label>Address (English)</label><textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea></div>
+                    <div class="input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
+                    
+                    <div class="input-group"><label>Download Date</label><input id="dlDate" class="form-input" placeholder="XX/XX/XXXX"></div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="previewArea" style="display:none;">
+                <div style="font-weight:bold; font-size: 16px; color:var(--text-sub); margin-bottom: 5px;">Live Preview</div>
+                <div class="card-wrapper" id="cardFront">
+                    <img src="voter-bg.png" class="card-bg">
+                    <div class="c-text p-epic" id="dEpic"></div>
+                    <div class="c-photo"><img id="dPhoto"></div>
+                    <div class="c-text p-h-name" id="hName"></div>
+                    <div class="c-text p-e-name" id="eName"></div>
+                    <div class="c-text p-h-fath" id="hFather"></div>
+                    <div class="c-text p-e-fath" id="eFather"></div>
+                    <div class="c-text p-h-gen" id="hGender"></div>
+                    <div class="c-text p-e-gen" id="eGender"></div>
+                    <div class="c-text p-h-dob" id="hDob"></div>
+                    <div class="c-text p-e-dob" id="eDob"></div>
+                </div>
+                <div class="card-wrapper" id="cardBack">
+                    <img src="voter_back.png" class="card-bg">
+                    <div class="address-section"> 
+                        <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
+                        <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
+                    </div>
+                    <div class="c-text p-date" id="dispDate"></div>
+                    <div class="qr-box"> <img src="qr.jpeg" class="qr-img"> <div class="c-text p-epic-back" id="dispEpicBack"></div> </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-bottom-bar">
+            <button class="btn btn-primary" onclick="generateAndSave()">
                 <i class="fas fa-magic"></i> Generate Card
             </button>
-            
-            <button id="dlPdfBtn" class="btn btn-primary" style="margin-top: 10px; background: #ef4444; display:none;" onclick="downloadPDF()">
+            <button id="dlPdfBtn" class="btn" style="background: #ef4444; color: white; display:none;" onclick="downloadPDF()">
                 <i class="fas fa-file-pdf"></i> Download PDF
             </button>
-        </div>
-
-        <div class="preview-section" id="previewArea" style="display:none;">
-            <div style="font-weight:bold; color:var(--text-sub);">Preview</div>
-            <div class="card-wrapper" id="cardFront">
-                <img src="voter-bg.png" class="card-bg">
-                <div class="c-text p-epic" id="dEpic"></div>
-                <div class="c-photo"><img id="dPhoto"></div>
-                <div class="c-text p-h-name" id="hName"></div>
-                <div class="c-text p-e-name" id="eName"></div>
-                <div class="c-text p-h-fath" id="hFather"></div>
-                <div class="c-text p-e-fath" id="eFather"></div>
-                <div class="c-text p-h-gen" id="hGender"></div>
-                <div class="c-text p-e-gen" id="eGender"></div>
-                <div class="c-text p-h-dob" id="hDob"></div>
-                <div class="c-text p-e-dob" id="eDob"></div>
-            </div>
-            <div class="card-wrapper" id="cardBack">
-                <img src="voter_back.png" class="card-bg">
-                <div class="address-section"> 
-                    <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
-                    <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
-                </div>
-                <div class="c-text p-date" id="dispDate"></div>
-                <div class="qr-box"> <img src="qr.jpeg" class="qr-img"> <div class="c-text p-epic-back" id="dispEpicBack"></div> </div>
-            </div>
         </div>
     </div>
 </div>
@@ -434,17 +495,21 @@ textarea.form-input { height: 80px; resize: none; }
             <i class="fas fa-sign-out-alt"></i>
         </button>
 
-        <i class="fas fa-crown" style="font-size:30px; color:#f59e0b; margin-bottom:5px;"></i>
-        <h2 style="color:#1e293b; margin-bottom: 5px;">Go Premium</h2>
-        <p style="font-size:13px; color:#64748b;">Select a plan to remove limits</p>
+        <i class="fas fa-crown" style="font-size:48px; color:#f59e0b; margin-bottom:15px;"></i>
+        <h2 style="color:#1e293b; margin-bottom: 8px; font-size: 26px;">Go Premium</h2>
+        <p style="font-size:15px; color:#64748b;">Select a plan to remove limits</p>
         <div id="plansContainer" class="plans-container"></div>
-        <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="margin:10px 0; text-decoration:none;">Select a Plan</a>
-        <div style="border-top:1px solid #eee; margin:15px 0; padding-top:15px;">
-             <p style="font-size:12px; margin-bottom:5px; font-weight:bold;">Have you paid?</p>
-             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:5px;">
-             <button id="submitUtrBtn" class="btn btn-primary" style="background:#16a34a; font-size:14px; padding:10px;">Verify Payment</button>
+        
+        <div style="position: sticky; bottom: 0; padding: 15px 0; background: var(--bg-color); border-top: 1px solid var(--border); margin-top: 20px;">
+            <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none;">Select a Plan</a>
         </div>
-        <button id="backToTrialBtn" class="btn" style="background:#64748b; color:white; margin-top:10px; display:none;">
+        
+        <div style="border-top:1px solid #e2e8f0; margin:20px 0; padding-top:20px; text-align: left;">
+             <p style="font-size:14px; margin-bottom:10px; font-weight:700; color:#1e293b;">Already Paid via UPI?</p>
+             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:10px;">
+             <button id="submitUtrBtn" class="btn" style="background:#10b981; color: white;">Verify Payment</button>
+        </div>
+        <button id="backToTrialBtn" class="btn" style="background:#e2e8f0; color:#1e293b; display:none;">
             <i class="fas fa-arrow-left"></i> Back to App
         </button>
     </div>
@@ -452,10 +517,10 @@ textarea.form-input { height: 80px; resize: none; }
 
 <div id="pending-screen" class="auth-wrapper">
     <div class="auth-box">
-        <i class="fas fa-hourglass-half" style="font-size:40px; color:#f59e0b; margin-bottom:10px;"></i>
-        <h1>Verification Pending</h1>
-        <p>Your payment is being reviewed.</p>
-        <button onclick="logout()" class="btn" style="margin-top:20px; border:1px solid #ddd;">Logout</button>
+        <i class="fas fa-hourglass-half" style="font-size:54px; color:#f59e0b; margin-bottom:20px;"></i>
+        <h1 style="font-size: 24px;">Verification Pending</h1>
+        <p style="color: #64748b; font-size: 15px;">Your payment is being reviewed.</p>
+        <button onclick="logout()" class="btn" style="margin-top:30px; background: #e2e8f0; color: #1e293b;">Logout</button>
     </div>
 </div>
 
@@ -463,13 +528,13 @@ textarea.form-input { height: 80px; resize: none; }
     <div class="modal-content">
         <div class="modal-header">
             <h3>Saved Cards</h3>
-            <div style="display:flex; gap:10px;">
-                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash"></i> Clear All</button>
-                <button onclick="closeHistory()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash"></i> Clear</button>
+                <button onclick="closeHistory()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
             </div>
         </div>
         <div class="modal-body" id="historyList">
-            <div style="text-align:center; color:#999; margin-top:20px;">Loading history...</div>
+            <div style="text-align:center; color:#94a3b8; margin-top:30px;">Loading history...</div>
         </div>
     </div>
 </div>
@@ -478,20 +543,20 @@ textarea.form-input { height: 80px; resize: none; }
     <div class="modal-content">
         <div class="modal-header">
             <h3>Refer & Earn</h3>
-            <button onclick="closeReferModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            <button onclick="closeReferModal()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
         </div>
         <div class="modal-body">
             <div class="refer-highlight">
-                <i class="fas fa-gift" style="font-size:40px; color:#f59e0b; margin-bottom:10px;"></i>
+                <i class="fas fa-gift" style="font-size:48px; color:#f59e0b; margin-bottom:15px;"></i>
                 <div class="refer-title">Get 7 Days Free!</div>
                 <div class="refer-text">Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!</div>
                 <span class="refer-hindi">अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!</span>
             </div>
-            <p style="font-size:13px; font-weight:bold; color:#333; margin-bottom:5px;">Your Referral Link:</p>
+            <p style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:8px;">Your Referral Link:</p>
             <div class="refer-link-box" id="myReferLink">Loading link...</div>
             <div class="refer-btns">
-                <button onclick="shareOnWhatsApp()" class="btn btn-primary" style="background:#25D366; border:none;"><i class="fab fa-whatsapp" style="font-size:18px;"></i> Share on WhatsApp</button>
-                <button onclick="copyReferLink()" class="btn btn-primary" style="background:#f59e0b; border:none;"><i class="fas fa-copy"></i> Copy Link</button>
+                <button onclick="shareOnWhatsApp()" class="btn" style="background:#25D366; color:white;"><i class="fab fa-whatsapp" style="font-size:20px;"></i> Share on WhatsApp</button>
+                <button onclick="copyReferLink()" class="btn" style="background:#f1f5f9; color:#1e293b;"><i class="fas fa-copy"></i> Copy Link</button>
             </div>
         </div>
     </div>
@@ -642,8 +707,9 @@ textarea.form-input { height: 80px; resize: none; }
   });
 
   function showScreen(id) {
-      document.querySelectorAll('.auth-wrapper, #app-screen').forEach(el => el.style.display = 'none');
-      document.getElementById(id).style.display = id === "app-screen" ? "block" : "flex";
+      // Includes splash-screen to ensure it gets hidden gracefully
+      document.querySelectorAll('#splash-screen, #login-screen, #app-screen, #paywall-screen, #pending-screen').forEach(el => el.style.display = 'none');
+      document.getElementById(id).style.display = "flex";
       loader.style.display = "none";
       if(id === "paywall-screen") renderPlans();
   }
@@ -677,12 +743,10 @@ textarea.form-input { height: 80px; resize: none; }
               const subEnd = data.subscriptionExpiry || 0;
               const payStatus = data.paymentStatus || "none";
               
-              // Calculate Time Left for Expiry Check
               const msPerDay = 24 * 60 * 60 * 1000;
               const daysLeft = (subEnd - now) / msPerDay;
 
               if (subEnd > now) {
-                  // --- CHECK EXPIRY ---
                   if (daysLeft <= 5) {
                       updateStatus("Plan Expiring", subEnd, "EXPIRING");
                       handlePopupSequence(subEnd); 
@@ -704,28 +768,22 @@ textarea.form-input { height: 80px; resize: none; }
       });
   }
 
-  // --- LOGIC TO HANDLE URGENT VS REFERRAL POPUPS ---
   function handlePopupSequence(expiryTime) {
       const now = Date.now();
       const msPerDay = 24 * 60 * 60 * 1000;
       const daysLeft = (expiryTime - now) / msPerDay;
       const daysLeftInt = Math.ceil(daysLeft);
 
-      // Update text in Modal
       document.getElementById('expDaysEn').innerText = daysLeftInt;
       document.getElementById('expDaysHi').innerText = daysLeftInt;
 
       const seenExpiry = sessionStorage.getItem('seenExpiryPopup');
        
       if (daysLeft <= 5 && daysLeft > 0 && !seenExpiry) {
-          // Open Urgent Modal
           document.getElementById('expiryModal').style.display = 'flex';
           sessionStorage.setItem('seenExpiryPopup', 'true');
-          
-          // --- DISABLE REFER POPUP FOR THESE USERS ---
           sessionStorage.setItem('seenLoginPopup', 'true'); 
       } else {
-          // Normal flow for non-expiring
           checkAutoPopup();
       }
   }
@@ -744,8 +802,7 @@ textarea.form-input { height: 80px; resize: none; }
       document.getElementById("subTitle").innerText = text;
       document.getElementById("subDesc").innerText = (type === "PREMIUM") ? "Full Access" : (type === "EXPIRING") ? "Renew Soon" : "Expires in 2h";
       
-      // --- MODIFIED: SHOW UPGRADE BUTTON IF TRIAL *OR* EXPIRING ---
-      document.getElementById("upgradeBtn").style.display = (type === "TRIAL" || type === "EXPIRING") ? "block" : "none";
+      document.getElementById("upgradeBtn").style.display = (type === "TRIAL" || type === "EXPIRING") ? "flex" : "none";
       
       const badge = document.getElementById("timerDisplay");
       setInterval(() => {
@@ -755,7 +812,6 @@ textarea.form-input { height: 80px; resize: none; }
           const m = Math.floor((diff / (1000*60)) % 60);
           const d = Math.floor(diff / (1000*60*60*24));
           badge.innerText = d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
-          // Color logic: Green for safe premium, Orange for expiring/trial
           badge.style.color = (type === "PREMIUM" && diff > 5*24*60*60*1000) ? "#16a34a" : "#ea580c";
       }, 1000);
   }
@@ -814,7 +870,7 @@ textarea.form-input { height: 80px; resize: none; }
           const snap = await getDocs(q);
           listDiv.innerHTML = "";
           window.historyData = []; 
-          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>"; return; }
+          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;'>No history found.</p>"; return; }
           snap.forEach(doc => {
               const d = doc.data();
               const id = doc.id;
@@ -840,23 +896,21 @@ textarea.form-input { height: 80px; resize: none; }
           snap.forEach(doc => { batch.delete(doc.ref); });
           await batch.commit();
           showToast("History deleted successfully", "success");
-          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#888'>No history found.</p>";
+          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;'>No history found.</p>";
           closeConfirm();
-      } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Yes, Delete All"; }
+      } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Delete All"; }
   }
 
-  // --- NEW: HANDLER FUNCTIONS FOR EXPIRY MODAL ---
-  // Moved inside module so they can access 'showScreen'
   window.handleUrgentUpgrade = () => {
       document.getElementById('expiryModal').style.display = 'none';
-      showScreen("paywall-screen"); // Calls renderPlans() internally
+      showScreen("paywall-screen");
       document.getElementById("backToTrialBtn").style.display = "flex";
       sessionStorage.setItem('seenLoginPopup', 'true');
   };
 
   window.closeExpiry = () => {
       document.getElementById('expiryModal').style.display = 'none';
-      sessionStorage.setItem('seenLoginPopup', 'true'); // Disable Refer popup
+      sessionStorage.setItem('seenLoginPopup', 'true'); 
   };
 
 </script>
@@ -864,7 +918,7 @@ textarea.form-input { height: 80px; resize: none; }
 <script>
 // --- GLOBAL VARS FOR CROPPER ---
 let cropper;
-window.croppedPhotoData = null; // Store final base64 image here
+window.croppedPhotoData = null; 
 
 // --- JS FOR CROPPER ---
 const photoInput = document.getElementById('photo');
@@ -879,10 +933,8 @@ photoInput.addEventListener('change', function(e) {
             imageToCrop.src = evt.target.result;
             cropModal.style.display = 'flex';
             
-            // Destroy old instance if exists
             if(cropper) cropper.destroy();
             
-            // Init new cropper with aspect ratio 4:5 (Approx 120x150)
             cropper = new Cropper(imageToCrop, {
                 aspectRatio: 120 / 150, 
                 viewMode: 1,
@@ -896,19 +948,16 @@ photoInput.addEventListener('change', function(e) {
 window.performCrop = function() {
     if(!cropper) return;
     
-    // Get high quality cropped data
     window.croppedPhotoData = cropper.getCroppedCanvas({
         width: 300, 
-        height: 375, // Keeps high res (2.5x of display)
+        height: 375, 
         imageSmoothingEnabled: true,
         imageSmoothingQuality: 'high'
     }).toDataURL('image/jpeg', 0.95);
     
-    // Immediate Feedback
     document.getElementById("dPhoto").src = window.croppedPhotoData;
     
     closeCropModal();
-    // Do NOT clear input so file stays selected in UI
     window.showToast("Photo cropped successfully", "success");
 }
 
@@ -918,7 +967,6 @@ window.closeCropModal = function() {
         cropper.destroy();
         cropper = null;
     }
-    // If they cancel without cropping, clear input so they can select again
     if(!window.croppedPhotoData) {
         photoInput.value = ""; 
     }
@@ -983,7 +1031,6 @@ function generateCardUI(){
   set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
   set("dispEpicBack", get("epic"));
 
-  // PHOTO LOGIC: Prefer cropped data, fallback to raw file
   if(window.croppedPhotoData) {
       document.getElementById("dPhoto").src = window.croppedPhotoData;
   } else {
@@ -995,9 +1042,9 @@ function generateCardUI(){
       }
   }
    
-  if(window.innerWidth < 600) {
-      document.getElementById("previewArea").scrollIntoView({ behavior: 'smooth' });
-  }
+  setTimeout(() => {
+     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }, 100);
 }
 
 async function downloadPDF() {
@@ -1030,7 +1077,6 @@ async function downloadPDF() {
 </script>
 
 <script>
-    // Debounce function to limit API calls
     function debounce(func, wait) {
         let timeout;
         return function(...args) {
@@ -1039,7 +1085,6 @@ async function downloadPDF() {
         };
     }
 
-    // Function to call Google Input Tools
     async function transliterate(text, targetId) {
         if (!text.trim()) {
             document.getElementById(targetId).value = "";
