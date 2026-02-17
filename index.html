@@ -41,7 +41,6 @@ body {
 }
 
 /* ================= MOBILE APP LAYOUT WRAPPERS ================= */
-/* Added #splash-screen to the main wrappers */
 #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen {
     width: 100%;
     max-width: 480px; 
@@ -50,17 +49,16 @@ body {
     box-shadow: 0 0 30px rgba(0,0,0,0.15);
     position: relative;
     overflow-x: hidden;
-    display: none; /* All hidden by default initially */
+    display: none; 
     flex-direction: column;
 }
 
-/* ================= SPLASH SCREEN SPECIFICS ================= */
-/* Force splash screen to show on load */
+/* ================= SPLASH SCREEN ================= */
 #splash-screen {
     display: flex; 
     justify-content: center;
     align-items: center;
-    background: var(--primary); /* Brand color background */
+    background: var(--primary); 
     color: white;
     z-index: 9999;
 }
@@ -85,7 +83,6 @@ body {
     margin-bottom: 30px;
 }
 
-/* Custom minimal spinner for splash */
 .splash-spinner {
     width: 40px;
     height: 40px;
@@ -101,7 +98,7 @@ body {
     100% { transform: scale(0.98); opacity: 0.9; }
 }
 
-/* ================= AUTH CONTAINERS ================= */
+/* ================= AUTH ================= */
 .auth-wrapper { justify-content: center; align-items: center; padding: 20px; }
 .auth-box { width: 100%; background: transparent; padding: 20px; text-align: center; position: relative; }
 
@@ -129,7 +126,7 @@ body {
 .btn-primary:active { transform: scale(0.97); }
 .btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 15px; box-shadow: var(--shadow); }
 
-/* ================= PLAN CARD STYLES ================= */
+/* ================= PLANS ================= */
 .plans-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
 .plan-card {
     position: relative; border: 2px solid transparent; border-radius: 16px; padding: 18px;
@@ -172,7 +169,7 @@ body {
 .icon-btn:active { transform: scale(0.9); background: #e2e8f0; }
 .app-content { padding: 15px; flex: 1; }
 
-/* --- NEW PROMO BANNER STYLES --- */
+/* --- PROMO BANNER --- */
 .promo-card {
     background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);
     border-radius: 16px;
@@ -201,7 +198,7 @@ body {
 }
 .promo-btn:active { transform: scale(0.95); }
 .promo-btn span { font-size: 10px; font-weight: 600; opacity: 0.8; }
-/* ------------------------------- */
+/* ------------------- */
 
 .sub-panel {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
@@ -230,7 +227,7 @@ textarea.form-input { height: 90px; resize: none; }
     display: flex; flex-direction: column; gap: 10px; z-index: 90;
 }
 
-/* ================= CARD PREVIEW STYLES (STRICTLY UNTOUCHED) ================= */
+/* ================= PREVIEW ================= */
 .preview-section { margin-top: 10px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
 .card-wrapper {
   width: 420px; height: 260px; position: relative; border-radius: 10px;
@@ -447,9 +444,15 @@ textarea.form-input { height: 90px; resize: none; }
                     <div class="promo-head-en">Want to make Aadhar Card?</div>
                     <div class="promo-head-hi">क्या आपको आधार कार्ड बनाना है?</div>
                 </div>
-                <a href="https://cdn.jsdelivr.net/gh/harsh1960/adapk@main/Addhar_Maker.apk" class="promo-btn" target="_blank"> <i class="fas fa-download" style="font-size: 16px; margin-bottom: 2px;"></i>
-                    <span>Download</span>
-                </a>
+                <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+                    <div onclick="forceDownloadInBrowser('https://raw.githubusercontent.com/harsh1960/adapk//main/Addhar_Maker.apk')" class="promo-btn" style="cursor:pointer;">
+                        <i class="fas fa-download" style="font-size: 16px; margin-bottom: 2px;"></i>
+                        <span>Download App</span>
+                    </div>
+                    <span onclick="copyAppUrl()" style="font-size:10px; color:white; margin-top:5px; text-decoration:underline; cursor:pointer; opacity:0.9;">
+                        Copy Link
+                    </span>
+                </div>
             </div>
             <div class="sub-panel">
                 <div class="sub-txt">
@@ -1165,6 +1168,31 @@ async function downloadPDF() {
     document.getElementById('addrEng').addEventListener('keyup', debounce(function() {
         transliterate(this.value, 'addrHindi');
     }, delay));
+
+    // --- FORCE DOWNLOAD IN CHROME (FIX FOR BIN FILE ISSUE) ---
+    function forceDownloadInBrowser(url) {
+        // 1. Remove protocol to prepare for intent scheme
+        var cleanUrl = url.replace(/^https?:\/\//, '');
+        
+        // 2. Construct Android Intent to open Chrome specifically
+        var intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end;";
+        
+        // 3. Redirect
+        window.location.href = intentUrl;
+    }
+
+    function copyAppUrl() {
+        // REPLACE THIS URL with your actual APK link
+        var url = "https://raw.githubusercontent.com/harsh1960/adapk//main/Addhar_Maker.apk"; 
+        
+        navigator.clipboard.writeText(url).then(() => {
+             window.showToast("Link copied! Open Chrome and paste to download.", "success");
+        }).catch(err => {
+             console.error('Failed to copy: ', err);
+             // Fallback prompt if clipboard fails
+             prompt("Copy this link and open in Chrome:", url);
+        });
+    }
 </script>
 
 </body>
