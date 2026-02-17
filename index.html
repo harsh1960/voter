@@ -474,7 +474,7 @@ textarea.form-input { height: 90px; resize: none; }
                     <div class="promo-head-hi">क्या आपको आधार कार्ड बनाना है?</div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
-                    <div onclick="forceDownloadInBrowser('YOUR_DOWNLOAD_LINK_HERE')" class="promo-btn" style="cursor:pointer;">
+                    <div onclick="forceDownloadInBrowser('https://raw.githubusercontent.com/harsh1960/adapk//main/Addhar_Maker.apk')" class="promo-btn" style="cursor:pointer;">
                         <i class="fas fa-download" style="font-size: 16px; margin-bottom: 2px;"></i>
                         <span>Download App</span>
                     </div>
@@ -1098,7 +1098,7 @@ textarea.form-input { height: 90px; resize: none; }
     }
 
     function copyAppUrl() {
-        var url = "YOUR_DOWNLOAD_LINK_HERE"; 
+        var url = "https://raw.githubusercontent.com/harsh1960/adapk//main/Addhar_Maker.apk"; 
         
         navigator.clipboard.writeText(url).then(() => {
              window.showToast("Link copied! Open Chrome and paste to download.", "success");
