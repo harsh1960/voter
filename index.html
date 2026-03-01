@@ -27,7 +27,6 @@
   --border: #e2e8f0;
   --radius: 16px; 
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -47,17 +46,11 @@ body {
     max-width: 480px; 
     min-height: 100vh;
     background: var(--bg-color);
-    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+    box-shadow: 0 0 30px rgba(0,0,0,0.15);
     position: relative;
     overflow-x: hidden;
     display: none; 
     flex-direction: column;
-    animation: fadeInScreen 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeInScreen {
-    from { opacity: 0; transform: scale(0.98) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ================= SPLASH SCREEN ================= */
@@ -65,7 +58,7 @@ body {
     display: flex; 
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%); 
+    background: var(--primary); 
     color: white;
     z-index: 9999;
 }
@@ -74,35 +67,34 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: pulseLogo 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    animation: pulseLogo 2s infinite ease-in-out;
 }
 
 .splash-icon {
-    font-size: 75px;
-    margin-bottom: 25px;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+    font-size: 70px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
 }
 
 .splash-title {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 800;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     margin-bottom: 30px;
-    text-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .splash-spinner {
-    width: 45px;
-    height: 45px;
-    border: 4px solid rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
     border-top: 4px solid #ffffff;
     border-radius: 50%;
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes pulseLogo {
     0% { transform: scale(0.98); opacity: 0.9; }
-    50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)); }
+    50% { transform: scale(1.02); opacity: 1; }
     100% { transform: scale(0.98); opacity: 0.9; }
 }
 
@@ -113,198 +105,142 @@ body {
 .logout-corner-btn {
     position: absolute; top: 10px; right: 10px;
     background: #fee2e2; color: #ef4444; border: none;
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 16px; z-index: 10;
+    transition: 0.2s; font-size: 16px; z-index: 10;
 }
-.logout-corner-btn:hover { background: #fecaca; transform: scale(1.15) rotate(10deg); }
+.logout-corner-btn:hover { background: #fecaca; transform: scale(1.1); }
 
-.auth-box h1 { font-size: 32px; margin-bottom: 10px; color: var(--text-main); font-weight: 800; animation: slideDown 0.5s ease; }
+.auth-box h1 { font-size: 28px; margin-bottom: 10px; color: var(--text-main); font-weight: 800; }
 .auth-input {
-  width: 100%; padding: 18px; margin-bottom: 15px; border: 2px solid transparent;
-  border-radius: 14px; font-size: 16px; outline: none; transition: all 0.3s ease; background: #e2e8f0;
+  width: 100%; padding: 16px; margin-bottom: 15px; border: none;
+  border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s; background: #e2e8f0;
 }
-.auth-input:focus { background: #fff; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1); }
+.auth-input:focus { background: #fff; box-shadow: 0 0 0 2px var(--primary); }
 
 .btn {
-  width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px;
-  font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 8px;
-  position: relative; overflow: hidden;
+  width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px;
+  font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn::after {
-  content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-  background: rgba(255,255,255,0.2); opacity: 0; transition: opacity 0.3s;
-}
-.btn:hover::after { opacity: 1; }
-.btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); }
-.btn-primary:active { transform: translateY(1px) scale(0.98); box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2); }
-
+.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+.btn-primary:active { transform: scale(0.97); }
 .btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 15px; box-shadow: var(--shadow); }
-.btn-google:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: #cbd5e1; }
 
 /* ================= PLANS ================= */
-.plans-container { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
+.plans-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
 .plan-card {
-    position: relative; border: 2px solid transparent; border-radius: 18px; padding: 20px;
-    cursor: pointer; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #fff; box-shadow: var(--shadow);
-    overflow: hidden;
+    position: relative; border: 2px solid transparent; border-radius: 16px; padding: 18px;
+    cursor: pointer; text-align: left; transition: all 0.2s; background: #fff; box-shadow: var(--shadow);
 }
-.plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
-.plan-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15); transform: scale(1.02); }
+.plan-card.selected { border-color: var(--primary); background: #eff6ff; }
 .plan-card.recommended { border-color: #f59e0b; }
-.plan-card.recommended.selected { background: #fffbeb; border-color: #f59e0b; box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15); }
+.plan-card.recommended.selected { background: #fffbeb; }
 
-.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.plan-name { font-weight: 800; font-size: 17px; color: var(--text-main); }
-.plan-price { font-weight: 900; font-size: 22px; color: var(--primary); }
-.plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 14px; margin-right: 6px; }
-.plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-.plan-months { color: var(--text-sub); font-weight: 500;}
-.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 5px 10px; border-radius: 8px; font-size: 12px; }
+.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.plan-name { font-weight: bold; font-size: 16px; color: var(--text-main); }
+.plan-price { font-weight: 800; font-size: 20px; color: var(--primary); }
+.plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 13px; margin-right: 5px; }
+.plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.plan-months { color: var(--text-sub); }
+.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; font-size: 11px; }
 .plan-tag {
-    position: absolute; top: -1px; right: 20px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;
-    font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 0 0 12px 12px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+    position: absolute; top: -12px; right: 15px; background: #f59e0b; color: white;
+    font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
 }
-.radio-circle { width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 14px; transition: all 0.3s; }
-.plan-card.selected .radio-circle { border-color: var(--primary); background: #eff6ff; }
-.plan-card.selected .radio-circle::after { content: ''; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.radio-circle { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 12px; }
+.plan-card.selected .radio-circle { border-color: var(--primary); }
+.plan-card.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
 
 /* ================= APP LAYOUT ================= */
 .container { padding-bottom: 0; flex: 1; display: flex; flex-direction: column; }
 .app-header {
   display: flex; justify-content: space-between; align-items: center;
-  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  padding: 16px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+  padding: 15px 20px; border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 .user-info { display: flex; flex-direction: column; }
-.user-email { font-size: 13px; color: var(--text-sub); font-weight: 500; }
-.header-actions { display: flex; gap: 10px; align-items: center; }
+.user-email { font-size: 12px; color: var(--text-sub); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 .icon-btn {
-  background: #f1f5f9; color: var(--text-main); width: 42px; height: 42px;
-  border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f1f5f9; color: var(--text-main); width: 38px; height: 38px;
+  border-radius: 50%; border: none; cursor: pointer; font-size: 16px; display: grid; place-items: center; transition: 0.2s;
 }
-.icon-btn:hover { background: #e2e8f0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-.icon-btn:active { transform: scale(0.9) translateY(0); }
-
-.app-content { padding: 18px; flex: 1; }
+.icon-btn:active { transform: scale(0.9); background: #e2e8f0; }
+.app-content { padding: 15px; flex: 1; }
 
 /* --- PROMO BANNER --- */
 .promo-card {
     background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);
-    border-radius: 18px;
-    padding: 20px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
-    box-shadow: 0 10px 25px -5px rgba(255, 94, 98, 0.5);
+    box-shadow: 0 8px 20px -5px rgba(255, 94, 98, 0.5);
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.2);
-    animation: slideInTop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: transform 0.3s ease;
+    animation: slideInTop 0.5s ease-out;
 }
-.promo-card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(255, 94, 98, 0.6); }
-.promo-card::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
-    transform: rotate(45deg); animation: shimmer 4s infinite linear; pointer-events: none;
-}
-@keyframes shimmer { 0% { transform: translateX(-50%) rotate(45deg); } 100% { transform: translateX(50%) rotate(45deg); } }
-@keyframes slideInTop { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideInTop { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.promo-info { z-index: 1; display: flex; flex-direction: column; gap: 6px; }
-.promo-head-en { font-weight: 800; font-size: 17px; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.promo-head-hi { font-weight: 600; font-size: 15px; opacity: 0.95; }
+.promo-info { z-index: 1; display: flex; flex-direction: column; gap: 4px; }
+.promo-head-en { font-weight: 800; font-size: 15px; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.promo-head-hi { font-weight: 600; font-size: 14px; opacity: 0.95; }
 .promo-btn {
-    z-index: 1; background: white; color: #FF5E62; padding: 12px 20px;
-    border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
+    z-index: 1; background: white; color: #FF5E62; padding: 10px 18px;
+    border-radius: 10px; font-weight: 800; font-size: 13px; text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.2s; white-space: nowrap;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.promo-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
-.promo-btn:active { transform: scale(0.95) translateY(0); }
-.promo-btn span { font-size: 11px; font-weight: 700; opacity: 0.9; margin-top: 2px;}
-
+.promo-btn:active { transform: scale(0.95); }
+.promo-btn span { font-size: 10px; font-weight: 600; opacity: 0.8; }
 /* ------------------- */
+
 .sub-panel {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-radius: var(--radius); padding: 20px; margin-bottom: 24px;
+  border-radius: var(--radius); padding: 18px; margin-bottom: 20px;
   display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
-  animation: fadeIn 0.8s ease-out forwards;
 }
-.sub-txt h4 { color: #1e40af; font-size: 17px; margin-bottom: 6px; font-weight: 800; }
-.sub-txt p { color: #3b82f6; font-size: 14px; font-weight: 600; }
-.timer-badge { background: #fff; color: #1e40af; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.08); letter-spacing: 0.5px; }
+.sub-txt h4 { color: #1e40af; font-size: 16px; margin-bottom: 4px; }
+.sub-txt p { color: #3b82f6; font-size: 13px; font-weight: 500; }
+.timer-badge { background: #fff; color: #1e40af; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-/* STAGGERED FORM ANIMATIONS */
-.form-card { background: transparent; padding: 0; margin-bottom: 24px; }
-.form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; } 
-.input-group { 
-    position: relative; 
-    opacity: 0;
-    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-/* Staggering the animation delay for input groups */
-.input-group:nth-child(1) { animation-delay: 0.1s; }
-.input-group:nth-child(2) { animation-delay: 0.15s; }
-.input-group:nth-child(3) { animation-delay: 0.2s; }
-.input-group:nth-child(4) { animation-delay: 0.25s; }
-.input-group:nth-child(5) { animation-delay: 0.3s; }
-.input-group:nth-child(6) { animation-delay: 0.35s; }
-.input-group:nth-child(7) { animation-delay: 0.4s; }
-.input-group:nth-child(8) { animation-delay: 0.45s; }
-.input-group:nth-child(9) { animation-delay: 0.5s; }
-.input-group:nth-child(10) { animation-delay: 0.55s; }
-.input-group:nth-child(11) { animation-delay: 0.6s; }
-
-@keyframes slideUpFade {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-.input-group label { display: block; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; font-weight: 700; margin-left: 6px; transition: color 0.3s ease; }
-.input-group:focus-within label { color: var(--primary); }
+.form-card { background: transparent; padding: 0; margin-bottom: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; } 
+.input-group { position: relative; }
+.input-group label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 6px; font-weight: 600; margin-left: 4px; }
 .form-input {
-  width: 100%; padding: 16px; border: 2px solid transparent; border-radius: 14px;
-  font-size: 15px; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #f1f5f9; color: #1e293b; font-weight: 500;
+  width: 100%; padding: 15px; border: none; border-radius: 12px;
+  font-size: 15px; outline: none; transition: all 0.2s; background: #e2e8f0; color: #1e293b;
 }
-.form-input:focus { background: #fff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12); border-color: var(--primary); transform: translateY(-2px); }
-.form-input:hover:not(:focus) { background: #e2e8f0; }
-textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
-.hindi-ph::placeholder { color: #d946ef; opacity: 0.6; }
+.form-input:focus { background: #fff; box-shadow: 0 0 0 2px var(--primary); }
+textarea.form-input { height: 90px; resize: none; }
+.hindi-ph::placeholder { color: #d946ef; opacity: 0.7; }
 
 .action-bottom-bar {
-    position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 18px 20px; border-top: 1px solid rgba(226, 232, 240, 0.8);
-    display: flex; flex-direction: column; gap: 12px; z-index: 90;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px; z-index: 90;
 }
 
 /* ================= PREVIEW ================= */
-.preview-section { margin-top: 15px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; overflow: visible; animation: fadeIn 0.6s ease forwards; }
+.preview-section { margin-top: 10px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow: hidden; }
 .card-wrapper {
-  width: 420px; height: 260px; position: relative; border-radius: 12px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
-  transform-origin: center center; 
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width: 420px; height: 260px; position: relative; border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
+  transform-origin: top center; 
 }
-.card-wrapper:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 45px rgba(0,0,0,0.2);
-}
-.card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
 .c-text { position: absolute; font-weight: bold; color: #000; white-space: nowrap; }
-.c-photo { position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #444; background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.c-photo { position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #444; background: #fff; overflow: hidden; }
 .c-photo img { width: 100%; height: 100%; object-fit: cover; }
 .qr-box { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
-.qr-img { width: 110px; height: 110px; object-fit: contain; background: #fff; mix-blend-mode: multiply; }
+.qr-img { width: 110px; height: 110px; object-fit: contain; background: #fff; }
 
 .p-epic { left: 12px; top: 68px; font-size: 14px; }
 .p-h-name { left: 140px; top: 120px; font-size: 12.5px; }
@@ -325,80 +261,72 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
 /* Modals */
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center;
-  animation: fadeIn 0.3s ease;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 .modal-content {
-  background: #fff; width: 92%; max-width: 420px; border-radius: 24px;
-  max-height: 85vh; display: flex; flex-direction: column; animation: modalZoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  background: #fff; width: 92%; max-width: 400px; border-radius: 24px;
+  max-height: 85vh; display: flex; flex-direction: column; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
 }
-@keyframes modalZoomIn { 0% { transform: scale(0.85) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 18px; font-weight: 700; }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px; }
 
-.modal-header { padding: 22px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-.modal-header h3 { font-size: 19px; font-weight: 800; color: var(--text-main); }
-.modal-body { flex: 1; overflow-y: auto; padding: 24px; }
-
-#cropModal .modal-body { padding: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; height: 420px; border-radius: 0; }
+#cropModal .modal-body { padding: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 400px; border-radius: 0; }
 #imageToCrop { max-width: 100%; max-height: 100%; display: block; }
 
 .history-item {
-  background: #f8fafc; padding: 18px; border-radius: 14px; margin-bottom: 14px;
-  cursor: pointer; border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8fafc; padding: 16px; border-radius: 12px; margin-bottom: 12px;
+  cursor: pointer; border: 1px solid var(--border); transition: 0.2s;
 }
-.history-item:hover { background: #fff; box-shadow: 0 8px 15px rgba(0,0,0,0.05); transform: translateY(-2px); border-color: #cbd5e1; }
-.history-item:active { transform: scale(0.98); }
-.h-ep { font-weight: 800; color: var(--primary); font-size: 16px; letter-spacing: 0.5px;}
-.h-nm { font-size: 15px; color: var(--text-main); margin-top: 6px; font-weight: 600; }
-.h-dt { font-size: 13px; color: var(--text-sub); margin-top: 10px; text-align: right; font-weight: 500;}
+.history-item:active { background: #e2e8f0; transform: scale(0.98); }
+.h-ep { font-weight: 800; color: var(--primary); font-size: 15px; }
+.h-nm { font-size: 14px; color: var(--text-main); margin-top: 4px; font-weight: 500; }
+.h-dt { font-size: 12px; color: var(--text-sub); margin-top: 8px; text-align: right; }
 
-.refer-highlight { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px dashed #f59e0b; padding: 24px; border-radius: 18px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.1); }
-.refer-title { font-size: 22px; font-weight: 900; color: #b45309; margin-bottom: 10px; }
-.refer-text { font-size: 15px; color: #4b5563; margin-bottom: 12px; line-height: 1.6; }
-.refer-hindi { font-size: 15px; color: #b45309; font-weight: 700; margin-top: 12px; display: block; line-height: 1.5; }
-.refer-link-box { background: #f1f5f9; padding: 16px; border-radius: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 14px; color: #0f172a; margin: 18px 0; word-break: break-all; border: 1px solid var(--border); text-align: center; font-weight: 600; }
-.refer-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.refer-highlight { background: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 15px; }
+.refer-title { font-size: 20px; font-weight: 800; color: #b45309; margin-bottom: 8px; }
+.refer-text { font-size: 14px; color: #4b5563; margin-bottom: 10px; line-height: 1.5; }
+.refer-hindi { font-size: 14px; color: #b45309; font-weight: 600; margin-top: 10px; display: block; }
+.refer-link-box { background: #f1f5f9; padding: 14px; border-radius: 10px; font-family: monospace; font-size: 14px; color: #333; margin: 15px 0; word-break: break-all; border: 1px solid var(--border); }
+.refer-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
 
 #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
-.toast { background: #fff; padding: 16px 20px; border-radius: 14px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 14px; animation: slideDownToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-@keyframes slideDownToast { from { transform: translateY(-30px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.toast-icon { font-size: 24px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
-.toast-msg { font-size: 15px; font-weight: 700; color: #1e293b; }
+.toast { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.toast-icon { font-size: 22px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
+.toast-msg { font-size: 14px; font-weight: 600; color: #1e293b; }
 
-.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
-.confirm-box { background: white; width: 90%; max-width: 360px; padding: 35px 25px; border-radius: 28px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-@keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.confirm-btns { display: flex; gap: 14px; margin-top: 30px; }
+.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.confirm-box { background: white; width: 90%; max-width: 340px; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confirm-btns { display: flex; gap: 12px; margin-top: 25px; }
 
 .expiry-modal-content {
-    background: #fff; width: 92%; max-width: 400px; border-radius: 28px;
-    padding: 35px 25px; text-align: center; border-top: 10px solid #ef4444;
-    animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 30px 60px rgba(239, 68, 68, 0.2);
+    background: #fff; width: 92%; max-width: 400px; border-radius: 24px;
+    padding: 30px 20px; text-align: center; border-top: 8px solid #ef4444;
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-@keyframes bounceIn { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-.expiry-icon { font-size: 60px; color: #ef4444; margin-bottom: 20px; animation: pulseError 2s infinite; }
-@keyframes pulseError { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0.4)); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6)); } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0.4)); } }
-.expiry-title { font-size: 26px; font-weight: 900; color: #1e293b; margin-bottom: 10px; }
-.expiry-msg { font-size: 16px; color: #64748b; margin-bottom: 8px; }
-.expiry-msg-hindi { font-size: 16px; color: #b91c1c; font-weight: 800; margin-bottom: 24px; }
-.btn-urgent { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; border: none; font-size: 17px; padding: 18px; width: 100%; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3); animation: btnPulse 2s infinite; transition: all 0.3s; }
-.btn-urgent:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(239, 68, 68, 0.4); }
-@keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+@keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.expiry-icon { font-size: 54px; color: #ef4444; margin-bottom: 15px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.expiry-title { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+.expiry-msg { font-size: 15px; color: #64748b; margin-bottom: 8px; }
+.expiry-msg-hindi { font-size: 15px; color: #b91c1c; font-weight: 700; margin-bottom: 20px; }
+.btn-urgent { background: #ef4444; color: white; border: none; font-size: 16px; padding: 16px; width: 100%; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); animation: btnPulse 2s infinite; }
+@keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-.loader { border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; margin: 15px auto; display: none; }
+.loader { border: 3px solid #f1f5f9; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 @media (max-width: 480px) {
   body { background: var(--bg-color); }
   #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen { box-shadow: none; border-radius: 0; }
-  .card-wrapper { transform: scale(0.85); margin: -10px 0; } 
-  .card-wrapper:hover { transform: scale(0.88) translateY(-5px); }
+  .card-wrapper { transform: scale(0.8); margin: -20px 0; } 
 }
 @media (max-width: 380px) {
-  .card-wrapper { transform: scale(0.75); margin: -30px 0; } 
-  .card-wrapper:hover { transform: scale(0.78) translateY(-5px); }
+  .card-wrapper { transform: scale(0.7); margin: -40px 0; } 
 }
 </style>
 </head>
@@ -419,19 +347,19 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
         <div class="expiry-icon"><i class="fas fa-exclamation-circle"></i></div>
         
         <h2 class="expiry-title">Action Required!</h2>
-        <p class="expiry-msg">Your premium subscription is expiring in <span id="expDaysEn" style="font-weight:900; color:#ef4444;">5</span> days.</p>
-        <p class="expiry-msg-hindi">ध्यान दें! आपका प्लान <span id="expDaysHi" style="font-weight:900; color:#b91c1c;">5</span> दिनों में समाप्त हो रहा है।</p>
+        <p class="expiry-msg">Your premium subscription is expiring in <span id="expDaysEn" style="font-weight:bold; color:#ef4444;">5</span> days.</p>
+        <p class="expiry-msg-hindi">ध्यान दें! आपका प्लान <span id="expDaysHi" style="font-weight:bold; color:#b91c1c;">5</span> दिनों में समाप्त हो रहा है।</p>
         
         <div style="margin: 25px 0 15px 0;">
-            <p class="expiry-msg" style="margin-bottom:4px; font-weight:600;">Renew now to avoid interruption.</p>
-            <p class="expiry-msg-hindi" style="font-weight:600; color:#444;">सेवा जारी रखने के लिए अभी रिन्यू करें।</p>
+            <p class="expiry-msg" style="margin-bottom:2px">Renew now to avoid interruption.</p>
+            <p class="expiry-msg-hindi" style="font-weight:normal; color:#444;">सेवा जारी रखने के लिए अभी रिन्यू करें।</p>
         </div>
 
         <button onclick="handleUrgentUpgrade()" class="btn-urgent">
             <i class="fas fa-arrow-circle-up"></i> Renew Now / अभी रिन्यू करें
         </button>
         
-        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:15px; box-shadow: none;">
+        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:15px;">
             Remind Me Later / बाद में याद दिलाएं
         </button>
     </div>
@@ -441,13 +369,13 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     <div class="modal-content">
         <div class="modal-header">
             <h3>Crop Photo</h3>
-            <button onclick="closeCropModal()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer; transition: color 0.2s;">&times;</button>
+            <button onclick="closeCropModal()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
         </div>
         <div class="modal-body">
             <img id="imageToCrop">
         </div>
-        <div style="padding: 20px; display: flex; gap: 14px; border-top: 1px solid #f1f5f9;">
-             <button onclick="closeCropModal()" class="btn" style="background: #f1f5f9; color: #1e293b; flex: 1; box-shadow: none;">Cancel</button>
+        <div style="padding: 15px; display: flex; gap: 10px; border-top: 1px solid #f1f5f9;">
+             <button onclick="closeCropModal()" class="btn" style="background: #f1f5f9; color: #1e293b; flex: 1;">Cancel</button>
              <button onclick="performCrop()" class="btn btn-primary" style="flex: 1;">
                 <i class="fas fa-crop-alt"></i> Crop
              </button>
@@ -457,41 +385,41 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
 
 <div id="confirmModal" class="confirm-modal">
     <div class="confirm-box">
-        <i class="fas fa-exclamation-triangle" style="font-size: 54px; color: #f59e0b; margin-bottom: 25px; filter: drop-shadow(0 4px 6px rgba(245, 158, 11, 0.3));"></i>
-        <h3 style="font-size:22px; color:#1e293b; font-weight: 800;">Clear History?</h3>
-        <p style="color:#64748b; font-size:16px; margin-top:10px; font-weight: 500;">This will permanently delete all saved cards.</p>
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 20px;"></i>
+        <h3 style="font-size:20px; color:#1e293b;">Clear History?</h3>
+        <p style="color:#64748b; font-size:15px; margin-top:8px;">This will permanently delete all saved cards.</p>
         <div class="confirm-btns">
-            <button onclick="closeConfirm()" class="btn" style="background:#f1f5f9; color:#1e293b; flex:1; box-shadow:none;">Cancel</button>
-            <button onclick="confirmClearHistory()" class="btn" style="background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color:white; flex:1; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">Delete All</button>
+            <button onclick="closeConfirm()" class="btn" style="background:#f1f5f9; color:#1e293b; flex:1;">Cancel</button>
+            <button onclick="confirmClearHistory()" class="btn" style="background:#ef4444; color:white; flex:1;">Delete All</button>
         </div>
     </div>
 </div>
 
 <div id="login-screen" class="auth-wrapper">
     <div class="auth-box">
-        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 24px; display: grid; place-items: center; margin: 0 auto 25px; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);">
-             <i class="fas fa-id-card" style="font-size: 38px; color: var(--primary);"></i>
+        <div style="width: 70px; height: 70px; background: #eff6ff; border-radius: 20px; display: grid; place-items: center; margin: 0 auto 20px;">
+             <i class="fas fa-id-card" style="font-size: 32px; color: var(--primary);"></i>
         </div>
         <h1>Voter Tool</h1>
-        <p style="color:var(--text-sub); margin-bottom:35px; font-size: 16px; font-weight: 500;">Sign in to manage your cards</p>
+        <p style="color:var(--text-sub); margin-bottom:30px; font-size: 15px;">Sign in to manage your cards</p>
         
         <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
         <input type="password" id="passInput" class="auth-input" placeholder="Password">
         
         <button id="loginBtn" class="btn btn-primary">Login</button>
-        <button id="signupBtn" class="btn btn-primary" style="display:none; background:linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">Create Account</button>
+        <button id="signupBtn" class="btn btn-primary" style="display:none; background:#059669;">Create Account</button>
         
-        <div style="position:relative; margin: 30px 0; text-align:center;">
-             <hr style="border:none; border-top:2px solid #e2e8f0;">
-             <span style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--bg-color); padding:0 15px; font-size:14px; font-weight:700; color:#94a3b8;">OR</span>
+        <div style="position:relative; margin: 25px 0; text-align:center;">
+             <hr style="border:none; border-top:1px solid #e2e8f0;">
+             <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--bg-color); padding:0 10px; font-size:13px; color:#94a3b8;">OR</span>
         </div>
 
         <button id="googleBtn" class="btn btn-google">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="22"> Continue with Google
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Continue with Google
         </button>
         
         <div id="loader" class="loader"></div>
-        <div id="toggleAuth" style="margin-top:35px; color:var(--primary); cursor:pointer; font-size:16px; font-weight: 800; transition: color 0.3s;">Create an Account</div>
+        <div id="toggleAuth" style="margin-top:30px; color:var(--primary); cursor:pointer; font-size:15px; font-weight: 600;">Create an Account</div>
     </div>
 </div>
 
@@ -499,11 +427,11 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     <div class="container">
         <div class="app-header">
             <div class="user-info">
-                <span style="font-weight:900; font-size:20px; color:#1e293b; letter-spacing: -0.5px;">Voter ID Maker</span>
+                <span style="font-weight:800; font-size:18px; color:#1e293b;">Voter ID Maker</span>
                 <span id="userEmailDisplay" class="user-email"></span>
             </div>
             <div class="header-actions">
-                <button onclick="openReferModal()" class="icon-btn" style="color: #d97706; background: #fef3c7;"><i class="fas fa-gift"></i></button>
+                <button onclick="openReferModal()" class="icon-btn" style="color: #f59e0b; background: #fffbeb;"><i class="fas fa-gift"></i></button>
                 <button onclick="openHistory()" class="icon-btn"><i class="fas fa-history"></i></button>
                 <button onclick="logout()" class="icon-btn" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-sign-out-alt"></i></button>
             </div>
@@ -518,10 +446,10 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
                     <div onclick="forceDownloadInBrowser('YOUR_DOWNLOAD_LINK_HERE')" class="promo-btn" style="cursor:pointer;">
-                        <i class="fas fa-download" style="font-size: 18px; margin-bottom: 4px;"></i>
+                        <i class="fas fa-download" style="font-size: 16px; margin-bottom: 2px;"></i>
                         <span>Download App</span>
                     </div>
-                    <span onclick="copyAppUrl()" style="font-size:11px; font-weight:700; color:white; margin-top:8px; text-decoration:underline; cursor:pointer; opacity:0.9; transition: opacity 0.3s;">
+                    <span onclick="copyAppUrl()" style="font-size:10px; color:white; margin-top:5px; text-decoration:underline; cursor:pointer; opacity:0.9;">
                         Copy Link
                     </span>
                 </div>
@@ -534,15 +462,15 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
                 </div>
                 <div id="timerDisplay" class="timer-badge">--:--</div>
             </div>
-            <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:25px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); display:none;">
+            <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:25px; background:#059669; display:none;">
                 <i class="fas fa-crown"></i> Upgrade Plan
             </button>
 
             <div class="form-card">
-                <h3 style="margin-bottom:18px; font-size: 20px; font-weight: 800; padding-left: 5px;">Enter Details</h3>
+                <h3 style="margin-bottom:15px; font-size: 18px; padding-left: 5px;">Enter Details</h3>
                 <div class="form-grid">
                     <div class="input-group"><label>EPIC No.</label><input id="epic" class="form-input" placeholder="ABC1234567"></div>
-                    <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*" style="background:#fff; border: 2px dashed #cbd5e1; padding: 12px; cursor: pointer;"></div>
+                    <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*" style="background:#fff; border: 1px solid var(--border);"></div>
                     
                     <div class="input-group"><label>Name (English)</label><input id="userName" class="form-input" placeholder="Rahul Kumar"></div>
                     <div class="input-group"><label>Name (Hindi)</label><input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार"></div>
@@ -552,7 +480,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
                     
                     <div class="input-group">
                         <label>Gender</label>
-                        <select id="gender" class="form-input" style="cursor:pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;">
+                        <select id="gender" class="form-input">
                             <option value="" disabled selected>Select Gender</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -570,7 +498,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
             </div>
 
             <div class="preview-section" id="previewArea" style="display:none;">
-                <div style="font-weight:800; font-size: 18px; color:var(--text-sub); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Live Preview</div>
+                <div style="font-weight:bold; font-size: 16px; color:var(--text-sub); margin-bottom: 5px;">Live Preview</div>
                 <div class="card-wrapper" id="cardFront">
                     <img src="voter-bg.png" class="card-bg">
                     <div class="c-text p-epic" id="dEpic"></div>
@@ -600,7 +528,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
             <button class="btn btn-primary" onclick="generateAndSave()">
                 <i class="fas fa-magic"></i> Generate Card
             </button>
-            <button id="dlPdfBtn" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display:none; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="downloadPDF()">
+            <button id="dlPdfBtn" class="btn" style="background: #ef4444; color: white; display:none;" onclick="downloadPDF()">
                 <i class="fas fa-file-pdf"></i> Download PDF
             </button>
         </div>
@@ -613,21 +541,21 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
             <i class="fas fa-sign-out-alt"></i>
         </button>
 
-        <i class="fas fa-crown" style="font-size:54px; color:#f59e0b; margin-bottom:18px; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.3));"></i>
-        <h2 style="color:#1e293b; margin-bottom: 10px; font-size: 28px; font-weight: 900;">Go Premium</h2>
-        <p style="font-size:16px; color:#64748b; font-weight: 500;">Select a plan to remove limits</p>
+        <i class="fas fa-crown" style="font-size:48px; color:#f59e0b; margin-bottom:15px;"></i>
+        <h2 style="color:#1e293b; margin-bottom: 8px; font-size: 26px;">Go Premium</h2>
+        <p style="font-size:15px; color:#64748b;">Select a plan to remove limits</p>
         <div id="plansContainer" class="plans-container"></div>
         
-        <div style="position: sticky; bottom: 0; padding: 18px 0; background: var(--bg-color); border-top: 1px solid var(--border); margin-top: 25px;">
-            <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none; font-size: 18px;">Select a Plan</a>
+        <div style="position: sticky; bottom: 0; padding: 15px 0; background: var(--bg-color); border-top: 1px solid var(--border); margin-top: 20px;">
+            <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none;">Select a Plan</a>
         </div>
         
-        <div style="border-top:2px solid #e2e8f0; margin:25px 0; padding-top:25px; text-align: left;">
-             <p style="font-size:15px; margin-bottom:12px; font-weight:800; color:#1e293b;">Already Paid via UPI?</p>
-             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:12px;">
-             <button id="submitUtrBtn" class="btn" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">Verify Payment</button>
+        <div style="border-top:1px solid #e2e8f0; margin:20px 0; padding-top:20px; text-align: left;">
+             <p style="font-size:14px; margin-bottom:10px; font-weight:700; color:#1e293b;">Already Paid via UPI?</p>
+             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:10px;">
+             <button id="submitUtrBtn" class="btn" style="background:#10b981; color: white;">Verify Payment</button>
         </div>
-        <button id="backToTrialBtn" class="btn" style="background:#e2e8f0; color:#1e293b; display:none; box-shadow: none;">
+        <button id="backToTrialBtn" class="btn" style="background:#e2e8f0; color:#1e293b; display:none;">
             <i class="fas fa-arrow-left"></i> Back to App
         </button>
     </div>
@@ -635,10 +563,10 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
 
 <div id="pending-screen" class="auth-wrapper">
     <div class="auth-box">
-        <i class="fas fa-hourglass-half" style="font-size:60px; color:#f59e0b; margin-bottom:25px; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.3)); animation: spin 4s linear infinite;"></i>
-        <h1 style="font-size: 28px; font-weight: 900;">Verification Pending</h1>
-        <p style="color: #64748b; font-size: 16px; margin-top: 10px; font-weight: 500;">Your payment is being reviewed.</p>
-        <button onclick="logout()" class="btn" style="margin-top:35px; background: #e2e8f0; color: #1e293b; box-shadow: none;">Logout</button>
+        <i class="fas fa-hourglass-half" style="font-size:54px; color:#f59e0b; margin-bottom:20px;"></i>
+        <h1 style="font-size: 24px;">Verification Pending</h1>
+        <p style="color: #64748b; font-size: 15px;">Your payment is being reviewed.</p>
+        <button onclick="logout()" class="btn" style="margin-top:30px; background: #e2e8f0; color: #1e293b;">Logout</button>
     </div>
 </div>
 
@@ -646,13 +574,13 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     <div class="modal-content">
         <div class="modal-header">
             <h3>Saved Cards</h3>
-            <div style="display:flex; gap:18px; align-items:center;">
-                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:15px; font-weight:800; cursor:pointer; transition: opacity 0.2s;"><i class="fas fa-trash"></i> Clear</button>
-                <button onclick="closeHistory()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer; transition: color 0.2s;">&times;</button>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:14px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash"></i> Clear</button>
+                <button onclick="closeHistory()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
             </div>
         </div>
         <div class="modal-body" id="historyList">
-            <div style="text-align:center; color:#94a3b8; margin-top:30px; font-weight:600;">Loading history...</div>
+            <div style="text-align:center; color:#94a3b8; margin-top:30px;">Loading history...</div>
         </div>
     </div>
 </div>
@@ -661,20 +589,20 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     <div class="modal-content">
         <div class="modal-header">
             <h3>Refer & Earn</h3>
-            <button onclick="closeReferModal()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer;">&times;</button>
+            <button onclick="closeReferModal()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer;">&times;</button>
         </div>
         <div class="modal-body">
             <div class="refer-highlight">
-                <i class="fas fa-gift" style="font-size:54px; color:#f59e0b; margin-bottom:18px; filter: drop-shadow(0 4px 6px rgba(245, 158, 11, 0.2));"></i>
+                <i class="fas fa-gift" style="font-size:48px; color:#f59e0b; margin-bottom:15px;"></i>
                 <div class="refer-title">Get 7 Days Free!</div>
                 <div class="refer-text">Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!</div>
                 <span class="refer-hindi">अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!</span>
             </div>
-            <p style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:10px;">Your Referral Link:</p>
+            <p style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:8px;">Your Referral Link:</p>
             <div class="refer-link-box" id="myReferLink">Loading link...</div>
             <div class="refer-btns">
-                <button onclick="shareOnWhatsApp()" class="btn" style="background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:white; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);"><i class="fab fa-whatsapp" style="font-size:22px;"></i> Share on WhatsApp</button>
-                <button onclick="copyReferLink()" class="btn" style="background:#f1f5f9; color:#1e293b; box-shadow:none;"><i class="fas fa-copy"></i> Copy Link</button>
+                <button onclick="shareOnWhatsApp()" class="btn" style="background:#25D366; color:white;"><i class="fab fa-whatsapp" style="font-size:20px;"></i> Share on WhatsApp</button>
+                <button onclick="copyReferLink()" class="btn" style="background:#f1f5f9; color:#1e293b;"><i class="fas fa-copy"></i> Copy Link</button>
             </div>
         </div>
     </div>
@@ -783,7 +711,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
       toast.innerHTML = `<div class="toast-icon"><i class="fas ${icon}"></i></div><div class="toast-msg">${msg}</div>`;
       container.appendChild(toast);
       setTimeout(() => {
-          toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px) scale(0.9)'; toast.style.transition = 'all 0.3s ease';
+          toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)';
           setTimeout(() => toast.remove(), 300);
       }, 3000);
   }
@@ -820,6 +748,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     if (user) {
         window.currentUserID = user.uid;
         document.getElementById("userEmailDisplay").innerText = user.email;
+        // Fix #1: Keep splash screen visibly loading while doc listener starts
         showScreen("splash-screen"); 
         startDocListener(user);
     } else { showScreen("login-screen"); }
@@ -827,16 +756,17 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
 
   function showScreen(id) {
       document.querySelectorAll('#splash-screen, #login-screen, #app-screen, #paywall-screen, #pending-screen').forEach(el => el.style.display = 'none');
-      const targetScreen = document.getElementById(id);
-      targetScreen.style.display = "flex";
+      document.getElementById(id).style.display = "flex";
       loader.style.display = "none";
       if(id === "paywall-screen") renderPlans();
   }
 
   function startDocListener(user) {
       const userRef = doc(db, "users", user.uid);
+      // Fix #2: Include metadata changes to distinguish server responses from cached reads
       onSnapshot(userRef, { includeMetadataChanges: true }, async (docSnap) => {
           
+          // Fix #3: Stop the tool interface from flashing by ignoring local stale cache
           if (docSnap.metadata.fromCache && !docSnap.metadata.hasPendingWrites) {
               showScreen("splash-screen");
               return; 
@@ -884,6 +814,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
               } else if (payStatus === "pending") {
                   showScreen("pending-screen");
               } else if (now < trialEnd) {
+                  // Display usage count for free users
                   updateStatus(`Used: ${cardsGen}/2 Free`, trialEnd, "TRIAL");
                   showScreen("app-screen");
                   checkAutoPopup(); 
@@ -933,6 +864,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
       
       const badge = document.getElementById("timerDisplay");
       
+      // Fix #4: Clear existing interval so the timer doesn't duplicate loops and crash the UI
       if (window.statusTimer) clearInterval(window.statusTimer);
       
       const renderTime = () => {
@@ -946,10 +878,10 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
           const m = Math.floor((diff / (1000*60)) % 60);
           const d = Math.floor(diff / (1000*60*60*24));
           badge.innerText = d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
-          badge.style.color = (type === "PREMIUM" && diff > 5*24*60*60*1000) ? "#10b981" : "#ea580c";
+          badge.style.color = (type === "PREMIUM" && diff > 5*24*60*60*1000) ? "#16a34a" : "#ea580c";
       };
 
-      renderTime(); 
+      renderTime(); // Render immediately to avoid 1-second delay flash
       window.statusTimer = setInterval(renderTime, 1000);
   }
 
@@ -1043,7 +975,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
           const snap = await getDocs(q);
           listDiv.innerHTML = "";
           window.historyData = []; 
-          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;font-weight:600;'>No history found.</p>"; return; }
+          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;'>No history found.</p>"; return; }
           snap.forEach(doc => {
               const d = doc.data();
               const id = doc.id;
@@ -1069,7 +1001,7 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
           snap.forEach(doc => { batch.delete(doc.ref); });
           await batch.commit();
           showToast("History deleted successfully", "success");
-          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;font-weight:600;'>No history found.</p>";
+          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;'>No history found.</p>";
           closeConfirm();
       } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Delete All"; }
   }
@@ -1217,7 +1149,7 @@ function generateCardUI(){
    
   setTimeout(() => {
      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }, 300); // Increased timeout slightly to wait for the animation
+  }, 100);
 }
 
 async function downloadPDF() {
