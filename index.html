@@ -189,7 +189,7 @@ body {
 .icon-btn:hover { background: #e2e8f0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
 .icon-btn:active { transform: scale(0.9) translateY(0); }
 
-.app-content { padding: 18px; flex: 1; }
+.app-content { padding: 18px; flex: 1; overflow-x: hidden; }
 
 /* --- PROMO BANNER --- */
 .promo-card {
@@ -250,7 +250,6 @@ body {
     opacity: 0;
     animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-/* Staggering the animation delay for input groups */
 .input-group:nth-child(1) { animation-delay: 0.1s; }
 .input-group:nth-child(2) { animation-delay: 0.15s; }
 .input-group:nth-child(3) { animation-delay: 0.2s; }
@@ -286,18 +285,42 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
     box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
 }
 
-/* ================= PREVIEW ================= */
-.preview-section { margin-top: 15px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; overflow: visible; animation: fadeIn 0.6s ease forwards; }
+/* ================= PREVIEW & ANIMATIONS ================= */
+.preview-section { margin-top: 15px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; overflow: visible; }
 .card-wrapper {
+  --card-scale: 1; 
   width: 420px; height: 260px; position: relative; border-radius: 12px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
   transform-origin: center center; 
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: scale(var(--card-scale));
+  transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .card-wrapper:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: scale(calc(var(--card-scale) * 1.02)) translateY(-8px);
     box-shadow: 0 25px 45px rgba(0,0,0,0.2);
 }
+
+/* --- Slide in from Right Animation --- */
+@keyframes slideInRightCard {
+    0% { transform: translateX(150%) scale(calc(var(--card-scale) * 0.8)); opacity: 0; }
+    80% { transform: translateX(-5%) scale(var(--card-scale)); opacity: 1; }
+    100% { transform: translateX(0) scale(var(--card-scale)); opacity: 1; }
+}
+
+.card-slide-in {
+    animation: slideInRightCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+#cardFront.card-slide-in {
+    animation-delay: 0.1s;
+}
+
+#cardBack.card-slide-in {
+    animation-delay: 0.3s;
+}
+
+/* ------------------------------------- */
+
 .card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
 .c-text { position: absolute; font-weight: bold; color: #000; white-space: nowrap; }
@@ -393,12 +416,10 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
 @media (max-width: 480px) {
   body { background: var(--bg-color); }
   #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen { box-shadow: none; border-radius: 0; }
-  .card-wrapper { transform: scale(0.85); margin: -10px 0; } 
-  .card-wrapper:hover { transform: scale(0.88) translateY(-5px); }
+  .card-wrapper { --card-scale: 0.85; margin: -10px 0; } 
 }
 @media (max-width: 380px) {
-  .card-wrapper { transform: scale(0.75); margin: -30px 0; } 
-  .card-wrapper:hover { transform: scale(0.78) translateY(-5px); }
+  .card-wrapper { --card-scale: 0.75; margin: -30px 0; } 
 }
 </style>
 </head>
@@ -1190,6 +1211,17 @@ function fillFormFromHistory(id) {
 function generateCardUI(){
   document.getElementById("previewArea").style.display = "flex";
   document.getElementById("dlPdfBtn").style.display = "flex";
+  
+  const cardFront = document.getElementById("cardFront");
+  const cardBack = document.getElementById("cardBack");
+  
+  cardFront.classList.remove("card-slide-in");
+  cardBack.classList.remove("card-slide-in");
+  void cardFront.offsetWidth; 
+  
+  cardFront.classList.add("card-slide-in");
+  cardBack.classList.add("card-slide-in");
+
   const get = id => document.getElementById(id).value;
   const set = (id, val) => document.getElementById(id).innerText = val;
   set("dEpic", get("epic"));
@@ -1217,33 +1249,58 @@ function generateCardUI(){
    
   setTimeout(() => {
      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }, 300); // Increased timeout slightly to wait for the animation
+  }, 100); 
 }
 
 async function downloadPDF() {
   const btn = document.getElementById("dlPdfBtn");
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
   btn.disabled = true;
+  
   try {
       const { jsPDF } = window.jspdf;
       const front = document.getElementById('cardFront');
       const back = document.getElementById('cardBack');
+      
+      // HTML2CANVAS FIX: Remove animations temporarily before capturing
+      front.classList.remove("card-slide-in");
+      back.classList.remove("card-slide-in");
+      
+      const orgTransformFront = front.style.transform;
+      const orgTransformBack = back.style.transform;
+      const orgTransitionFront = front.style.transition;
+      const orgTransitionBack = back.style.transition;
+      
+      // Force neutral styles for capturing
+      front.style.transition = "none";
+      back.style.transition = "none";
+      front.style.transform = "scale(1) translate(0px, 0px)";
+      back.style.transform = "scale(1) translate(0px, 0px)";
+
       const opts = { scale: 3, useCORS: true, backgroundColor: null };
-      const orgTransform = front.style.transform;
-      const orgMargin = front.style.margin;
-      front.style.transform = "scale(1)"; front.style.margin = "0";
-      back.style.transform = "scale(1)"; back.style.margin = "0";
       const canvas1 = await html2canvas(front, opts);
       const canvas2 = await html2canvas(back, opts);
-      front.style.transform = orgTransform; front.style.margin = orgMargin;
-      back.style.transform = orgTransform; back.style.margin = orgMargin;
+      
+      // Restore the CSS and animations
+      front.style.transform = orgTransformFront;
+      back.style.transform = orgTransformBack;
+      front.style.transition = orgTransitionFront;
+      back.style.transition = orgTransitionBack;
+      front.classList.add("card-slide-in");
+      back.classList.add("card-slide-in");
+
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
-      pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+      pdf.addImage(canvas1.toDataURL('image/png', 1.0), 'PNG', 0, 0, 85.6, 54);
       pdf.addPage();
-      pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 85.6, 54);
+      pdf.addImage(canvas2.toDataURL('image/png', 1.0), 'PNG', 0, 0, 85.6, 54);
       pdf.save('voter-id-card.pdf');
+      
       window.showToast("PDF downloaded successfully", "success");
-  } catch (error) { window.showToast("Error generating PDF", "error"); }
+  } catch (error) { 
+      console.error(error);
+      window.showToast("Error generating PDF", "error"); 
+  }
+  
   btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
   btn.disabled = false;
 }
