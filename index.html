@@ -2,709 +2,1415 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Voter ID Generator (SaaS)</title>
+<title>Voter ID Maker Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900;1000&family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <style>
-/* ================= CSS VARIABLES & RESET ================= */
+/* ===== DESIGN TOKENS ===== */
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --danger: #ef4444;
-  --success: #10b981;
-  --whatsapp: #25D366;
-  --bg-color: #f8fafc;
-  --surface: #ffffff;
-  --text-main: #1e293b;
-  --text-sub: #64748b;
-  --border: #e2e8f0;
-  --radius: 16px; 
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --saffron:    #FF6B00;
+  --saffron-lt: #FF8C38;
+  --saffron-dk: #D95900;
+  --teal:       #00C9A7;
+  --teal-lt:    #1FDDBE;
+  --teal-dk:    #00A889;
+  --indigo:     #4F46E5;
+  --gold:       #FFBB00;
+  --danger:     #FF4757;
+  --success:    #00C9A7;
+  --bg:         #0F1117;
+  --bg2:        #181C27;
+  --bg3:        #1E2335;
+  --surface:    #252B3E;
+  --surface2:   #2E3550;
+  --border:     rgba(255,255,255,0.08);
+  --border-hi:  rgba(255,107,0,0.4);
+  --text:       #F0F2FF;
+  --text-sub:   #8892B0;
+  --text-muted: #4A5270;
+  --radius-sm:  12px;
+  --radius:     18px;
+  --radius-lg:  24px;
+  --radius-xl:  32px;
+  --font-head:  'Baloo 2', cursive;
+  --font-body:  'Nunito', sans-serif;
+  --glow-sf:    0 0 30px rgba(255,107,0,0.25);
+  --glow-tl:    0 0 30px rgba(0,201,167,0.2);
+  --shadow:     0 8px 32px rgba(0,0,0,0.4);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.5);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+/* ===== RESET ===== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-body { 
-    background: #cbd5e1; 
-    color: var(--text-main); 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    min-height: 100vh;
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ================= MOBILE APP LAYOUT WRAPPERS ================= */
+/* Noise texture overlay */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:0.5;
+}
+
+/* ===== SCREEN WRAPPERS ===== */
 #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen {
-    width: 100%;
-    max-width: 480px; 
-    min-height: 100vh;
-    background: var(--bg-color);
-    box-shadow: 0 0 40px rgba(0,0,0,0.15);
-    position: relative;
-    overflow-x: hidden;
-    display: none; 
-    flex-direction: column;
-    animation: fadeInScreen 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  width: 100%; max-width: 480px; min-height: 100vh;
+  background: var(--bg);
+  position: relative; overflow-x: hidden;
+  display: none; flex-direction: column;
+  animation: screenIn 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
+  z-index: 1;
 }
 
-@keyframes fadeInScreen {
-    from { opacity: 0; transform: scale(0.98) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes screenIn {
+  from { opacity:0; transform:translateY(16px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0)    scale(1); }
 }
 
-/* ================= SPLASH SCREEN ================= */
+/* ===== SPLASH ===== */
 #splash-screen {
-    display: flex; 
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%); 
-    color: white;
-    z-index: 9999;
+  display: flex;
+  justify-content: center; align-items: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,107,0,0.3) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 50% at 80% 80%, rgba(0,201,167,0.2) 0%, transparent 60%),
+              var(--bg);
 }
 
-.splash-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: pulseLogo 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+.splash-wrap {
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+  animation: splashPop 1.8s ease infinite alternate;
+}
+@keyframes splashPop {
+  from { transform:scale(0.97); filter:brightness(0.95); }
+  to   { transform:scale(1.02); filter:brightness(1.05); }
 }
 
-.splash-icon {
-    font-size: 75px;
-    margin-bottom: 25px;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+.splash-logo {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-lt) 50%, var(--gold) 100%);
+  border-radius: 28px;
+  display: grid; place-items: center;
+  font-size: 48px; color: white;
+  box-shadow: 0 20px 50px rgba(255,107,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+  position: relative;
+}
+.splash-logo::after {
+  content:'';
+  position:absolute; inset:-3px;
+  border-radius:31px;
+  background: conic-gradient(from 0deg, var(--saffron), var(--teal), var(--gold), var(--saffron));
+  z-index:-1;
+  animation: spin 3s linear infinite;
+  opacity:0.6;
 }
 
 .splash-title {
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    margin-bottom: 30px;
-    text-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  font-family: var(--font-head);
+  font-size: 32px; font-weight: 800;
+  background: linear-gradient(135deg, #fff 30%, var(--saffron-lt) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
 }
 
 .splash-spinner {
-    width: 45px;
-    height: 45px;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid #ffffff;
-    border-radius: 50%;
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  width:40px; height:40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top: 3px solid var(--saffron);
+  border-right: 3px solid var(--teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes pulseLogo {
-    0% { transform: scale(0.98); opacity: 0.9; }
-    50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)); }
-    100% { transform: scale(0.98); opacity: 0.9; }
+/* ===== AUTH SCREENS ===== */
+.auth-wrapper { justify-content:center; align-items:center; padding:24px; }
+.auth-box {
+  width:100%; background:transparent; padding:10px;
+  text-align:center; position:relative;
 }
-
-/* ================= AUTH ================= */
-.auth-wrapper { justify-content: center; align-items: center; padding: 20px; }
-.auth-box { width: 100%; background: transparent; padding: 20px; text-align: center; position: relative; }
 
 .logout-corner-btn {
-    position: absolute; top: 10px; right: 10px;
-    background: #fee2e2; color: #ef4444; border: none;
-    width: 38px; height: 38px; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 16px; z-index: 10;
+  position:absolute; top:0; right:0;
+  background:rgba(255,71,87,0.15); color:var(--danger);
+  border:1px solid rgba(255,71,87,0.25);
+  width:40px; height:40px; border-radius:50%;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all 0.3s ease; font-size:15px; z-index:10;
 }
-.logout-corner-btn:hover { background: #fecaca; transform: scale(1.15) rotate(10deg); }
+.logout-corner-btn:hover { background:rgba(255,71,87,0.3); transform:scale(1.1); }
 
-.auth-box h1 { font-size: 32px; margin-bottom: 10px; color: var(--text-main); font-weight: 800; animation: slideDown 0.5s ease; }
-.auth-input {
-  width: 100%; padding: 18px; margin-bottom: 15px; border: 2px solid transparent;
-  border-radius: 14px; font-size: 16px; outline: none; transition: all 0.3s ease; background: #e2e8f0;
+.auth-logo-box {
+  width:88px; height:88px;
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-lt) 100%);
+  border-radius: 24px;
+  display:grid; place-items:center;
+  margin:0 auto 28px;
+  box-shadow: var(--glow-sf), 0 0 0 1px rgba(255,255,255,0.08);
+  font-size:38px; color:white;
 }
-.auth-input:focus { background: #fff; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1); }
+
+.auth-title {
+  font-family: var(--font-head);
+  font-size:30px; font-weight:800;
+  background: linear-gradient(135deg, var(--text) 40%, var(--saffron-lt) 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:8px;
+}
+.auth-sub { color:var(--text-sub); font-size:15px; font-weight:600; margin-bottom:32px; }
+
+.auth-input {
+  width:100%; padding:17px 20px;
+  margin-bottom:14px;
+  background:var(--bg3);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:15px; font-weight:600; color:var(--text);
+  outline:none; transition:all 0.3s ease;
+  font-family:var(--font-body);
+}
+.auth-input::placeholder { color:var(--text-muted); }
+.auth-input:focus {
+  background:var(--surface);
+  border-color:var(--saffron);
+  box-shadow:var(--glow-sf);
+  transform:translateY(-1px);
+}
 
 .btn {
-  width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px;
-  font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 8px;
-  position: relative; overflow: hidden;
+  width:100%; padding:17px 20px;
+  border:none; border-radius:var(--radius-sm);
+  font-size:16px; font-weight:800;
+  cursor:pointer; transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  position:relative; overflow:hidden;
+  font-family:var(--font-body); letter-spacing:0.3px;
 }
 .btn::after {
-  content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-  background: rgba(255,255,255,0.2); opacity: 0; transition: opacity 0.3s;
+  content:''; position:absolute; inset:0;
+  background:rgba(255,255,255,0.1); opacity:0; transition:opacity 0.3s;
 }
-.btn:hover::after { opacity: 1; }
-.btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); }
-.btn-primary:active { transform: translateY(1px) scale(0.98); box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2); }
+.btn:active::after { opacity:1; }
+.btn:active { transform:scale(0.97) translateY(1px); }
 
-.btn-google { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 15px; box-shadow: var(--shadow); }
-.btn-google:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: #cbd5e1; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-lt) 50%, var(--gold) 100%);
+  color:#fff;
+  box-shadow: 0 8px 24px rgba(255,107,0,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(255,107,0,0.5); }
 
-/* ================= PLANS ================= */
-.plans-container { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
+.btn-teal {
+  background: linear-gradient(135deg, var(--teal-dk) 0%, var(--teal) 100%);
+  color:#fff;
+  box-shadow: 0 8px 24px rgba(0,201,167,0.35);
+}
+.btn-teal:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(0,201,167,0.45); }
+
+.btn-ghost {
+  background: var(--surface);
+  color:var(--text);
+  border:1.5px solid var(--border);
+}
+.btn-ghost:hover { background:var(--surface2); border-color:rgba(255,255,255,0.15); }
+
+.btn-google {
+  background:var(--surface); color:var(--text);
+  border:1.5px solid var(--border);
+  margin-top:14px;
+}
+.btn-google:hover { background:var(--surface2); border-color:rgba(255,255,255,0.15); }
+
+.divider {
+  position:relative; margin:28px 0; text-align:center;
+}
+.divider::before {
+  content:''; position:absolute; top:50%; left:0; right:0;
+  height:1px; background:var(--border);
+}
+.divider span {
+  position:relative; background:var(--bg);
+  padding:0 16px; font-size:13px; font-weight:700; color:var(--text-muted);
+}
+
+/* ===== PLANS ===== */
+.plans-container { display:flex; flex-direction:column; gap:12px; margin:20px 0; }
+
 .plan-card {
-    position: relative; border: 2px solid transparent; border-radius: 18px; padding: 20px;
-    cursor: pointer; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #fff; box-shadow: var(--shadow);
-    overflow: hidden;
+  position:relative; border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:18px 20px;
+  cursor:pointer; text-align:left;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  background:var(--bg3); overflow:hidden;
 }
-.plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
-.plan-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15); transform: scale(1.02); }
-.plan-card.recommended { border-color: #f59e0b; }
-.plan-card.recommended.selected { background: #fffbeb; border-color: #f59e0b; box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15); }
+.plan-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,107,0,0.05) 0%, transparent 60%);
+  opacity:0; transition:opacity 0.3s;
+}
+.plan-card:hover::before { opacity:1; }
+.plan-card:hover { transform:translateY(-2px); border-color:rgba(255,107,0,0.3); }
+.plan-card.selected {
+  border-color:var(--saffron);
+  background:linear-gradient(135deg, rgba(255,107,0,0.12) 0%, var(--bg3) 100%);
+  box-shadow: var(--glow-sf);
+}
+.plan-card.recommended { border-color:rgba(255,187,0,0.4); }
+.plan-card.recommended.selected { border-color:var(--gold); box-shadow:0 0 30px rgba(255,187,0,0.2); }
 
-.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.plan-name { font-weight: 800; font-size: 17px; color: var(--text-main); }
-.plan-price { font-weight: 900; font-size: 22px; color: var(--primary); }
-.plan-original { text-decoration: line-through; color: var(--text-sub); font-size: 14px; margin-right: 6px; }
-.plan-details { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-.plan-months { color: var(--text-sub); font-weight: 500;}
-.plan-savings { color: var(--success); font-weight: bold; background: #ecfdf5; padding: 5px 10px; border-radius: 8px; font-size: 12px; }
+.plan-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.plan-name { font-weight:800; font-size:16px; color:var(--text); display:flex; align-items:center; gap:10px; }
+.plan-price { font-weight:900; font-size:22px; color:var(--saffron); font-family:var(--font-head); }
+.plan-original { text-decoration:line-through; color:var(--text-muted); font-size:13px; margin-right:6px; }
+.plan-details { display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+.plan-months { color:var(--text-sub); font-weight:600; }
+.plan-savings {
+  color:var(--teal); font-weight:800;
+  background:rgba(0,201,167,0.12); padding:4px 10px;
+  border-radius:8px; font-size:12px;
+  border:1px solid rgba(0,201,167,0.2);
+}
 .plan-tag {
-    position: absolute; top: -1px; right: 20px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;
-    font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 0 0 12px 12px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+  position:absolute; top:-1px; right:18px;
+  background:linear-gradient(135deg, var(--gold) 0%, #FF9500 100%);
+  color:#1a0a00; font-size:10px; font-weight:900;
+  padding:5px 12px; border-radius:0 0 10px 10px;
+  text-transform:uppercase; letter-spacing:0.5px;
+  box-shadow:0 4px 12px rgba(255,187,0,0.3);
 }
-.radio-circle { width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; margin-right: 14px; transition: all 0.3s; }
-.plan-card.selected .radio-circle { border-color: var(--primary); background: #eff6ff; }
-.plan-card.selected .radio-circle::after { content: ''; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.radio-circle {
+  width:20px; height:20px; border:2px solid var(--border);
+  border-radius:50%; display:grid; place-items:center;
+  flex-shrink:0; transition:all 0.3s;
+}
+.plan-card.selected .radio-circle { border-color:var(--saffron); background:rgba(255,107,0,0.1); }
+.plan-card.selected .radio-circle::after {
+  content:''; width:10px; height:10px;
+  background:var(--saffron); border-radius:50%;
+  animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
 
-/* ================= APP LAYOUT ================= */
-.container { padding-bottom: 0; flex: 1; display: flex; flex-direction: column; }
+/* ===== APP HEADER ===== */
 .app-header {
-  display: flex; justify-content: space-between; align-items: center;
-  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  padding: 16px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(15,17,23,0.85);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
 }
-.user-info { display: flex; flex-direction: column; }
-.user-email { font-size: 13px; color: var(--text-sub); font-weight: 500; }
-.header-actions { display: flex; gap: 10px; align-items: center; }
+
+.header-brand {
+  display:flex; align-items:center; gap:12px;
+}
+.header-logo {
+  width:40px; height:40px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-lt));
+  border-radius:12px;
+  display:grid; place-items:center;
+  font-size:18px; color:#fff;
+  box-shadow:0 4px 12px rgba(255,107,0,0.35);
+  flex-shrink:0;
+}
+.header-title {
+  font-family:var(--font-head);
+  font-size:20px; font-weight:800;
+  color:var(--text); letter-spacing:-0.3px;
+}
+.header-sub { font-size:11px; font-weight:600; color:var(--text-sub); }
+
+.header-actions { display:flex; gap:8px; align-items:center; }
 .icon-btn {
-  background: #f1f5f9; color: var(--text-main); width: 42px; height: 42px;
-  border-radius: 50%; border: none; cursor: pointer; font-size: 18px; display: grid; place-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width:40px; height:40px; border-radius:12px;
+  background:var(--surface); color:var(--text-sub);
+  border:1.5px solid var(--border);
+  cursor:pointer; font-size:16px;
+  display:grid; place-items:center;
+  transition:all 0.3s ease;
 }
-.icon-btn:hover { background: #e2e8f0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-.icon-btn:active { transform: scale(0.9) translateY(0); }
+.icon-btn:hover { background:var(--surface2); color:var(--text); transform:translateY(-1px); }
+.icon-btn:active { transform:scale(0.92); }
 
-.app-content { padding: 18px; flex: 1; overflow-x: hidden; }
+/* ===== APP CONTENT ===== */
+.app-content { padding:18px; flex:1; overflow-x:hidden; }
 
-/* --- PROMO BANNER --- */
+/* ===== PROMO CARD ===== */
 .promo-card {
-    background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);
-    border-radius: 18px;
-    padding: 20px;
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    box-shadow: 0 10px 25px -5px rgba(255, 94, 98, 0.5);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.2);
-    animation: slideInTop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: transform 0.3s ease;
+  background:linear-gradient(135deg, #FF6B00 0%, #FF4500 40%, #E53400 100%);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:20px;
+  display:flex; justify-content:space-between; align-items:center;
+  color:white; position:relative; overflow:hidden;
+  border:1px solid rgba(255,255,255,0.15);
+  box-shadow:0 12px 30px rgba(255,107,0,0.4);
+  animation:slideInTop 0.6s cubic-bezier(0.16,1,0.3,1);
 }
-.promo-card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(255, 94, 98, 0.6); }
 .promo-card::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
-    transform: rotate(45deg); animation: shimmer 4s infinite linear; pointer-events: none;
+  content:''; position:absolute; top:-40%; left:-20%;
+  width:60%; height:200%;
+  background:rgba(255,255,255,0.08);
+  transform:rotate(20deg);
+  pointer-events:none;
 }
-@keyframes shimmer { 0% { transform: translateX(-50%) rotate(45deg); } 100% { transform: translateX(50%) rotate(45deg); } }
-@keyframes slideInTop { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.promo-info { z-index: 1; display: flex; flex-direction: column; gap: 6px; }
-.promo-head-en { font-weight: 800; font-size: 17px; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.promo-head-hi { font-weight: 600; font-size: 15px; opacity: 0.95; }
+.promo-card::after {
+  content:''; position:absolute; top:10px; right:80px;
+  width:80px; height:80px;
+  background:radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  border-radius:50%;
+}
+@keyframes slideInTop {
+  from { transform:translateY(-20px); opacity:0; }
+  to   { transform:translateY(0); opacity:1; }
+}
+.promo-info { z-index:1; }
+.promo-head-en { font-weight:800; font-size:16px; line-height:1.3; font-family:var(--font-head); }
+.promo-head-hi { font-size:13px; font-weight:600; opacity:0.9; margin-top:3px; }
 .promo-btn {
-    z-index: 1; background: white; color: #FF5E62; padding: 12px 20px;
-    border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index:1; background:rgba(255,255,255,0.95); color:#D95900;
+  padding:10px 16px; border-radius:12px;
+  font-weight:900; font-size:13px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.25);
+  transition:all 0.3s; white-space:nowrap;
+  display:flex; flex-direction:column; align-items:center; cursor:pointer;
+  border:none; font-family:var(--font-body);
 }
-.promo-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
-.promo-btn:active { transform: scale(0.95) translateY(0); }
-.promo-btn span { font-size: 11px; font-weight: 700; opacity: 0.9; margin-top: 2px;}
+.promo-btn:hover { transform:translateY(-2px) scale(1.04); }
+.promo-btn span { font-size:10px; font-weight:700; opacity:0.8; margin-top:2px; }
 
-/* ------------------- */
+/* ===== STATUS PANEL ===== */
 .sub-panel {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-radius: var(--radius); padding: 20px; margin-bottom: 24px;
-  display: flex; justify-content: space-between; align-items: center; border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
-  animation: fadeIn 0.8s ease-out forwards;
+  background:var(--bg3);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:20px;
+  display:flex; justify-content:space-between; align-items:center;
+  position:relative; overflow:hidden;
 }
-.sub-txt h4 { color: #1e40af; font-size: 17px; margin-bottom: 6px; font-weight: 800; }
-.sub-txt p { color: #3b82f6; font-size: 14px; font-weight: 600; }
-.timer-badge { background: #fff; color: #1e40af; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.08); letter-spacing: 0.5px; }
+.sub-panel::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(to bottom, var(--saffron), var(--teal));
+  border-radius:3px 0 0 3px;
+}
+.sub-txt h4 { color:var(--text); font-size:16px; font-weight:800; margin-bottom:4px; font-family:var(--font-head); }
+.sub-txt p { color:var(--text-sub); font-size:13px; font-weight:600; }
+.timer-badge {
+  background:var(--surface);
+  color:var(--saffron);
+  padding:8px 14px; border-radius:10px;
+  font-size:14px; font-weight:900;
+  border:1px solid rgba(255,107,0,0.2);
+  font-family:var(--font-head); letter-spacing:0.5px;
+}
 
-/* STAGGERED FORM ANIMATIONS */
-.form-card { background: transparent; padding: 0; margin-bottom: 24px; }
-.form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; } 
-.input-group { 
-    position: relative; 
-    opacity: 0;
-    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* ===== SECTION HEADER ===== */
+.section-header {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:18px; padding-left:2px;
 }
-.input-group:nth-child(1) { animation-delay: 0.1s; }
-.input-group:nth-child(2) { animation-delay: 0.15s; }
-.input-group:nth-child(3) { animation-delay: 0.2s; }
-.input-group:nth-child(4) { animation-delay: 0.25s; }
-.input-group:nth-child(5) { animation-delay: 0.3s; }
-.input-group:nth-child(6) { animation-delay: 0.35s; }
-.input-group:nth-child(7) { animation-delay: 0.4s; }
-.input-group:nth-child(8) { animation-delay: 0.45s; }
-.input-group:nth-child(9) { animation-delay: 0.5s; }
-.input-group:nth-child(10) { animation-delay: 0.55s; }
-.input-group:nth-child(11) { animation-delay: 0.6s; }
+.section-dot {
+  width:6px; height:24px;
+  background:linear-gradient(to bottom, var(--saffron), var(--teal));
+  border-radius:3px; flex-shrink:0;
+}
+.section-title {
+  font-family:var(--font-head);
+  font-size:20px; font-weight:800; color:var(--text);
+}
+
+/* ===== FORM FIELDS ===== */
+.form-card { background:transparent; padding:0; margin-bottom:20px; }
+.form-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+
+.input-group {
+  opacity:0;
+  animation:slideUpFade 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.input-group:nth-child(1)  { animation-delay:0.05s; }
+.input-group:nth-child(2)  { animation-delay:0.10s; }
+.input-group:nth-child(3)  { animation-delay:0.15s; }
+.input-group:nth-child(4)  { animation-delay:0.20s; }
+.input-group:nth-child(5)  { animation-delay:0.25s; }
+.input-group:nth-child(6)  { animation-delay:0.30s; }
+.input-group:nth-child(7)  { animation-delay:0.35s; }
+.input-group:nth-child(8)  { animation-delay:0.40s; }
+.input-group:nth-child(9)  { animation-delay:0.45s; }
+.input-group:nth-child(10) { animation-delay:0.50s; }
+.input-group:nth-child(11) { animation-delay:0.55s; }
 
 @keyframes slideUpFade {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
-.input-group label { display: block; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; font-weight: 700; margin-left: 6px; transition: color 0.3s ease; }
-.input-group:focus-within label { color: var(--primary); }
+.input-group label {
+  display:block; font-size:12px; font-weight:800;
+  color:var(--text-sub); margin-bottom:8px;
+  margin-left:4px; text-transform:uppercase; letter-spacing:0.7px;
+  transition:color 0.3s;
+}
+.input-group:focus-within label { color:var(--saffron-lt); }
+
 .form-input {
-  width: 100%; padding: 16px; border: 2px solid transparent; border-radius: 14px;
-  font-size: 15px; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #f1f5f9; color: #1e293b; font-weight: 500;
+  width:100%; padding:15px 18px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:15px; font-weight:600;
+  color:var(--text); background:var(--bg3);
+  outline:none; transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  font-family:var(--font-body);
 }
-.form-input:focus { background: #fff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12); border-color: var(--primary); transform: translateY(-2px); }
-.form-input:hover:not(:focus) { background: #e2e8f0; }
-textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
-.hindi-ph::placeholder { color: #d946ef; opacity: 0.6; }
+.form-input::placeholder { color:var(--text-muted); font-weight:500; }
+.form-input:focus {
+  background:var(--surface);
+  border-color:var(--saffron);
+  box-shadow:var(--glow-sf);
+  transform:translateY(-1px);
+}
+.form-input:hover:not(:focus) { background:var(--surface); border-color:rgba(255,255,255,0.12); }
 
+textarea.form-input { height:90px; resize:none; line-height:1.5; }
+.hindi-ph::placeholder { color:rgba(255,107,0,0.4); font-weight:500; }
+
+/* Photo upload special */
+.photo-upload-label {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 18px;
+  background:var(--bg3);
+  border:1.5px dashed rgba(255,107,0,0.35);
+  border-radius:var(--radius-sm);
+  cursor:pointer; transition:all 0.3s ease;
+  position:relative; overflow:hidden;
+}
+.photo-upload-label:hover { background:var(--surface); border-color:var(--saffron); }
+.photo-upload-icon {
+  width:44px; height:44px; border-radius:12px;
+  background:linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.05));
+  display:grid; place-items:center; font-size:20px; color:var(--saffron); flex-shrink:0;
+  border:1px solid rgba(255,107,0,0.2);
+}
+.photo-upload-text { display:flex; flex-direction:column; gap:2px; }
+.photo-upload-text strong { font-size:14px; font-weight:800; color:var(--text); }
+.photo-upload-text span { font-size:12px; color:var(--text-sub); font-weight:600; }
+#photoPreviewThumb {
+  width:44px; height:44px; border-radius:10px;
+  object-fit:cover; display:none; border:2px solid var(--saffron);
+  box-shadow:0 4px 12px rgba(255,107,0,0.3); flex-shrink:0;
+}
+#photo { display:none; }
+
+select.form-input {
+  cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892B0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 16px center;
+  padding-right:40px;
+}
+select.form-input option { background:var(--bg3); color:var(--text); }
+
+/* ===== BOTTOM ACTION BAR ===== */
 .action-bottom-bar {
-    position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 18px 20px; border-top: 1px solid rgba(226, 232, 240, 0.8);
-    display: flex; flex-direction: column; gap: 12px; z-index: 90;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+  position:sticky; bottom:0;
+  background:rgba(15,17,23,0.92);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  padding:16px 18px;
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:10px;
+  z-index:90;
 }
 
-/* ================= PREVIEW & ANIMATIONS ================= */
-.preview-section { margin-top: 15px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; overflow: visible; }
+/* ===== ANIM TOGGLE ===== */
+.toggle-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 4px;
+}
+.toggle-label { font-size:13px; font-weight:700; color:var(--text-sub); }
+.anim-switch { position:relative; display:inline-block; width:46px; height:24px; }
+.anim-switch input { opacity:0; width:0; height:0; }
+.anim-slider {
+  position:absolute; cursor:pointer; inset:0;
+  background:var(--surface2); transition:.4s;
+  border:1px solid var(--border);
+}
+.anim-slider:before {
+  position:absolute; content:""; height:18px; width:18px;
+  left:2px; bottom:2px; background:#fff;
+  transition:.4s; box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+input:checked + .anim-slider { background:linear-gradient(135deg, var(--saffron), var(--saffron-lt)); border-color:transparent; }
+input:checked + .anim-slider:before { transform:translateX(22px); }
+.anim-slider.anim-round { border-radius:24px; }
+.anim-slider.anim-round:before { border-radius:50%; }
+
+/* ===== CARD PREVIEW ===== */
+.preview-section {
+  margin-top:10px; margin-bottom:40px;
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+}
+.preview-label {
+  font-size:11px; font-weight:900; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:2px;
+  background:var(--bg3); padding:6px 16px;
+  border-radius:20px; border:1px solid var(--border);
+}
 .card-wrapper {
-  --card-scale: 1; 
-  width: 420px; height: 260px; position: relative; border-radius: 12px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.15); flex-shrink: 0; background: #fff; color: #000;
-  transform-origin: center center; 
-  transform: scale(var(--card-scale));
-  transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --card-scale: 1;
+  width:420px; height:260px;
+  position:relative; border-radius:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  flex-shrink:0; background:#fff; color:#000;
+  transform-origin:center;
+  transform:scale(var(--card-scale));
+  transition:box-shadow 0.4s cubic-bezier(0.175,0.885,0.32,1.275), transform 0.4s;
 }
 .card-wrapper:hover {
-    transform: scale(calc(var(--card-scale) * 1.02)) translateY(-8px);
-    box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+  transform:scale(calc(var(--card-scale)*1.02)) translateY(-6px);
+  box-shadow:0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,0,0.15);
 }
 
-/* --- Slide in from Right Animation --- */
 @keyframes slideInRightCard {
-    0% { transform: translateX(150%) scale(calc(var(--card-scale) * 0.8)); opacity: 0; }
-    80% { transform: translateX(-5%) scale(var(--card-scale)); opacity: 1; }
-    100% { transform: translateX(0) scale(var(--card-scale)); opacity: 1; }
+  0%   { transform:translateX(150%) scale(calc(var(--card-scale)*0.8)); opacity:0; }
+  80%  { transform:translateX(-5%) scale(var(--card-scale)); opacity:1; }
+  100% { transform:translateX(0) scale(var(--card-scale)); opacity:1; }
 }
+.card-slide-in { animation:slideInRightCard 0.8s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+#cardFront.card-slide-in { animation-delay:0.1s; }
+#cardBack.card-slide-in  { animation-delay:0.3s; }
 
-.card-slide-in {
-    animation: slideInRightCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+@keyframes zoomBounceInCard {
+  0%   { transform:scale(0.3) translateY(100px) rotateX(30deg); opacity:0; }
+  60%  { transform:scale(calc(var(--card-scale)*1.08)) translateY(-15px) rotateX(-5deg); opacity:1; }
+  100% { transform:scale(var(--card-scale)) translateY(0) rotateX(0deg); opacity:1; }
 }
+.card-zoom-in { animation:zoomBounceInCard 0.85s cubic-bezier(0.34,1.56,0.64,1) both; }
+#cardFront.card-zoom-in { animation-delay:0.1s; }
+#cardBack.card-zoom-in  { animation-delay:0.25s; }
 
-#cardFront.card-slide-in {
-    animation-delay: 0.1s;
-}
+.card-bg { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+.c-text { position:absolute; font-weight:bold; color:#000; white-space:nowrap; }
+.c-photo { position:absolute; left:10px; top:90px; width:120px; height:150px; border:2px solid #444; background:#fff; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+.c-photo img { width:100%; height:100%; object-fit:cover; }
+.qr-box { position:absolute; left:25px; top:60px; width:100px; display:flex; flex-direction:column; align-items:center; }
+.qr-img { width:110px; height:110px; object-fit:contain; background:#fff; mix-blend-mode:multiply; }
+.p-epic   { left:12px; top:68px; font-size:14px; }
+.p-h-name { left:140px; top:120px; font-size:12.5px; }
+.p-e-name { left:140px; top:138px; font-size:12.5px; }
+.p-h-fath { left:140px; top:158px; font-size:12px; }
+.p-e-fath { left:140px; top:175px; font-size:12px; }
+.p-h-gen  { left:140px; top:195px; font-size:11.5px; }
+.p-e-gen  { left:230px; top:195px; font-size:11.5px; }
+.p-h-dob  { left:140px; top:212px; font-size:11.5px; }
+.p-e-dob  { left:230px; top:212px; font-size:11.5px; }
+.address-section { position:absolute; left:160px; top:18px; width:240px; font-weight:bold; z-index:10; }
+.h-addr-label,.e-addr-label { font-size:12px; font-weight:bold; margin-bottom:2px; color:#000; }
+.h-addr-text,.e-addr-text   { font-size:13px; font-weight:bold; line-height:1.2; margin-bottom:10px; color:#000; }
+.p-date     { left:160px; top:180px; font-size:13px; }
+.p-epic-back { font-size:14px; margin-top:-25px; font-weight:bold; color:#000; }
 
-#cardBack.card-slide-in {
-    animation-delay: 0.3s;
-}
-
-/* ------------------------------------- */
-
-.card-bg { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-
-.c-text { position: absolute; font-weight: bold; color: #000; white-space: nowrap; }
-.c-photo { position: absolute; left: 10px; top: 90px; width: 120px; height: 150px; border: 2px solid #444; background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-.c-photo img { width: 100%; height: 100%; object-fit: cover; }
-.qr-box { position: absolute; left: 25px; top: 60px; width: 100px; display: flex; flex-direction: column; align-items: center; }
-.qr-img { width: 110px; height: 110px; object-fit: contain; background: #fff; mix-blend-mode: multiply; }
-
-.p-epic { left: 12px; top: 68px; font-size: 14px; }
-.p-h-name { left: 140px; top: 120px; font-size: 12.5px; }
-.p-e-name { left: 140px; top: 138px; font-size: 12.5px; }
-.p-h-fath { left: 140px; top: 158px; font-size: 12px; }
-.p-e-fath { left: 140px; top: 175px; font-size: 12px; }
-.p-h-gen { left: 140px; top: 195px; font-size: 11.5px; }
-.p-e-gen { left: 230px; top: 195px; font-size: 11.5px; }
-.p-h-dob { left: 140px; top: 212px; font-size: 11.5px; }
-.p-e-dob { left: 230px; top: 212px; font-size: 11.5px; }
-
-.address-section { position: absolute; left: 160px; top: 18px; width: 240px; font-weight: bold; z-index: 10; }
-.h-addr-label, .e-addr-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #000; }
-.h-addr-text, .e-addr-text { font-size: 13px; font-weight: bold; line-height: 1.2; margin-bottom: 10px; color: #000; }
-.p-date { left: 160px; top: 180px; font-size: 13px; }
-.p-epic-back { font-size: 14px; margin-top: -25px; font-weight: bold; color: #000; }
-
-/* Modals */
+/* ===== MODALS ===== */
 .modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center;
-  animation: fadeIn 0.3s ease;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  z-index:1000; display:none; align-items:center; justify-content:center;
+  animation:fadeIn 0.3s ease;
+  padding:16px;
 }
 .modal-content {
-  background: #fff; width: 92%; max-width: 420px; border-radius: 24px;
-  max-height: 85vh; display: flex; flex-direction: column; animation: modalZoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  background:var(--bg2); width:100%; max-width:440px;
+  border-radius:var(--radius-lg);
+  max-height:88vh; display:flex; flex-direction:column;
+  animation:modalIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  box-shadow:var(--shadow-lg), 0 0 0 1px var(--border);
 }
-@keyframes modalZoomIn { 0% { transform: scale(0.85) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn {
+  from { transform:scale(0.88) translateY(24px); opacity:0; }
+  to   { transform:scale(1) translateY(0); opacity:1; }
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-.modal-header { padding: 22px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-.modal-header h3 { font-size: 19px; font-weight: 800; color: var(--text-main); }
-.modal-body { flex: 1; overflow-y: auto; padding: 24px; }
+.modal-header {
+  padding:20px 22px;
+  border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.modal-header h3 {
+  font-family:var(--font-head);
+  font-size:19px; font-weight:800; color:var(--text);
+}
+.modal-close {
+  width:34px; height:34px; border-radius:10px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--text-sub); font-size:16px;
+  cursor:pointer; display:grid; place-items:center;
+  transition:all 0.3s;
+}
+.modal-close:hover { background:var(--surface2); color:var(--text); }
+.modal-body { flex:1; overflow-y:auto; padding:22px; }
 
-#cropModal .modal-body { padding: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; height: 420px; border-radius: 0; }
-#imageToCrop { max-width: 100%; max-height: 100%; display: block; }
+#cropModal .modal-body {
+  padding:0; background:#000;
+  display:flex; align-items:center; justify-content:center;
+  height:400px; border-radius:0;
+}
 
 .history-item {
-  background: #f8fafc; padding: 18px; border-radius: 14px; margin-bottom: 14px;
-  cursor: pointer; border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background:var(--bg3); padding:16px 18px;
+  border-radius:var(--radius-sm); margin-bottom:10px;
+  cursor:pointer; border:1.5px solid var(--border);
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
-.history-item:hover { background: #fff; box-shadow: 0 8px 15px rgba(0,0,0,0.05); transform: translateY(-2px); border-color: #cbd5e1; }
-.history-item:active { transform: scale(0.98); }
-.h-ep { font-weight: 800; color: var(--primary); font-size: 16px; letter-spacing: 0.5px;}
-.h-nm { font-size: 15px; color: var(--text-main); margin-top: 6px; font-weight: 600; }
-.h-dt { font-size: 13px; color: var(--text-sub); margin-top: 10px; text-align: right; font-weight: 500;}
+.history-item:hover {
+  background:var(--surface);
+  border-color:rgba(255,107,0,0.3);
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+.history-item:active { transform:scale(0.98); }
+.h-ep  { font-weight:900; color:var(--saffron); font-size:15px; letter-spacing:0.5px; font-family:var(--font-head); }
+.h-nm  { font-size:14px; color:var(--text); margin-top:5px; font-weight:700; }
+.h-dt  { font-size:12px; color:var(--text-muted); margin-top:8px; text-align:right; font-weight:600; }
 
-.refer-highlight { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px dashed #f59e0b; padding: 24px; border-radius: 18px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.1); }
-.refer-title { font-size: 22px; font-weight: 900; color: #b45309; margin-bottom: 10px; }
-.refer-text { font-size: 15px; color: #4b5563; margin-bottom: 12px; line-height: 1.6; }
-.refer-hindi { font-size: 15px; color: #b45309; font-weight: 700; margin-top: 12px; display: block; line-height: 1.5; }
-.refer-link-box { background: #f1f5f9; padding: 16px; border-radius: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 14px; color: #0f172a; margin: 18px 0; word-break: break-all; border: 1px solid var(--border); text-align: center; font-weight: 600; }
-.refer-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+/* ===== REFER CARD ===== */
+.refer-highlight {
+  background:linear-gradient(135deg, rgba(255,187,0,0.1) 0%, rgba(255,107,0,0.05) 100%);
+  border:1.5px dashed rgba(255,187,0,0.4);
+  padding:22px; border-radius:var(--radius); text-align:center; margin-bottom:18px;
+}
+.refer-title { font-size:22px; font-weight:900; color:var(--gold); margin-bottom:8px; font-family:var(--font-head); }
+.refer-text  { font-size:14px; color:var(--text-sub); line-height:1.6; margin-bottom:10px; }
+.refer-hindi { font-size:14px; color:var(--saffron-lt); font-weight:700; display:block; line-height:1.5; }
+.refer-link-box {
+  background:var(--bg3); padding:14px 16px; border-radius:var(--radius-sm);
+  font-family:ui-monospace,monospace; font-size:13px; color:var(--teal);
+  margin:16px 0; word-break:break-all; border:1px solid var(--border);
+  text-align:center; font-weight:600;
+}
+.refer-btns { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
 
-#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
-.toast { background: #fff; padding: 16px 20px; border-radius: 14px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 14px; animation: slideDownToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-@keyframes slideDownToast { from { transform: translateY(-30px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.toast-icon { font-size: 24px; } .toast.success .toast-icon { color: var(--success); } .toast.error .toast-icon { color: var(--danger); }
-.toast-msg { font-size: 15px; font-weight: 700; color: #1e293b; }
+/* ===== TOAST ===== */
+#toast-container {
+  position:fixed; top:18px; left:50%; transform:translateX(-50%);
+  z-index:9999; display:flex; flex-direction:column; gap:8px;
+  width:90%; max-width:380px; pointer-events:none;
+}
+.toast {
+  background:var(--bg2); padding:14px 18px;
+  border-radius:var(--radius-sm);
+  box-shadow:var(--shadow), 0 0 0 1px var(--border);
+  display:flex; align-items:center; gap:12px;
+  animation:toastIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes toastIn {
+  from { transform:translateY(-24px) scale(0.9); opacity:0; }
+  to   { transform:translateY(0) scale(1); opacity:1; }
+}
+.toast-icon { font-size:22px; }
+.toast.success .toast-icon { color:var(--teal); }
+.toast.error   .toast-icon { color:var(--danger); }
+.toast.info    .toast-icon { color:var(--saffron); }
+.toast-msg { font-size:14px; font-weight:700; color:var(--text); }
 
-.confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
-.confirm-box { background: white; width: 90%; max-width: 360px; padding: 35px 25px; border-radius: 28px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-@keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.confirm-btns { display: flex; gap: 14px; margin-top: 30px; }
+/* ===== CONFIRM MODAL ===== */
+.confirm-modal {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(10px); z-index:2000;
+  display:none; align-items:center; justify-content:center;
+  animation:fadeIn 0.3s ease; padding:16px;
+}
+.confirm-box {
+  background:var(--bg2); width:100%; max-width:360px;
+  padding:30px 24px; border-radius:var(--radius-lg);
+  text-align:center;
+  box-shadow:var(--shadow-lg), 0 0 0 1px var(--border);
+  animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.confirm-box h3 { font-family:var(--font-head); font-size:20px; font-weight:800; color:var(--text); margin:16px 0 8px; }
+.confirm-box p  { font-size:14px; color:var(--text-sub); font-weight:600; }
+.confirm-btns   { display:flex; gap:12px; margin-top:24px; }
 
+/* ===== EXPIRY MODAL ===== */
 .expiry-modal-content {
-    background: #fff; width: 92%; max-width: 400px; border-radius: 28px;
-    padding: 35px 25px; text-align: center; border-top: 10px solid #ef4444;
-    animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 30px 60px rgba(239, 68, 68, 0.2);
+  background:var(--bg2); width:92%; max-width:400px;
+  border-radius:var(--radius-lg); padding:32px 22px; text-align:center;
+  border-top:4px solid var(--danger);
+  animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+  box-shadow:var(--shadow-lg), 0 0 0 1px var(--border);
 }
-@keyframes bounceIn { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-.expiry-icon { font-size: 60px; color: #ef4444; margin-bottom: 20px; animation: pulseError 2s infinite; }
-@keyframes pulseError { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0.4)); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6)); } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0.4)); } }
-.expiry-title { font-size: 26px; font-weight: 900; color: #1e293b; margin-bottom: 10px; }
-.expiry-msg { font-size: 16px; color: #64748b; margin-bottom: 8px; }
-.expiry-msg-hindi { font-size: 16px; color: #b91c1c; font-weight: 800; margin-bottom: 24px; }
-.btn-urgent { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; border: none; font-size: 17px; padding: 18px; width: 100%; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3); animation: btnPulse 2s infinite; transition: all 0.3s; }
-.btn-urgent:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(239, 68, 68, 0.4); }
-@keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+.expiry-icon { font-size:56px; color:var(--danger); margin-bottom:16px; animation:pulseError 2s infinite; }
+@keyframes pulseError {
+  0%  { transform:scale(1);   filter:drop-shadow(0 0 0 rgba(255,71,87,0.4)); }
+  50% { transform:scale(1.1); filter:drop-shadow(0 0 12px rgba(255,71,87,0.6)); }
+  100%{ transform:scale(1);   filter:drop-shadow(0 0 0 rgba(255,71,87,0.4)); }
+}
+.expiry-title { font-family:var(--font-head); font-size:24px; font-weight:900; color:var(--text); margin-bottom:10px; }
+.expiry-msg   { font-size:15px; color:var(--text-sub); margin-bottom:6px; }
+.expiry-msg-hindi { font-size:15px; color:var(--danger); font-weight:800; margin-bottom:20px; }
+.btn-urgent {
+  background:linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+  color:white; border:none; font-size:16px;
+  padding:17px; width:100%; border-radius:var(--radius-sm);
+  cursor:pointer; display:flex; justify-content:center; align-items:center; gap:10px;
+  font-weight:800; font-family:var(--font-body);
+  box-shadow:0 8px 20px rgba(255,71,87,0.35);
+  animation:btnPulse 2s infinite;
+  transition:all 0.3s;
+}
+@keyframes btnPulse {
+  0%  { box-shadow:0 0 0 0 rgba(255,71,87,0.7); }
+  70% { box-shadow:0 0 0 14px rgba(255,71,87,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,71,87,0); }
+}
 
-.loader { border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; margin: 15px auto; display: none; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* ===== PENDING SCREEN ===== */
+.pending-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; padding:24px; }
+.pending-icon { font-size:64px; color:var(--gold); margin-bottom:20px; animation:spin 4s linear infinite; }
+.pending-wrap h1 { font-family:var(--font-head); font-size:26px; font-weight:900; color:var(--text); }
+.pending-wrap p  { color:var(--text-sub); font-size:15px; margin-top:10px; font-weight:600; }
 
-@media (max-width: 480px) {
-  body { background: var(--bg-color); }
-  #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen { box-shadow: none; border-radius: 0; }
-  .card-wrapper { --card-scale: 0.85; margin: -10px 0; } 
+/* ===== LOADER ===== */
+.loader {
+  border:3px solid var(--surface2);
+  border-top:3px solid var(--saffron);
+  border-radius:50%; width:30px; height:30px;
+  animation:spin 1s linear infinite; margin:14px auto; display:none;
 }
-@media (max-width: 380px) {
-  .card-wrapper { --card-scale: 0.75; margin: -30px 0; } 
+
+/* ===== PAYWALL ===== */
+.paywall-hero {
+  width:76px; height:76px;
+  background:linear-gradient(135deg, rgba(255,187,0,0.2), rgba(255,107,0,0.1));
+  border:1.5px solid rgba(255,187,0,0.3);
+  border-radius:22px; display:grid; place-items:center;
+  margin:0 auto 20px; font-size:36px; color:var(--gold);
+  box-shadow:0 0 30px rgba(255,187,0,0.2);
 }
+.paywall-title { font-family:var(--font-head); font-size:26px; font-weight:900; color:var(--text); margin-bottom:8px; }
+.paywall-sub   { font-size:15px; color:var(--text-sub); font-weight:600; }
+
+.utr-section {
+  background:var(--bg3);
+  border-radius:var(--radius);
+  padding:20px;
+  border:1.5px solid var(--border);
+  margin-top:16px;
+}
+.utr-section p { font-size:14px; font-weight:800; color:var(--text); margin-bottom:14px; }
+
+/* ===== MEDIA ===== */
+@media (max-width:480px) {
+  body { background:var(--bg); }
+  #splash-screen, #app-screen, #login-screen, #paywall-screen, #pending-screen {
+    box-shadow:none; border-radius:0;
+  }
+  .card-wrapper { --card-scale:0.85; margin:-10px 0; }
+}
+@media (max-width:380px) {
+  .card-wrapper { --card-scale:0.75; margin:-28px 0; }
+}
+
+/* ===== UPGRADE CHIP ===== */
+.upgrade-chip {
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg, rgba(0,201,167,0.15), rgba(0,201,167,0.05));
+  border:1.5px solid rgba(0,201,167,0.25);
+  border-radius:50px;
+  padding:12px 20px;
+  color:var(--teal);
+  font-weight:800; font-size:15px;
+  cursor:pointer; transition:all 0.3s ease;
+  width:100%; justify-content:center; margin-bottom:18px;
+  font-family:var(--font-body);
+}
+.upgrade-chip:hover { background:rgba(0,201,167,0.2); transform:translateY(-1px); box-shadow:var(--glow-tl); }
+
 </style>
 </head>
-
 <body>
 
 <div id="toast-container"></div>
 
+<!-- SPLASH -->
 <div id="splash-screen">
-    <div class="splash-content">
-        <i class="fas fa-id-card splash-icon"></i>
-        <h1 class="splash-title">Voter Tool</h1>
-        <div class="splash-spinner"></div>
-    </div>
+  <div class="splash-wrap">
+    <div class="splash-logo"><i class="fas fa-id-card"></i></div>
+    <h1 class="splash-title">Voter ID Maker</h1>
+    <div class="splash-spinner"></div>
+  </div>
 </div>
 
-<div id="expiryModal" class="modal" style="z-index: 1001;"> <div class="expiry-modal-content">
-        <div class="expiry-icon"><i class="fas fa-exclamation-circle"></i></div>
-        
-        <h2 class="expiry-title">Action Required!</h2>
-        <p class="expiry-msg">Your premium subscription is expiring in <span id="expDaysEn" style="font-weight:900; color:#ef4444;">5</span> days.</p>
-        <p class="expiry-msg-hindi">ध्यान दें! आपका प्लान <span id="expDaysHi" style="font-weight:900; color:#b91c1c;">5</span> दिनों में समाप्त हो रहा है।</p>
-        
-        <div style="margin: 25px 0 15px 0;">
-            <p class="expiry-msg" style="margin-bottom:4px; font-weight:600;">Renew now to avoid interruption.</p>
-            <p class="expiry-msg-hindi" style="font-weight:600; color:#444;">सेवा जारी रखने के लिए अभी रिन्यू करें।</p>
-        </div>
-
-        <button onclick="handleUrgentUpgrade()" class="btn-urgent">
-            <i class="fas fa-arrow-circle-up"></i> Renew Now / अभी रिन्यू करें
-        </button>
-        
-        <button onclick="closeExpiry()" class="btn" style="background:transparent; color:#64748b; margin-top:10px; font-size:15px; box-shadow: none;">
-            Remind Me Later / बाद में याद दिलाएं
-        </button>
+<!-- EXPIRY MODAL -->
+<div id="expiryModal" class="modal" style="z-index:1001;">
+  <div class="expiry-modal-content">
+    <div class="expiry-icon"><i class="fas fa-exclamation-circle"></i></div>
+    <h2 class="expiry-title">Action Required!</h2>
+    <p class="expiry-msg">Your subscription expires in <span id="expDaysEn" style="font-weight:900;color:var(--danger);">5</span> days.</p>
+    <p class="expiry-msg-hindi">आपका प्लान <span id="expDaysHi" style="font-weight:900;">5</span> दिनों में समाप्त हो रहा है।</p>
+    <div style="margin:20px 0 16px;">
+      <p class="expiry-msg" style="font-weight:600;">Renew now to avoid interruption.</p>
+      <p class="expiry-msg-hindi" style="color:var(--text-sub); font-weight:600;">सेवा जारी रखने के लिए अभी रिन्यू करें।</p>
     </div>
+    <button onclick="handleUrgentUpgrade()" class="btn-urgent">
+      <i class="fas fa-arrow-circle-up"></i> Renew Now / अभी रिन्यू करें
+    </button>
+    <button onclick="closeExpiry()" class="btn btn-ghost" style="margin-top:10px; font-size:14px; background:transparent; border:none; color:var(--text-muted); box-shadow:none; padding:10px;">
+      Remind Me Later
+    </button>
+  </div>
 </div>
 
+<!-- CROP MODAL -->
 <div id="cropModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Crop Photo</h3>
-            <button onclick="closeCropModal()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer; transition: color 0.2s;">&times;</button>
-        </div>
-        <div class="modal-body">
-            <img id="imageToCrop">
-        </div>
-        <div style="padding: 20px; display: flex; gap: 14px; border-top: 1px solid #f1f5f9;">
-             <button onclick="closeCropModal()" class="btn" style="background: #f1f5f9; color: #1e293b; flex: 1; box-shadow: none;">Cancel</button>
-             <button onclick="performCrop()" class="btn btn-primary" style="flex: 1;">
-                <i class="fas fa-crop-alt"></i> Crop
-             </button>
-        </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Crop Photo</h3>
+      <button onclick="closeCropModal()" class="modal-close"><i class="fas fa-times"></i></button>
     </div>
+    <div class="modal-body"><img id="imageToCrop"></div>
+    <div style="padding:16px 18px; display:flex; gap:12px; border-top:1px solid var(--border);">
+      <button onclick="closeCropModal()" class="btn btn-ghost" style="flex:1;">Cancel</button>
+      <button onclick="performCrop()" class="btn btn-primary" style="flex:1;">
+        <i class="fas fa-crop-alt"></i> Crop
+      </button>
+    </div>
+  </div>
 </div>
 
-<div id="confirmModal" class="confirm-modal">
-    <div class="confirm-box">
-        <i class="fas fa-exclamation-triangle" style="font-size: 54px; color: #f59e0b; margin-bottom: 25px; filter: drop-shadow(0 4px 6px rgba(245, 158, 11, 0.3));"></i>
-        <h3 style="font-size:22px; color:#1e293b; font-weight: 800;">Clear History?</h3>
-        <p style="color:#64748b; font-size:16px; margin-top:10px; font-weight: 500;">This will permanently delete all saved cards.</p>
-        <div class="confirm-btns">
-            <button onclick="closeConfirm()" class="btn" style="background:#f1f5f9; color:#1e293b; flex:1; box-shadow:none;">Cancel</button>
-            <button onclick="confirmClearHistory()" class="btn" style="background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color:white; flex:1; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">Delete All</button>
-        </div>
-    </div>
-</div>
-
-<div id="login-screen" class="auth-wrapper">
-    <div class="auth-box">
-        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 24px; display: grid; place-items: center; margin: 0 auto 25px; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);">
-             <i class="fas fa-id-card" style="font-size: 38px; color: var(--primary);"></i>
-        </div>
-        <h1>Voter Tool</h1>
-        <p style="color:var(--text-sub); margin-bottom:35px; font-size: 16px; font-weight: 500;">Sign in to manage your cards</p>
-        
-        <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
-        <input type="password" id="passInput" class="auth-input" placeholder="Password">
-        
-        <button id="loginBtn" class="btn btn-primary">Login</button>
-        <button id="signupBtn" class="btn btn-primary" style="display:none; background:linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">Create Account</button>
-        
-        <div style="position:relative; margin: 30px 0; text-align:center;">
-             <hr style="border:none; border-top:2px solid #e2e8f0;">
-             <span style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--bg-color); padding:0 15px; font-size:14px; font-weight:700; color:#94a3b8;">OR</span>
-        </div>
-
-        <button id="googleBtn" class="btn btn-google">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="22"> Continue with Google
-        </button>
-        
-        <div id="loader" class="loader"></div>
-        <div id="toggleAuth" style="margin-top:35px; color:var(--primary); cursor:pointer; font-size:16px; font-weight: 800; transition: color 0.3s;">Create an Account</div>
-    </div>
-</div>
-
-<div id="app-screen">
-    <div class="container">
-        <div class="app-header">
-            <div class="user-info">
-                <span style="font-weight:900; font-size:20px; color:#1e293b; letter-spacing: -0.5px;">Voter ID Maker</span>
-                <span id="userEmailDisplay" class="user-email"></span>
-            </div>
-            <div class="header-actions">
-                <button onclick="openReferModal()" class="icon-btn" style="color: #d97706; background: #fef3c7;"><i class="fas fa-gift"></i></button>
-                <button onclick="openHistory()" class="icon-btn"><i class="fas fa-history"></i></button>
-                <button onclick="logout()" class="icon-btn" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </div>
-
-        <div class="app-content">
-            
-            <div class="promo-card">
-                <div class="promo-info">
-                    <div class="promo-head-en">Want to make Aadhar Card?</div>
-                    <div class="promo-head-hi">क्या आपको आधार कार्ड बनाना है?</div>
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
-                    <div onclick="forceDownloadInBrowser('YOUR_DOWNLOAD_LINK_HERE')" class="promo-btn" style="cursor:pointer;">
-                        <i class="fas fa-download" style="font-size: 18px; margin-bottom: 4px;"></i>
-                        <span>Download App</span>
-                    </div>
-                    <span onclick="copyAppUrl()" style="font-size:11px; font-weight:700; color:white; margin-top:8px; text-decoration:underline; cursor:pointer; opacity:0.9; transition: opacity 0.3s;">
-                        Copy Link
-                    </span>
-                </div>
-            </div>
-
-            <div class="sub-panel">
-                <div class="sub-txt">
-                    <h4 id="subTitle">Checking Status...</h4>
-                    <p id="subDesc">Please wait</p>
-                </div>
-                <div id="timerDisplay" class="timer-badge">--:--</div>
-            </div>
-            <button id="upgradeBtn" class="btn btn-primary" style="margin-bottom:25px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); display:none;">
-                <i class="fas fa-crown"></i> Upgrade Plan
-            </button>
-
-            <div class="form-card">
-                <h3 style="margin-bottom:18px; font-size: 20px; font-weight: 800; padding-left: 5px;">Enter Details</h3>
-                <div class="form-grid">
-                    <div class="input-group"><label>EPIC No.</label><input id="epic" class="form-input" placeholder="ABC1234567"></div>
-                    <div class="input-group"><label>Photo</label><input type="file" id="photo" class="form-input" accept="image/*" style="background:#fff; border: 2px dashed #cbd5e1; padding: 12px; cursor: pointer;"></div>
-                    
-                    <div class="input-group"><label>Name (English)</label><input id="userName" class="form-input" placeholder="Rahul Kumar"></div>
-                    <div class="input-group"><label>Name (Hindi)</label><input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार"></div>
-                    
-                    <div class="input-group"><label>Father (English)</label><input id="fatherName" class="form-input" placeholder="Sohan Kumar"></div>
-                    <div class="input-group"><label>Father (Hindi)</label><input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार"></div>
-                    
-                    <div class="input-group">
-                        <label>Gender</label>
-                        <select id="gender" class="form-input" style="cursor:pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;">
-                            <option value="" disabled selected>Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group"><label>DOB</label><input id="dob" class="form-input" placeholder="01/01/1990"></div>
-                    
-                    <div class="input-group"><label>Address (English)</label><textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea></div>
-                    <div class="input-group"><label>Address (Hindi)</label><textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea></div>
-                    
-                    <div class="input-group"><label>Download Date</label><input id="dlDate" class="form-input" placeholder="XX/XX/XXXX"></div>
-                </div>
-            </div>
-
-            <div class="preview-section" id="previewArea" style="display:none;">
-                <div style="font-weight:800; font-size: 18px; color:var(--text-sub); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Live Preview</div>
-                <div class="card-wrapper" id="cardFront">
-                    <img src="voter-bg.png" class="card-bg">
-                    <div class="c-text p-epic" id="dEpic"></div>
-                    <div class="c-photo"><img id="dPhoto"></div>
-                    <div class="c-text p-h-name" id="hName"></div>
-                    <div class="c-text p-e-name" id="eName"></div>
-                    <div class="c-text p-h-fath" id="hFather"></div>
-                    <div class="c-text p-e-fath" id="eFather"></div>
-                    <div class="c-text p-h-gen" id="hGender"></div>
-                    <div class="c-text p-e-gen" id="eGender"></div>
-                    <div class="c-text p-h-dob" id="hDob"></div>
-                    <div class="c-text p-e-dob" id="eDob"></div>
-                </div>
-                <div class="card-wrapper" id="cardBack">
-                    <img src="voter_back.png" class="card-bg">
-                    <div class="address-section"> 
-                        <div class="h-addr-label">पता:</div> <div class="h-addr-text" id="dispAddrHindi"></div>
-                        <div class="e-addr-label">Address:</div> <div class="e-addr-text" id="dispAddrEng"></div>
-                    </div>
-                    <div class="c-text p-date" id="dispDate"></div>
-                    <div class="qr-box"> <img src="qr.jpeg" class="qr-img"> <div class="c-text p-epic-back" id="dispEpicBack"></div> </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="action-bottom-bar">
-            <button class="btn btn-primary" onclick="generateAndSave()">
-                <i class="fas fa-magic"></i> Generate Card
-            </button>
-            <button id="dlPdfBtn" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display:none; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="downloadPDF()">
-                <i class="fas fa-file-pdf"></i> Download PDF
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="paywall-screen" class="auth-wrapper">
-    <div class="auth-box plan-mode">
-        <button onclick="logout()" class="logout-corner-btn" title="Logout">
-            <i class="fas fa-sign-out-alt"></i>
-        </button>
-
-        <i class="fas fa-crown" style="font-size:54px; color:#f59e0b; margin-bottom:18px; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.3));"></i>
-        <h2 style="color:#1e293b; margin-bottom: 10px; font-size: 28px; font-weight: 900;">Go Premium</h2>
-        <p style="font-size:16px; color:#64748b; font-weight: 500;">Select a plan to remove limits</p>
-        <div id="plansContainer" class="plans-container"></div>
-        
-        <div style="position: sticky; bottom: 0; padding: 18px 0; background: var(--bg-color); border-top: 1px solid var(--border); margin-top: 25px;">
-            <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none; font-size: 18px;">Select a Plan</a>
-        </div>
-        
-        <div style="border-top:2px solid #e2e8f0; margin:25px 0; padding-top:25px; text-align: left;">
-             <p style="font-size:15px; margin-bottom:12px; font-weight:800; color:#1e293b;">Already Paid via UPI?</p>
-             <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:12px;">
-             <button id="submitUtrBtn" class="btn" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">Verify Payment</button>
-        </div>
-        <button id="backToTrialBtn" class="btn" style="background:#e2e8f0; color:#1e293b; display:none; box-shadow: none;">
-            <i class="fas fa-arrow-left"></i> Back to App
-        </button>
-    </div>
-</div>
-
-<div id="pending-screen" class="auth-wrapper">
-    <div class="auth-box">
-        <i class="fas fa-hourglass-half" style="font-size:60px; color:#f59e0b; margin-bottom:25px; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.3)); animation: spin 4s linear infinite;"></i>
-        <h1 style="font-size: 28px; font-weight: 900;">Verification Pending</h1>
-        <p style="color: #64748b; font-size: 16px; margin-top: 10px; font-weight: 500;">Your payment is being reviewed.</p>
-        <button onclick="logout()" class="btn" style="margin-top:35px; background: #e2e8f0; color: #1e293b; box-shadow: none;">Logout</button>
-    </div>
-</div>
-
+<!-- HISTORY MODAL -->
 <div id="historyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Saved Cards</h3>
-            <div style="display:flex; gap:18px; align-items:center;">
-                <button onclick="showConfirm()" style="background:none; border:none; color:#ef4444; font-size:15px; font-weight:800; cursor:pointer; transition: opacity 0.2s;"><i class="fas fa-trash"></i> Clear</button>
-                <button onclick="closeHistory()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer; transition: color 0.2s;">&times;</button>
-            </div>
-        </div>
-        <div class="modal-body" id="historyList">
-            <div style="text-align:center; color:#94a3b8; margin-top:30px; font-weight:600;">Loading history...</div>
-        </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Saved Cards</h3>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button onclick="showConfirm()" style="background:rgba(255,71,87,0.12); border:1px solid rgba(255,71,87,0.2); color:var(--danger); font-size:13px; font-weight:800; cursor:pointer; padding:7px 12px; border-radius:10px; font-family:var(--font-body); transition:all 0.3s;">
+          <i class="fas fa-trash"></i> Clear
+        </button>
+        <button onclick="closeHistory()" class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
     </div>
+    <div class="modal-body" id="historyList">
+      <div style="text-align:center; color:var(--text-muted); margin-top:30px; font-weight:600;">Loading...</div>
+    </div>
+  </div>
 </div>
 
+<!-- REFER MODAL -->
 <div id="referModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Refer & Earn</h3>
-            <button onclick="closeReferModal()" style="background:none; border:none; font-size:28px; color:#64748b; cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="refer-highlight">
-                <i class="fas fa-gift" style="font-size:54px; color:#f59e0b; margin-bottom:18px; filter: drop-shadow(0 4px 6px rgba(245, 158, 11, 0.2));"></i>
-                <div class="refer-title">Get 7 Days Free!</div>
-                <div class="refer-text">Invite your friends to use this app. If they purchase a subscription using your link, you will get <b>7 Days Extra Validity</b> for free!</div>
-                <span class="refer-hindi">अपने दोस्तों को नीचे दिए गए लिंक को शेयर करें। यदि वे आपके लिंक से ऐप का सब्सक्रिप्शन खरीदते हैं, तो आपको 7 दिन की एक्स्ट्रा ऐप उपयोग करने को मिलेगी!</span>
-            </div>
-            <p style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:10px;">Your Referral Link:</p>
-            <div class="refer-link-box" id="myReferLink">Loading link...</div>
-            <div class="refer-btns">
-                <button onclick="shareOnWhatsApp()" class="btn" style="background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:white; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);"><i class="fab fa-whatsapp" style="font-size:22px;"></i> Share on WhatsApp</button>
-                <button onclick="copyReferLink()" class="btn" style="background:#f1f5f9; color:#1e293b; box-shadow:none;"><i class="fas fa-copy"></i> Copy Link</button>
-            </div>
-        </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Refer &amp; Earn</h3>
+      <button onclick="closeReferModal()" class="modal-close"><i class="fas fa-times"></i></button>
     </div>
+    <div class="modal-body">
+      <div class="refer-highlight">
+        <i class="fas fa-gift" style="font-size:48px; color:var(--gold); margin-bottom:14px; filter:drop-shadow(0 4px 8px rgba(255,187,0,0.3));"></i>
+        <div class="refer-title">Get 7 Days Free!</div>
+        <div class="refer-text">Share your link. When friends subscribe, you get <strong style="color:var(--teal);">7 Days Extra</strong> free!</div>
+        <span class="refer-hindi">दोस्तों को लिंक शेयर करें और 7 दिन एक्स्ट्रा पाएं!</span>
+      </div>
+      <p style="font-size:14px; font-weight:800; color:var(--text); margin-bottom:8px;">Your Referral Link:</p>
+      <div class="refer-link-box" id="myReferLink">Loading link...</div>
+      <div class="refer-btns">
+        <button onclick="shareOnWhatsApp()" class="btn btn-teal">
+          <i class="fab fa-whatsapp" style="font-size:20px;"></i> Share on WhatsApp
+        </button>
+        <button onclick="copyReferLink()" class="btn btn-ghost">
+          <i class="fas fa-copy"></i> Copy Link
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="confirm-modal">
+  <div class="confirm-box">
+    <i class="fas fa-exclamation-triangle" style="font-size:48px; color:var(--gold); filter:drop-shadow(0 4px 6px rgba(255,187,0,0.3));"></i>
+    <h3>Clear History?</h3>
+    <p>This will permanently delete all saved cards.</p>
+    <div class="confirm-btns">
+      <button onclick="closeConfirm()" class="btn btn-ghost" style="flex:1;">Cancel</button>
+      <button onclick="confirmClearHistory()" class="btn" style="background:linear-gradient(135deg,var(--danger),#c0392b); color:#fff; flex:1; box-shadow:0 4px 15px rgba(255,71,87,0.3);">Delete All</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="auth-wrapper">
+  <div class="auth-box">
+    <div class="auth-logo-box"><i class="fas fa-id-card"></i></div>
+    <h1 class="auth-title">Voter ID Maker</h1>
+    <p class="auth-sub">Sign in to manage your cards</p>
+    <input type="email" id="emailInput" class="auth-input" placeholder="Email Address">
+    <input type="password" id="passInput" class="auth-input" placeholder="Password">
+    <button id="loginBtn" class="btn btn-primary">Login</button>
+    <button id="signupBtn" class="btn btn-teal" style="display:none;">Create Account</button>
+    <div class="divider"><span>OR</span></div>
+    <button id="googleBtn" class="btn btn-google">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Continue with Google
+    </button>
+    <div id="loader" class="loader"></div>
+    <div id="toggleAuth" style="margin-top:28px; color:var(--saffron); cursor:pointer; font-size:15px; font-weight:800; transition:opacity 0.3s;">
+      Create an Account
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <div class="container" style="flex:1; display:flex; flex-direction:column;">
+
+    <!-- Header -->
+    <div class="app-header">
+      <div class="header-brand">
+        <div class="header-logo"><i class="fas fa-id-card"></i></div>
+        <div>
+          <div class="header-title">Voter ID Maker</div>
+          <div id="userEmailDisplay" class="header-sub"></div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button onclick="openReferModal()" class="icon-btn" style="color:var(--gold); border-color:rgba(255,187,0,0.2); background:rgba(255,187,0,0.08);">
+          <i class="fas fa-gift"></i>
+        </button>
+        <button onclick="openHistory()" class="icon-btn"><i class="fas fa-history"></i></button>
+        <button onclick="logout()" class="icon-btn" style="color:var(--danger); border-color:rgba(255,71,87,0.2); background:rgba(255,71,87,0.08);">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="app-content">
+
+      <!-- Promo -->
+      <div class="promo-card">
+        <div class="promo-info">
+          <div class="promo-head-en">Want to make Aadhar Card?</div>
+          <div class="promo-head-hi">क्या आपको आधार कार्ड बनाना है?</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+          <button onclick="forceDownloadInBrowser('YOUR_DOWNLOAD_LINK_HERE')" class="promo-btn">
+            <i class="fas fa-download" style="font-size:16px; margin-bottom:2px;"></i>
+            <span>Download App</span>
+          </button>
+          <span onclick="copyAppUrl()" style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); margin-top:7px; text-decoration:underline; cursor:pointer; z-index:1;">Copy Link</span>
+        </div>
+      </div>
+
+      <!-- Status panel -->
+      <div class="sub-panel">
+        <div class="sub-txt">
+          <h4 id="subTitle">Checking Status...</h4>
+          <p id="subDesc">Please wait</p>
+        </div>
+        <div id="timerDisplay" class="timer-badge">--:--</div>
+      </div>
+
+      <!-- Upgrade chip -->
+      <button id="upgradeBtn" class="upgrade-chip" style="display:none;">
+        <i class="fas fa-crown"></i> Upgrade Plan
+      </button>
+
+      <!-- Form -->
+      <div class="form-card">
+        <div class="section-header">
+          <div class="section-dot"></div>
+          <span class="section-title">Enter Details</span>
+        </div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label>EPIC No.</label>
+            <input id="epic" class="form-input" placeholder="ABC1234567">
+          </div>
+
+          <div class="input-group">
+            <label>Photo</label>
+            <label class="photo-upload-label" for="photo">
+              <img id="photoPreviewThumb" src="" alt="">
+              <div class="photo-upload-icon" id="photoUploadIcon"><i class="fas fa-camera"></i></div>
+              <div class="photo-upload-text">
+                <strong id="photoUploadText">Upload Photo</strong>
+                <span>Tap to select image</span>
+              </div>
+            </label>
+            <input type="file" id="photo" accept="image/*">
+          </div>
+
+          <div class="input-group">
+            <label>Name (English)</label>
+            <input id="userName" class="form-input" placeholder="Rahul Kumar">
+          </div>
+          <div class="input-group">
+            <label>Name (Hindi)</label>
+            <input id="nameHindi" class="form-input hindi-ph" placeholder="राहुल कुमार">
+          </div>
+
+          <div class="input-group">
+            <label>Father's Name (English)</label>
+            <input id="fatherName" class="form-input" placeholder="Sohan Kumar">
+          </div>
+          <div class="input-group">
+            <label>Father's Name (Hindi)</label>
+            <input id="fatherHindi" class="form-input hindi-ph" placeholder="सोहन कुमार">
+          </div>
+
+          <div class="input-group">
+            <label>Gender</label>
+            <select id="gender" class="form-input">
+              <option value="" disabled selected>Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Date of Birth</label>
+            <input id="dob" class="form-input" placeholder="01/01/1990">
+          </div>
+
+          <div class="input-group">
+            <label>Address (English)</label>
+            <textarea id="addrEng" class="form-input" placeholder="Full Address here..."></textarea>
+          </div>
+          <div class="input-group">
+            <label>Address (Hindi)</label>
+            <textarea id="addrHindi" class="form-input hindi-ph" placeholder="पूरा पता यहाँ लिखें..."></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>Download Date</label>
+            <input id="dlDate" class="form-input" placeholder="XX/XX/XXXX">
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Area -->
+      <div class="preview-section" id="previewArea" style="display:none;">
+        <div class="toggle-row" style="width:100%; max-width:420px;">
+          <span class="preview-label">Live Preview</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="toggle-label">3D Anim</span>
+            <label class="anim-switch">
+              <input type="checkbox" id="animToggle">
+              <span class="anim-slider anim-round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card-wrapper" id="cardFront">
+          <img src="voter-bg.png" class="card-bg">
+          <div class="c-text p-epic" id="dEpic"></div>
+          <div class="c-photo"><img id="dPhoto"></div>
+          <div class="c-text p-h-name" id="hName"></div>
+          <div class="c-text p-e-name" id="eName"></div>
+          <div class="c-text p-h-fath" id="hFather"></div>
+          <div class="c-text p-e-fath" id="eFather"></div>
+          <div class="c-text p-h-gen" id="hGender"></div>
+          <div class="c-text p-e-gen" id="eGender"></div>
+          <div class="c-text p-h-dob" id="hDob"></div>
+          <div class="c-text p-e-dob" id="eDob"></div>
+        </div>
+
+        <div class="card-wrapper" id="cardBack">
+          <img src="voter_back.png" class="card-bg">
+          <div class="address-section">
+            <div class="h-addr-label">पता:</div>
+            <div class="h-addr-text" id="dispAddrHindi"></div>
+            <div class="e-addr-label">Address:</div>
+            <div class="e-addr-text" id="dispAddrEng"></div>
+          </div>
+          <div class="c-text p-date" id="dispDate"></div>
+          <div class="qr-box">
+            <img src="qr.jpeg" class="qr-img">
+            <div class="c-text p-epic-back" id="dispEpicBack"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end app-content -->
+
+    <!-- Bottom bar -->
+    <div class="action-bottom-bar">
+      <button class="btn btn-primary" onclick="generateAndSave()">
+        <i class="fas fa-magic"></i> Generate Card
+      </button>
+      <button id="dlPdfBtn" class="btn" style="background:linear-gradient(135deg,var(--danger),#c0392b); color:#fff; display:none; box-shadow:0 6px 20px rgba(255,71,87,0.35);" onclick="downloadPDF()">
+        <i class="fas fa-file-pdf"></i> Download PDF
+      </button>
+    </div>
+
+  </div>
+</div><!-- end app-screen -->
+
+<!-- PAYWALL -->
+<div id="paywall-screen" class="auth-wrapper">
+  <div class="auth-box plan-mode">
+    <button onclick="logout()" class="logout-corner-btn" title="Logout">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+    <div class="paywall-hero"><i class="fas fa-crown"></i></div>
+    <h2 class="paywall-title">Go Premium</h2>
+    <p class="paywall-sub">Select a plan to unlock unlimited access</p>
+    <div id="plansContainer" class="plans-container"></div>
+    <div style="position:sticky; bottom:0; padding:16px 0; background:var(--bg); border-top:1px solid var(--border); margin-top:20px;">
+      <a id="payNowBtn" href="#" target="_blank" class="btn btn-primary" style="text-decoration:none; font-size:17px;">Select a Plan</a>
+    </div>
+    <div class="utr-section">
+      <p>Already Paid via UPI?</p>
+      <input id="utrInput" class="auth-input" placeholder="Enter UTR / Transaction ID" style="margin-bottom:12px;">
+      <button id="submitUtrBtn" class="btn btn-teal">Verify Payment</button>
+    </div>
+    <button id="backToTrialBtn" class="btn btn-ghost" style="display:none; margin-top:12px;">
+      <i class="fas fa-arrow-left"></i> Back to App
+    </button>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div id="pending-screen" class="auth-wrapper">
+  <div class="auth-box">
+    <div class="pending-wrap">
+      <i class="fas fa-hourglass-half pending-icon"></i>
+      <h1>Verification Pending</h1>
+      <p>Your payment is being reviewed. Please wait.</p>
+      <button onclick="logout()" class="btn btn-ghost" style="margin-top:32px; max-width:240px;">Logout</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- SCRIPTS (same logic, updated UI refs) -->
+<script>
+function generateCardUI(){
+  document.getElementById("previewArea").style.display = "flex";
+  document.getElementById("dlPdfBtn").style.display = "flex";
+  const cardFront = document.getElementById("cardFront");
+  const cardBack  = document.getElementById("cardBack");
+  const isZoomAnim = document.getElementById("animToggle").checked;
+  const activeAnimClass = isZoomAnim ? "card-zoom-in" : "card-slide-in";
+  cardFront.classList.remove("card-slide-in","card-zoom-in");
+  cardBack.classList.remove("card-slide-in","card-zoom-in");
+  void cardFront.offsetWidth;
+  cardFront.classList.add(activeAnimClass);
+  cardBack.classList.add(activeAnimClass);
+  const get = id => document.getElementById(id).value;
+  const set = (id, val) => document.getElementById(id).innerText = val;
+  set("dEpic", get("epic"));
+  set("hName", "नाम : " + get("nameHindi"));
+  set("eName", "Name : " + get("userName"));
+  set("hFather", "पिता का नाम : " + get("fatherHindi"));
+  set("eFather", "Father's Name : " + get("fatherName"));
+  set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
+  set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
+  set("dispAddrHindi", get("addrHindi"));
+  set("dispAddrEng", get("addrEng"));
+  set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
+  set("dispEpicBack", get("epic"));
+  if(window.croppedPhotoData) {
+    document.getElementById("dPhoto").src = window.croppedPhotoData;
+  } else {
+    const file = document.getElementById("photo").files[0];
+    if(file){ const r = new FileReader(); r.onload = () => document.getElementById("dPhoto").src = r.result; r.readAsDataURL(file); }
+  }
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+}
+
+document.getElementById('animToggle').addEventListener('change', () => {
+  if(document.getElementById("previewArea").style.display === "flex") generateCardUI();
+});
+
+async function downloadPDF() {
+  const btn = document.getElementById("dlPdfBtn");
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  btn.disabled = true;
+  try {
+    const { jsPDF } = window.jspdf;
+    const front = document.getElementById('cardFront');
+    const back  = document.getElementById('cardBack');
+    const isZoomAnim = document.getElementById("animToggle").checked;
+    const activeAnimClass = isZoomAnim ? "card-zoom-in" : "card-slide-in";
+    front.classList.remove("card-slide-in","card-zoom-in");
+    back.classList.remove("card-slide-in","card-zoom-in");
+    const o1=front.style.transform, o2=back.style.transform, o3=front.style.transition, o4=back.style.transition;
+    front.style.transition=back.style.transition="none";
+    front.style.transform=back.style.transform="scale(1) translate(0,0)";
+    const opts = { scale:3, useCORS:true, backgroundColor:null };
+    const c1 = await html2canvas(front, opts);
+    const c2 = await html2canvas(back, opts);
+    front.style.transform=o1; back.style.transform=o2;
+    front.style.transition=o3; back.style.transition=o4;
+    front.classList.add(activeAnimClass); back.classList.add(activeAnimClass);
+    const pdf = new jsPDF({ orientation:'landscape', unit:'mm', format:[85.6,54] });
+    pdf.addImage(c1.toDataURL('image/png',1.0),'PNG',0,0,85.6,54);
+    pdf.addPage();
+    pdf.addImage(c2.toDataURL('image/png',1.0),'PNG',0,0,85.6,54);
+    pdf.save('voter-id-card.pdf');
+    window.showToast("PDF downloaded!", "success");
+  } catch(e) { console.error(e); window.showToast("Error generating PDF","error"); }
+  btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
+  btn.disabled = false;
+}
+</script>
+
+<script>
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); };
+}
+
+async function transliterate(text, targetId) {
+  if(!text.trim()) { document.getElementById(targetId).value = ""; return; }
+  try {
+    const url = `https://www.google.com/inputtools/request?text=${encodeURIComponent(text)}&ime=transliteration_en_hi&num=1`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if(data && data[1] && data[1].length > 0) {
+      let resultText = "";
+      data[1].forEach(word => { if(word[1] && word[1].length > 0) resultText += word[1][0] + " "; });
+      document.getElementById(targetId).value = resultText.trim();
+    }
+  } catch(e) { console.error("Transliteration Error:", e); }
+}
+
+const delay = 300;
+document.getElementById('userName').addEventListener('keyup', debounce(function(){ transliterate(this.value,'nameHindi'); }, delay));
+document.getElementById('fatherName').addEventListener('keyup', debounce(function(){ transliterate(this.value,'fatherHindi'); }, delay));
+document.getElementById('addrEng').addEventListener('keyup', debounce(function(){ transliterate(this.value,'addrHindi'); }, delay));
+
+function forceDownloadInBrowser(url) {
+  var cleanUrl = url.replace(/^https?:\/\//,'');
+  var intentUrl = "intent://"+cleanUrl+"#Intent;scheme=https;package=com.android.chrome;end;";
+  window.location.href = intentUrl;
+}
+
+function copyAppUrl() {
+  var url = "YOUR_DOWNLOAD_LINK_HERE";
+  navigator.clipboard.writeText(url).then(() => window.showToast("Link copied! Open Chrome and paste to download.","success"))
+    .catch(err => prompt("Copy this link and open in Chrome:", url));
+}
+</script>
+
+<!-- CROPPER LOGIC -->
+<script>
+let cropper;
+window.croppedPhotoData = null;
+
+const photoInput = document.getElementById('photo');
+const cropModal  = document.getElementById('cropModal');
+const imageToCrop = document.getElementById('imageToCrop');
+
+photoInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      imageToCrop.src = evt.target.result;
+      cropModal.style.display = 'flex';
+      if(cropper) cropper.destroy();
+      cropper = new Cropper(imageToCrop, { aspectRatio: 120/150, viewMode:1, autoCropArea:1 });
+    };
+    reader.readAsDataURL(file);
+    // show thumb label
+    const thumb = document.getElementById('photoPreviewThumb');
+    const icon  = document.getElementById('photoUploadIcon');
+    const text  = document.getElementById('photoUploadText');
+    const fr2 = new FileReader();
+    fr2.onload = (e2) => { thumb.src = e2.target.result; thumb.style.display='block'; icon.style.display='none'; text.textContent='Photo Selected'; };
+    fr2.readAsDataURL(file);
+  }
+});
+
+window.performCrop = function() {
+  if(!cropper) return;
+  window.croppedPhotoData = cropper.getCroppedCanvas({ width:300, height:375, imageSmoothingEnabled:true, imageSmoothingQuality:'high' }).toDataURL('image/jpeg',0.95);
+  document.getElementById("dPhoto").src = window.croppedPhotoData;
+  // Update thumb
+  document.getElementById('photoPreviewThumb').src = window.croppedPhotoData;
+  document.getElementById('photoPreviewThumb').style.display = 'block';
+  document.getElementById('photoUploadIcon').style.display = 'none';
+  document.getElementById('photoUploadText').textContent = 'Photo Cropped ✓';
+  closeCropModal();
+  window.showToast("Photo cropped successfully","success");
+};
+
+window.closeCropModal = function() {
+  cropModal.style.display = 'none';
+  if(cropper) { cropper.destroy(); cropper = null; }
+  if(!window.croppedPhotoData) photoInput.value = "";
+};
+
+function closeHistory()  { document.getElementById("historyModal").style.display="none"; }
+function showConfirm()   { document.getElementById("confirmModal").style.display="flex"; }
+function closeConfirm()  { document.getElementById("confirmModal").style.display="none"; }
+function openReferModal() {
+  document.getElementById("referModal").style.display="flex";
+  if(window.currentUserID) {
+    const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
+    document.getElementById("myReferLink").innerText = link;
+  }
+}
+function closeReferModal() { document.getElementById("referModal").style.display="none"; }
+function shareOnWhatsApp() {
+  const link = document.getElementById("myReferLink").innerText;
+  if(link.includes("Loading")) return;
+  const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function copyReferLink() {
+  const txt = document.getElementById("myReferLink").innerText;
+  if(txt.includes("Loading")) return;
+  navigator.clipboard.writeText(txt).then(() => window.showToast("Link copied!","success"));
+}
+
+function fillFormFromHistory(id) {
+  const data = window.historyData[id];
+  if(!data) return;
+  document.getElementById("epic").value        = data.epic || "";
+  document.getElementById("userName").value    = data.userName || "";
+  document.getElementById("nameHindi").value   = data.nameHindi || "";
+  document.getElementById("fatherName").value  = data.fatherName || "";
+  document.getElementById("fatherHindi").value = data.fatherHindi || "";
+  document.getElementById("gender").value      = data.gender || "";
+  document.getElementById("dob").value         = data.dob || "";
+  document.getElementById("addrHindi").value   = data.addrHindi || "";
+  document.getElementById("addrEng").value     = data.addrEng || "";
+  document.getElementById("dlDate").value      = data.dlDate || "";
+  closeHistory();
+  generateCardUI();
+  window.showToast("Data restored from history","success");
+}
+</script>
+
+<!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, addDoc, query, orderBy, limit, getDocs, writeBatch, getDoc, increment } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, addDoc, query, orderBy, getDocs, writeBatch, getDoc, increment } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDZLakPR2A5wQ7okDL-L7nCSxJDICiMtEQ",
@@ -721,656 +1427,300 @@ textarea.form-input { height: 95px; resize: none; line-height: 1.5; }
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // --- 1. CAPTURE REFERRAL CODE ---
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
-  if (refCode) {
-      localStorage.setItem('referredByCode', refCode);
-      window.history.replaceState({}, document.title, window.location.pathname);
-  }
+  if(refCode) { localStorage.setItem('referredByCode', refCode); window.history.replaceState({}, document.title, window.location.pathname); }
 
-  // --- GLOBAL VARIABLES ---
   window.currentUserID = null;
-  let historyData = [];
-   
-  // --- PLANS ---
+
   const planData = [
-    { id: "quarterly_3", duration: "3 Months", price: 199, original: 297, savings: "Save ₹98", tag: "Most Popular", recommended: true },
-    { id: "half_yearly_6", duration: "6 Months", price: 399, original: 594, savings: "Save ₹193", tag: "Best Value", recommended: false },
-    { id: "yearly_12", duration: "1 Year", price: 799, original: 1189, savings: "Save ₹387", tag: "Super Saver", recommended: false },
-    { id: "monthly_1", duration: "1 Month", price: 99, original: 125, savings: "Save ₹26", tag: "", recommended: false }
+    { id:"quarterly_3",   duration:"3 Months", price:199, original:297, savings:"Save ₹98",  tag:"Most Popular", recommended:true  },
+    { id:"half_yearly_6", duration:"6 Months", price:399, original:594, savings:"Save ₹193", tag:"Best Value",   recommended:false },
+    { id:"yearly_12",     duration:"1 Year",   price:799, original:1189,savings:"Save ₹387", tag:"Super Saver", recommended:false },
+    { id:"monthly_1",     duration:"1 Month",  price:99,  original:125, savings:"Save ₹26",  tag:"",            recommended:false }
   ];
 
   const planLinks = {
-      "quarterly_3": "https://payments.cashfree.com/forms/voterpremium179",
-      "half_yearly_6": "https://payments.cashfree.com/forms?code=voter329",
-      "yearly_12": "https://payments.cashfree.com/forms/voter599",
-      "monthly_1": "https://payments.cashfree.com/forms/votermaker"
+    "quarterly_3":   "https://payments.cashfree.com/forms/voterpremium179",
+    "half_yearly_6": "https://payments.cashfree.com/forms?code=voter329",
+    "yearly_12":     "https://payments.cashfree.com/forms/voter599",
+    "monthly_1":     "https://payments.cashfree.com/forms/votermaker"
   };
 
   function renderPlans() {
-      const container = document.getElementById("plansContainer");
-      container.innerHTML = "";
-      planData.forEach((plan) => {
-          const div = document.createElement("div");
-          const isSelected = plan.recommended; 
-          div.className = `plan-card ${isSelected ? 'selected' : ''} ${plan.recommended ? 'recommended' : ''}`;
-          div.onclick = () => selectPlan(plan.id, div);
-          div.id = `plan-${plan.id}`;
-          
-          let tagHtml = plan.tag ? `<div class="plan-tag">${plan.tag}</div>` : '';
-          let savingsHtml = plan.savings ? `<div class="plan-savings">${plan.savings}</div>` : '';
-          let origPriceHtml = plan.original > plan.price ? `<span class="plan-original">₹${plan.original}</span>` : '';
-
-          div.innerHTML = `
-              ${tagHtml}
-              <div class="plan-header">
-                  <div style="display:flex; align-items:center;">
-                    <div class="radio-circle"></div>
-                    <span class="plan-name">${plan.duration}</span>
-                  </div>
-                  <span class="plan-price">₹${plan.price}</span>
-              </div>
-              <div class="plan-details">
-                  <span class="plan-months">Full Access</span>
-                  <div style="text-align:right;">${origPriceHtml} ${savingsHtml}</div>
-              </div>
-          `;
-          container.appendChild(div);
-          if(isSelected) updatePayLink(plan.id);
-      });
+    const container = document.getElementById("plansContainer");
+    container.innerHTML = "";
+    planData.forEach(plan => {
+      const div = document.createElement("div");
+      const isSelected = plan.recommended;
+      div.className = `plan-card ${isSelected?'selected':''} ${plan.recommended?'recommended':''}`;
+      div.onclick = () => selectPlan(plan.id, div);
+      div.id = `plan-${plan.id}`;
+      const tagHtml   = plan.tag   ? `<div class="plan-tag">${plan.tag}</div>` : '';
+      const savHtml   = plan.savings ? `<div class="plan-savings">${plan.savings}</div>` : '';
+      const origHtml  = plan.original > plan.price ? `<span class="plan-original">₹${plan.original}</span>` : '';
+      div.innerHTML = `
+        ${tagHtml}
+        <div class="plan-header">
+          <div class="plan-name"><div class="radio-circle"></div>${plan.duration}</div>
+          <span class="plan-price">₹${plan.price}</span>
+        </div>
+        <div class="plan-details">
+          <span class="plan-months">Full Access</span>
+          <div style="text-align:right;">${origHtml} ${savHtml}</div>
+        </div>`;
+      container.appendChild(div);
+      if(isSelected) updatePayLink(plan.id);
+    });
   }
 
   window.selectPlan = (id, element) => {
-      document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('selected'));
-      element.classList.add('selected');
-      updatePayLink(id);
-  }
+    document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    updatePayLink(id);
+  };
 
   function updatePayLink(id) {
-      const btn = document.getElementById("payNowBtn");
-      const url = planLinks[id] || "#";
-      const plan = planData.find(p => p.id === id);
-      btn.href = url;
-      btn.innerHTML = `Pay ₹${plan.price} <i class="fas fa-arrow-right" style="margin-left:5px"></i>`;
+    const btn  = document.getElementById("payNowBtn");
+    const url  = planLinks[id] || "#";
+    const plan = planData.find(p => p.id === id);
+    btn.href = url;
+    btn.innerHTML = `Pay ₹${plan.price} <i class="fas fa-arrow-right" style="margin-left:6px"></i>`;
   }
 
-  // --- CUSTOM TOAST ---
   window.showToast = (msg, type='info') => {
-      const container = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.className = `toast ${type}`;
-      let icon = type==='success' ? 'fa-check-circle' : type==='error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-      toast.innerHTML = `<div class="toast-icon"><i class="fas ${icon}"></i></div><div class="toast-msg">${msg}</div>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-          toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px) scale(0.9)'; toast.style.transition = 'all 0.3s ease';
-          setTimeout(() => toast.remove(), 300);
-      }, 3000);
-  }
-
-  // --- AUTH ---
-  const loader = document.getElementById("loader");
-  const handleAuth = (method) => {
-    const email = document.getElementById("emailInput").value;
-    const pass = document.getElementById("passInput").value;
-    if(!email || !pass) return showToast("Please fill all fields", "error");
-    loader.style.display="block";
-    method(auth, email, pass).catch(err => { showToast(err.message, "error"); loader.style.display="none"; });
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icon = type==='success'?'fa-check-circle':type==='error'?'fa-times-circle':'fa-info-circle';
+    toast.innerHTML = `<div class="toast-icon"><i class="fas ${icon}"></i></div><div class="toast-msg">${msg}</div>`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity='0'; toast.style.transform='translateY(-16px) scale(0.9)'; toast.style.transition='all 0.3s ease'; setTimeout(()=>toast.remove(),300); }, 3000);
   };
-  document.getElementById("loginBtn").addEventListener("click", () => handleAuth(signInWithEmailAndPassword));
-  document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
-  document.getElementById("googleBtn").addEventListener("click", () => {
+
+  const loader = document.getElementById("loader");
+  const handleAuth = method => {
+    const email = document.getElementById("emailInput").value;
+    const pass  = document.getElementById("passInput").value;
+    if(!email||!pass) return showToast("Please fill all fields","error");
     loader.style.display="block";
-    signInWithPopup(auth, provider).catch(err => { showToast(err.message, "error"); loader.style.display="none"; });
-  });
-  document.getElementById("toggleAuth").addEventListener("click", (e) => {
-      let isLogin = document.getElementById("loginBtn").style.display !== "none";
-      document.getElementById("loginBtn").style.display = !isLogin ? "flex" : "none";
-      document.getElementById("signupBtn").style.display = !isLogin ? "none" : "flex";
-      e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
+    method(auth, email, pass).catch(err => { showToast(err.message,"error"); loader.style.display="none"; });
+  };
+  document.getElementById("loginBtn").addEventListener("click",  () => handleAuth(signInWithEmailAndPassword));
+  document.getElementById("signupBtn").addEventListener("click", () => handleAuth(createUserWithEmailAndPassword));
+  document.getElementById("googleBtn").addEventListener("click", () => { loader.style.display="block"; signInWithPopup(auth, provider).catch(err => { showToast(err.message,"error"); loader.style.display="none"; }); });
+  document.getElementById("toggleAuth").addEventListener("click", e => {
+    let isLogin = document.getElementById("loginBtn").style.display !== "none";
+    document.getElementById("loginBtn").style.display  = !isLogin ? "flex" : "none";
+    document.getElementById("signupBtn").style.display = !isLogin ? "none" : "flex";
+    e.target.innerText = !isLogin ? "Create an Account" : "Back to Login";
   });
   window.logout = () => signOut(auth).then(() => {
-      sessionStorage.removeItem('seenLoginPopup'); 
-      sessionStorage.removeItem('seenExpiryPopup'); 
-      localStorage.removeItem("mySessionId"); 
-      location.reload();
+    sessionStorage.removeItem('seenLoginPopup');
+    sessionStorage.removeItem('seenExpiryPopup');
+    localStorage.removeItem("mySessionId");
+    location.reload();
   });
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.currentUserID = user.uid;
-        document.getElementById("userEmailDisplay").innerText = user.email;
-        showScreen("splash-screen"); 
-        startDocListener(user);
+  onAuthStateChanged(auth, user => {
+    if(user) {
+      window.currentUserID = user.uid;
+      document.getElementById("userEmailDisplay").innerText = user.email;
+      showScreen("splash-screen");
+      startDocListener(user);
     } else { showScreen("login-screen"); }
   });
 
   function showScreen(id) {
-      document.querySelectorAll('#splash-screen, #login-screen, #app-screen, #paywall-screen, #pending-screen').forEach(el => el.style.display = 'none');
-      const targetScreen = document.getElementById(id);
-      targetScreen.style.display = "flex";
-      loader.style.display = "none";
-      if(id === "paywall-screen") renderPlans();
+    document.querySelectorAll('#splash-screen,#login-screen,#app-screen,#paywall-screen,#pending-screen').forEach(el => el.style.display='none');
+    const target = document.getElementById(id);
+    target.style.display = "flex";
+    loader.style.display = "none";
+    if(id === "paywall-screen") renderPlans();
   }
 
   function startDocListener(user) {
-      const userRef = doc(db, "users", user.uid);
-      onSnapshot(userRef, { includeMetadataChanges: true }, async (docSnap) => {
-          
-          if (docSnap.metadata.fromCache && !docSnap.metadata.hasPendingWrites) {
-              showScreen("splash-screen");
-              return; 
-          }
+    const userRef = doc(db,"users",user.uid);
+    onSnapshot(userRef, { includeMetadataChanges:true }, async docSnap => {
+      if(docSnap.metadata.fromCache && !docSnap.metadata.hasPendingWrites) { showScreen("splash-screen"); return; }
+      const now = Date.now();
+      if(!docSnap.exists()) {
+        const referredBy = localStorage.getItem('referredByCode');
+        const newSession = Date.now().toString();
+        localStorage.setItem("mySessionId", newSession);
+        const newData = { email:user.email, joinedAt:now, lastActiveAt:now, subscriptionExpiry:0, sessionId:newSession, cardsGenerated:0 };
+        if(referredBy && referredBy !== user.uid) newData.referredBy = referredBy;
+        await setDoc(userRef, newData);
+        localStorage.removeItem('referredByCode');
+      } else {
+        const data = docSnap.data();
+        const lastActive = data.lastActiveAt || 0;
+        if(now - lastActive > 5*60*1000) updateDoc(userRef, { lastActiveAt:now }).catch(()=>{});
+        const trialEnd  = data.joinedAt + 7200000;
+        const subEnd    = data.subscriptionExpiry || 0;
+        const payStatus = data.paymentStatus || "none";
+        const cardsGen  = data.cardsGenerated || 0;
+        const msPerDay  = 86400000;
+        const daysLeft  = (subEnd - now) / msPerDay;
 
-          const now = Date.now();
-          if (!docSnap.exists()) {
-              const referredBy = localStorage.getItem('referredByCode');
-              const newSession = Date.now().toString();
-              localStorage.setItem("mySessionId", newSession);
-              const newUserData = { 
-                  email: user.email, 
-                  joinedAt: now, 
-                  lastActiveAt: now, 
-                  subscriptionExpiry: 0, 
-                  sessionId: newSession,
-                  cardsGenerated: 0 
-              };
-              if(referredBy && referredBy !== user.uid) newUserData.referredBy = referredBy;
-              await setDoc(userRef, newUserData);
-              localStorage.removeItem('referredByCode');
-          } else {
-              const data = docSnap.data();
-              const lastActive = data.lastActiveAt || 0;
-              if (now - lastActive > 5 * 60 * 1000) {
-                  updateDoc(userRef, { lastActiveAt: now }).catch(e => console.log("Active update skipped"));
-              }
-              
-              const trialEnd = data.joinedAt + 7200000; // 2 Hours
-              const subEnd = data.subscriptionExpiry || 0;
-              const payStatus = data.paymentStatus || "none";
-              const cardsGen = data.cardsGenerated || 0;
-              
-              const msPerDay = 24 * 60 * 60 * 1000;
-              const daysLeft = (subEnd - now) / msPerDay;
-
-              if (subEnd > now) {
-                  if (daysLeft <= 5) {
-                      updateStatus("Plan Expiring", subEnd, "EXPIRING");
-                      handlePopupSequence(subEnd); 
-                  } else {
-                      updateStatus("Premium Active", subEnd, "PREMIUM");
-                  }
-                  showScreen("app-screen");
-              } else if (payStatus === "pending") {
-                  showScreen("pending-screen");
-              } else if (now < trialEnd) {
-                  updateStatus(`Used: ${cardsGen}/2 Free`, trialEnd, "TRIAL");
-                  showScreen("app-screen");
-                  checkAutoPopup(); 
-              } else {
-                  showScreen("paywall-screen");
-                  document.getElementById("backToTrialBtn").style.display = "none";
-              }
-          }
-      });
+        if(subEnd > now) {
+          if(daysLeft <= 5) { updateStatus("Plan Expiring", subEnd, "EXPIRING"); handlePopupSequence(subEnd); }
+          else              { updateStatus("Premium Active", subEnd, "PREMIUM"); }
+          showScreen("app-screen");
+        } else if(payStatus === "pending") {
+          showScreen("pending-screen");
+        } else if(now < trialEnd) {
+          updateStatus(`Used: ${cardsGen}/2 Free`, trialEnd, "TRIAL");
+          showScreen("app-screen");
+          checkAutoPopup();
+        } else {
+          showScreen("paywall-screen");
+          document.getElementById("backToTrialBtn").style.display = "none";
+        }
+      }
+    });
   }
 
   function handlePopupSequence(expiryTime) {
-      const now = Date.now();
-      const msPerDay = 24 * 60 * 60 * 1000;
-      const daysLeft = (expiryTime - now) / msPerDay;
-      const daysLeftInt = Math.ceil(daysLeft);
-
-      document.getElementById('expDaysEn').innerText = daysLeftInt;
-      document.getElementById('expDaysHi').innerText = daysLeftInt;
-
-      const seenExpiry = sessionStorage.getItem('seenExpiryPopup');
-        
-      if (daysLeft <= 5 && daysLeft > 0 && !seenExpiry) {
-          document.getElementById('expiryModal').style.display = 'flex';
-          sessionStorage.setItem('seenExpiryPopup', 'true');
-          sessionStorage.setItem('seenLoginPopup', 'true'); 
-      } else {
-          checkAutoPopup();
-      }
+    const now = Date.now();
+    const daysLeft = (expiryTime - now) / 86400000;
+    const daysLeftInt = Math.ceil(daysLeft);
+    document.getElementById('expDaysEn').innerText = daysLeftInt;
+    document.getElementById('expDaysHi').innerText = daysLeftInt;
+    const seenExpiry = sessionStorage.getItem('seenExpiryPopup');
+    if(daysLeft <= 5 && daysLeft > 0 && !seenExpiry) {
+      document.getElementById('expiryModal').style.display = 'flex';
+      sessionStorage.setItem('seenExpiryPopup','true');
+      sessionStorage.setItem('seenLoginPopup','true');
+    } else { checkAutoPopup(); }
   }
 
   function checkAutoPopup() {
-      const seen = sessionStorage.getItem('seenLoginPopup');
-      if(!seen) { 
-          setTimeout(() => { 
-              openReferModal(); 
-              sessionStorage.setItem('seenLoginPopup', 'true'); 
-          }, 1500); 
-      }
+    const seen = sessionStorage.getItem('seenLoginPopup');
+    if(!seen) setTimeout(() => { openReferModal(); sessionStorage.setItem('seenLoginPopup','true'); }, 1500);
   }
 
   function updateStatus(text, time, type) {
-      document.getElementById("subTitle").innerText = text;
-      document.getElementById("subDesc").innerText = (type === "PREMIUM") ? "Full Access" : (type === "EXPIRING") ? "Renew Soon" : "Expires in 2h";
-      
-      document.getElementById("upgradeBtn").style.display = (type === "TRIAL" || type === "EXPIRING") ? "flex" : "none";
-      
-      const badge = document.getElementById("timerDisplay");
-      
-      if (window.statusTimer) clearInterval(window.statusTimer);
-      
-      const renderTime = () => {
-          const diff = time - Date.now();
-          if(diff <= 0) {
-              badge.innerText = "Expired";
-              clearInterval(window.statusTimer);
-              return; 
-          }
-          const h = Math.floor((diff / (1000*60*60)) % 24);
-          const m = Math.floor((diff / (1000*60)) % 60);
-          const d = Math.floor(diff / (1000*60*60*24));
-          badge.innerText = d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
-          badge.style.color = (type === "PREMIUM" && diff > 5*24*60*60*1000) ? "#10b981" : "#ea580c";
-      };
-
-      renderTime(); 
-      window.statusTimer = setInterval(renderTime, 1000);
+    document.getElementById("subTitle").innerText = text;
+    document.getElementById("subDesc").innerText  = type==="PREMIUM" ? "Full Access" : type==="EXPIRING" ? "Renew Soon" : "Expires in 2h";
+    document.getElementById("upgradeBtn").style.display = (type==="TRIAL"||type==="EXPIRING") ? "flex" : "none";
+    const badge = document.getElementById("timerDisplay");
+    if(window.statusTimer) clearInterval(window.statusTimer);
+    const renderTime = () => {
+      const diff = time - Date.now();
+      if(diff <= 0) { badge.innerText="Expired"; clearInterval(window.statusTimer); return; }
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff/3600000)%24);
+      const m = Math.floor((diff/60000)%60);
+      badge.innerText = d>0 ? `${d}d ${h}h` : `${h}h ${m}m`;
+      badge.style.color = (type==="PREMIUM" && diff > 5*86400000) ? "var(--teal)" : "var(--saffron)";
+    };
+    renderTime();
+    window.statusTimer = setInterval(renderTime, 1000);
   }
 
   document.getElementById("submitUtrBtn").addEventListener("click", async () => {
-      const utr = document.getElementById("utrInput").value;
-      if(utr.length < 5) return showToast("Invalid UTR", "error");
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { paymentStatus: "pending", utrNumber: utr, submittedAt: Date.now() });
-      showToast("Payment submitted for review", "success");
+    const utr = document.getElementById("utrInput").value;
+    if(utr.length < 5) return showToast("Invalid UTR","error");
+    await updateDoc(doc(db,"users",auth.currentUser.uid), { paymentStatus:"pending", utrNumber:utr, submittedAt:Date.now() });
+    showToast("Payment submitted for review","success");
   });
 
-  document.getElementById("upgradeBtn").addEventListener("click", () => {
-      showScreen("paywall-screen");
-      document.getElementById("backToTrialBtn").style.display = "flex";
-  });
+  document.getElementById("upgradeBtn").addEventListener("click", () => { showScreen("paywall-screen"); document.getElementById("backToTrialBtn").style.display="flex"; });
   document.getElementById("backToTrialBtn").addEventListener("click", () => showScreen("app-screen"));
 
-  // --- SAVE HISTORY WITH 2 CARD LIMIT ---
   window.generateAndSave = async function() {
-      if(!window.currentUserID) return;
-      
-      const btn = document.querySelector(".btn-primary[onclick='generateAndSave()']");
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-      btn.disabled = true;
-
-      try {
-        const userRef = doc(db, "users", window.currentUserID);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) { throw new Error("User not found"); }
-        
-        const data = userSnap.data();
-        const isPremium = (data.subscriptionExpiry || 0) > Date.now();
-        const usageCount = data.cardsGenerated || 0;
-        const FREE_LIMIT = 2;
-
-        if (!isPremium && usageCount >= FREE_LIMIT) {
-             showToast(`Limit Reached! You have used ${FREE_LIMIT}/${FREE_LIMIT} free cards. Upgrade now.`, "error");
-             showScreen("paywall-screen");
-             document.getElementById("backToTrialBtn").style.display = "flex"; 
-             btn.innerHTML = originalText;
-             btn.disabled = false;
-             return; 
-        }
-
-        // Generate UI first so user sees it
-        generateCardUI();
-
-        const now = Date.now();
-        const formData = {
-          epic: document.getElementById("epic").value,
-          userName: document.getElementById("userName").value,
-          nameHindi: document.getElementById("nameHindi").value,
-          fatherName: document.getElementById("fatherName").value,
-          fatherHindi: document.getElementById("fatherHindi").value,
-          gender: document.getElementById("gender").value,
-          dob: document.getElementById("dob").value,
-          addrHindi: document.getElementById("addrHindi").value,
-          addrEng: document.getElementById("addrEng").value,
-          dlDate: document.getElementById("dlDate").value,
-          timestamp: now
-        };
-
-        const histRef = collection(db, `users/${window.currentUserID}/history`);
-        await addDoc(histRef, formData);
-
-        // Increment the usage counter
-        await updateDoc(userRef, { 
-            lastActiveAt: now,
-            cardsGenerated: increment(1)
-        });
-
-        showToast(isPremium ? "Card Saved!" : `Card Saved! (${usageCount + 1}/${FREE_LIMIT} free used)`, "success");
-
-      } catch(e) { 
-        console.error("Save error", e); 
-        showToast("Error saving card", "error");
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+    if(!window.currentUserID) return;
+    const btn = document.querySelector(".btn-primary[onclick='generateAndSave()']");
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    btn.disabled = true;
+    try {
+      const userRef  = doc(db,"users",window.currentUserID);
+      const userSnap = await getDoc(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+      const data = userSnap.data();
+      const isPremium  = (data.subscriptionExpiry || 0) > Date.now();
+      const usageCount = data.cardsGenerated || 0;
+      const FREE_LIMIT = 2;
+      if(!isPremium && usageCount >= FREE_LIMIT) {
+        showToast(`Limit reached! Upgrade to continue.`,"error");
+        showScreen("paywall-screen");
+        document.getElementById("backToTrialBtn").style.display="flex";
+        btn.innerHTML = origText; btn.disabled = false; return;
       }
+      generateCardUI();
+      const now = Date.now();
+      const formData = {
+        epic:        document.getElementById("epic").value,
+        userName:    document.getElementById("userName").value,
+        nameHindi:   document.getElementById("nameHindi").value,
+        fatherName:  document.getElementById("fatherName").value,
+        fatherHindi: document.getElementById("fatherHindi").value,
+        gender:      document.getElementById("gender").value,
+        dob:         document.getElementById("dob").value,
+        addrHindi:   document.getElementById("addrHindi").value,
+        addrEng:     document.getElementById("addrEng").value,
+        dlDate:      document.getElementById("dlDate").value,
+        timestamp:   now
+      };
+      await addDoc(collection(db,`users/${window.currentUserID}/history`), formData);
+      await updateDoc(userRef, { lastActiveAt:now, cardsGenerated:increment(1) });
+      showToast(isPremium ? "Card Saved!" : `Card Saved! (${usageCount+1}/${FREE_LIMIT} free used)`, "success");
+    } catch(e) { console.error(e); showToast("Error saving card","error"); }
+    finally { btn.innerHTML=origText; btn.disabled=false; }
   };
 
   window.openHistory = async function() {
-      document.getElementById("historyModal").style.display = "flex";
-      const listDiv = document.getElementById("historyList");
-      listDiv.innerHTML = '<div class="loader" style="display:block"></div>';
-      if(!window.currentUserID) return;
-      try {
-          const q = query(collection(db, `users/${window.currentUserID}/history`), orderBy("timestamp", "desc"));
-          const snap = await getDocs(q);
-          listDiv.innerHTML = "";
-          window.historyData = []; 
-          if(snap.empty) { listDiv.innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;font-weight:600;'>No history found.</p>"; return; }
-          snap.forEach(doc => {
-              const d = doc.data();
-              const id = doc.id;
-              window.historyData[id] = d; 
-              const dateStr = new Date(d.timestamp).toLocaleDateString();
-              const item = document.createElement("div");
-              item.className = "history-item";
-              item.innerHTML = `<div class="h-ep">${d.epic || "No EPIC"}</div><div class="h-nm">${d.userName}</div><div class="h-dt">${dateStr}</div>`;
-              item.onclick = () => fillFormFromHistory(id);
-              listDiv.appendChild(item);
-          });
-      } catch(e) { listDiv.innerHTML = "Error loading history."; }
-  }
+    document.getElementById("historyModal").style.display="flex";
+    const listDiv = document.getElementById("historyList");
+    listDiv.innerHTML = '<div class="loader" style="display:block"></div>';
+    if(!window.currentUserID) return;
+    try {
+      const q = query(collection(db,`users/${window.currentUserID}/history`), orderBy("timestamp","desc"));
+      const snap = await getDocs(q);
+      listDiv.innerHTML = "";
+      window.historyData = [];
+      if(snap.empty) { listDiv.innerHTML="<p style='text-align:center;color:var(--text-muted);margin-top:20px;font-weight:600;'>No history found.</p>"; return; }
+      snap.forEach(doc => {
+        const d = doc.data(); const id = doc.id;
+        window.historyData[id] = d;
+        const dateStr = new Date(d.timestamp).toLocaleDateString();
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `<div class="h-ep">${d.epic||"No EPIC"}</div><div class="h-nm">${d.userName}</div><div class="h-dt">${dateStr}</div>`;
+        item.onclick = () => fillFormFromHistory(id);
+        listDiv.appendChild(item);
+      });
+    } catch(e) { listDiv.innerHTML="<p style='color:var(--danger);padding:16px;'>Error loading history.</p>"; }
+  };
 
   window.confirmClearHistory = async function() {
-      if(!window.currentUserID) return;
-      const btn = document.querySelector("#confirmModal .btn[onclick*='confirmClearHistory']");
-      btn.innerHTML = "Deleting...";
-      try {
-          const batch = writeBatch(db);
-          const q = query(collection(db, `users/${window.currentUserID}/history`));
-          const snap = await getDocs(q);
-          snap.forEach(doc => { batch.delete(doc.ref); });
-          await batch.commit();
-          showToast("History deleted successfully", "success");
-          document.getElementById("historyList").innerHTML = "<p style='text-align:center;color:#94a3b8;margin-top:20px;font-weight:600;'>No history found.</p>";
-          closeConfirm();
-      } catch(e) { showToast("Failed to delete history", "error"); } finally { btn.innerHTML = "Delete All"; }
-  }
+    if(!window.currentUserID) return;
+    const btn = document.querySelector("#confirmModal .btn[onclick*='confirmClearHistory']");
+    btn.innerHTML="Deleting...";
+    try {
+      const batch = writeBatch(db);
+      const snap  = await getDocs(query(collection(db,`users/${window.currentUserID}/history`)));
+      snap.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      showToast("History deleted","success");
+      document.getElementById("historyList").innerHTML="<p style='text-align:center;color:var(--text-muted);margin-top:20px;font-weight:600;'>No history found.</p>";
+      closeConfirm();
+    } catch(e) { showToast("Failed to delete","error"); } finally { btn.innerHTML="Delete All"; }
+  };
 
   window.handleUrgentUpgrade = () => {
-      document.getElementById('expiryModal').style.display = 'none';
-      showScreen("paywall-screen");
-      document.getElementById("backToTrialBtn").style.display = "flex";
-      sessionStorage.setItem('seenLoginPopup', 'true');
+    document.getElementById('expiryModal').style.display='none';
+    showScreen("paywall-screen");
+    document.getElementById("backToTrialBtn").style.display="flex";
+    sessionStorage.setItem('seenLoginPopup','true');
   };
 
   window.closeExpiry = () => {
-      document.getElementById('expiryModal').style.display = 'none';
-      sessionStorage.setItem('seenLoginPopup', 'true'); 
+    document.getElementById('expiryModal').style.display='none';
+    sessionStorage.setItem('seenLoginPopup','true');
   };
-
-</script>
-
-<script>
-// --- GLOBAL VARS FOR CROPPER ---
-let cropper;
-window.croppedPhotoData = null; 
-
-// --- JS FOR CROPPER ---
-const photoInput = document.getElementById('photo');
-const cropModal = document.getElementById('cropModal');
-const imageToCrop = document.getElementById('imageToCrop');
-
-photoInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            imageToCrop.src = evt.target.result;
-            cropModal.style.display = 'flex';
-            
-            if(cropper) cropper.destroy();
-            
-            cropper = new Cropper(imageToCrop, {
-                aspectRatio: 120 / 150, 
-                viewMode: 1,
-                autoCropArea: 1,
-            });
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
-window.performCrop = function() {
-    if(!cropper) return;
-    
-    window.croppedPhotoData = cropper.getCroppedCanvas({
-        width: 300, 
-        height: 375, 
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high'
-    }).toDataURL('image/jpeg', 0.95);
-    
-    document.getElementById("dPhoto").src = window.croppedPhotoData;
-    
-    closeCropModal();
-    window.showToast("Photo cropped successfully", "success");
-}
-
-window.closeCropModal = function() {
-    cropModal.style.display = 'none';
-    if(cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
-    if(!window.croppedPhotoData) {
-        photoInput.value = ""; 
-    }
-}
-
-// --- STANDARD UI LOGIC ---
-function closeHistory() { document.getElementById("historyModal").style.display = "none"; }
-function showConfirm() { document.getElementById("confirmModal").style.display = "flex"; }
-function closeConfirm() { document.getElementById("confirmModal").style.display = "none"; }
-function openReferModal() {
-  document.getElementById("referModal").style.display = "flex";
-  if(window.currentUserID) {
-      const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
-      document.getElementById("myReferLink").innerText = link;
-  }
-}
-function closeReferModal() { document.getElementById("referModal").style.display = "none"; }
-function shareOnWhatsApp() {
-  const link = document.getElementById("myReferLink").innerText;
-  if(link.includes("Loading")) return;
-  const msg = `Hey! Create Voter ID cards easily with this app.\n\nUse my link to get special benefits:\n${link}\n\nभाई, वोटर आईडी कार्ड बनाने के लिए ये ऐप बेहतरीन है!`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-}
-function copyReferLink() {
-  const txt = document.getElementById("myReferLink").innerText;
-  if(txt.includes("Loading")) return;
-  navigator.clipboard.writeText(txt).then(() => window.showToast("Link copied!", "success"));
-}
-
-function fillFormFromHistory(id) {
-  const data = window.historyData[id];
-  if(!data) return;
-  document.getElementById("epic").value = data.epic || "";
-  document.getElementById("userName").value = data.userName || "";
-  document.getElementById("nameHindi").value = data.nameHindi || "";
-  document.getElementById("fatherName").value = data.fatherName || "";
-  document.getElementById("fatherHindi").value = data.fatherHindi || "";
-  document.getElementById("gender").value = data.gender || "";
-  document.getElementById("dob").value = data.dob || "";
-  document.getElementById("addrHindi").value = data.addrHindi || "";
-  document.getElementById("addrEng").value = data.addrEng || "";
-  document.getElementById("dlDate").value = data.dlDate || "";
-  closeHistory();
-  generateCardUI(); 
-  window.showToast("Data restored from history", "success");
-}
-
-function generateCardUI(){
-  document.getElementById("previewArea").style.display = "flex";
-  document.getElementById("dlPdfBtn").style.display = "flex";
-  
-  const cardFront = document.getElementById("cardFront");
-  const cardBack = document.getElementById("cardBack");
-  
-  cardFront.classList.remove("card-slide-in");
-  cardBack.classList.remove("card-slide-in");
-  void cardFront.offsetWidth; 
-  
-  cardFront.classList.add("card-slide-in");
-  cardBack.classList.add("card-slide-in");
-
-  const get = id => document.getElementById(id).value;
-  const set = (id, val) => document.getElementById(id).innerText = val;
-  set("dEpic", get("epic"));
-  set("hName", "नाम : " + get("nameHindi")); 
-  set("eName", "Name : " + get("userName"));
-  set("hFather", "पिता का नाम : " + get("fatherHindi")); 
-  set("eFather", "Father's Name : " + get("fatherName"));
-  set("hGender", "लिंग / Gender :"); set("eGender", get("gender"));
-  set("hDob", "जन्म तिथि / DOB :"); set("eDob", get("dob"));
-  set("dispAddrHindi", get("addrHindi")); 
-  set("dispAddrEng", get("addrEng"));
-  set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
-  set("dispEpicBack", get("epic"));
-
-  if(window.croppedPhotoData) {
-      document.getElementById("dPhoto").src = window.croppedPhotoData;
-  } else {
-      const file = document.getElementById("photo").files[0];
-      if(file){ 
-          const r = new FileReader(); 
-          r.onload = () => document.getElementById("dPhoto").src = r.result; 
-          r.readAsDataURL(file); 
-      }
-  }
-   
-  setTimeout(() => {
-     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }, 100); 
-}
-
-async function downloadPDF() {
-  const btn = document.getElementById("dlPdfBtn");
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-  btn.disabled = true;
-  
-  try {
-      const { jsPDF } = window.jspdf;
-      const front = document.getElementById('cardFront');
-      const back = document.getElementById('cardBack');
-      
-      // HTML2CANVAS FIX: Remove animations temporarily before capturing
-      front.classList.remove("card-slide-in");
-      back.classList.remove("card-slide-in");
-      
-      const orgTransformFront = front.style.transform;
-      const orgTransformBack = back.style.transform;
-      const orgTransitionFront = front.style.transition;
-      const orgTransitionBack = back.style.transition;
-      
-      // Force neutral styles for capturing
-      front.style.transition = "none";
-      back.style.transition = "none";
-      front.style.transform = "scale(1) translate(0px, 0px)";
-      back.style.transform = "scale(1) translate(0px, 0px)";
-
-      const opts = { scale: 3, useCORS: true, backgroundColor: null };
-      const canvas1 = await html2canvas(front, opts);
-      const canvas2 = await html2canvas(back, opts);
-      
-      // Restore the CSS and animations
-      front.style.transform = orgTransformFront;
-      back.style.transform = orgTransformBack;
-      front.style.transition = orgTransitionFront;
-      back.style.transition = orgTransitionBack;
-      front.classList.add("card-slide-in");
-      back.classList.add("card-slide-in");
-
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [85.6, 54] });
-      pdf.addImage(canvas1.toDataURL('image/png', 1.0), 'PNG', 0, 0, 85.6, 54);
-      pdf.addPage();
-      pdf.addImage(canvas2.toDataURL('image/png', 1.0), 'PNG', 0, 0, 85.6, 54);
-      pdf.save('voter-id-card.pdf');
-      
-      window.showToast("PDF downloaded successfully", "success");
-  } catch (error) { 
-      console.error(error);
-      window.showToast("Error generating PDF", "error"); 
-  }
-  
-  btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
-  btn.disabled = false;
-}
-</script>
-
-<script>
-    function debounce(func, wait) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
-    async function transliterate(text, targetId) {
-        if (!text.trim()) {
-            document.getElementById(targetId).value = "";
-            return;
-        }
-        
-        try {
-            const url = `https://www.google.com/inputtools/request?text=${encodeURIComponent(text)}&ime=transliteration_en_hi&num=1`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data && data[1] && data[1].length > 0) {
-                let resultText = "";
-                data[1].forEach(word => {
-                    if(word[1] && word[1].length > 0) {
-                        resultText += word[1][0] + " "; 
-                    }
-                });
-                document.getElementById(targetId).value = resultText.trim();
-            }
-        } catch (error) {
-            console.error("Transliteration Error:", error);
-        }
-    }
-
-    const delay = 300; 
-
-    document.getElementById('userName').addEventListener('keyup', debounce(function() {
-        transliterate(this.value, 'nameHindi');
-    }, delay));
-
-    document.getElementById('fatherName').addEventListener('keyup', debounce(function() {
-        transliterate(this.value, 'fatherHindi');
-    }, delay));
-
-    document.getElementById('addrEng').addEventListener('keyup', debounce(function() {
-        transliterate(this.value, 'addrHindi');
-    }, delay));
-
-    // --- FORCE DOWNLOAD IN CHROME (FIX FOR BIN FILE ISSUE) ---
-    function forceDownloadInBrowser(url) {
-        var cleanUrl = url.replace(/^https?:\/\//, '');
-        var intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end;";
-        window.location.href = intentUrl;
-    }
-
-    function copyAppUrl() {
-        var url = "YOUR_DOWNLOAD_LINK_HERE"; 
-        
-        navigator.clipboard.writeText(url).then(() => {
-             window.showToast("Link copied! Open Chrome and paste to download.", "success");
-        }).catch(err => {
-             console.error('Failed to copy: ', err);
-             prompt("Copy this link and open in Chrome:", url);
-        });
-    }
 </script>
 
 </body>
