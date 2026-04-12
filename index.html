@@ -1292,7 +1292,7 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
           <div class="watermark-overlay">MADE WITH VOTER ID MAKER</div>
           <div class="wm-alert" data-html2canvas-ignore="true" onclick="removeWatermarkPrompt()">
             Remove Watermark? Buy Premium <i class="fas fa-arrow-right"></i>
-            <span>इस लाल निशान को हटाने के लिए रिचार्ज करें,क्लिक करें</span>
+            <span>इसे हटाने के लिए क्लिक करें</span>
           </div>
         </div>
 
@@ -1312,7 +1312,7 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
           <div class="watermark-overlay">MADE WITH VOTER ID MAKER</div>
           <div class="wm-alert" data-html2canvas-ignore="true" onclick="removeWatermarkPrompt()">
             Remove Watermark? Buy Premium <i class="fas fa-arrow-right"></i>
-            <span>इस लाल निशान को हटाने के लिए रिचार्ज करें,क्लिक करें</span>
+            <span>इसे हटाने के लिए क्लिक करें</span>
           </div>
         </div>
       </div>
@@ -1364,6 +1364,28 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
   </div>
 </div>
 
+
+<script>
+// --- NEW: Handle WebView Pausing/Reloading for WhatsApp Share ---
+window.checkAndProcessPendingUnlock = async function() {
+  if (localStorage.getItem("pendingWhatsAppUnlock") === "true" && window.currentUserID) {
+    localStorage.removeItem("pendingWhatsAppUnlock"); // clear it immediately
+    try {
+      // Must dynamically import Firestore functions if they are only available in the module script below.
+      // A better approach is simply setting a global flag and letting the Firebase module script handle it.
+    } catch(e) {
+      console.error("Error checking unlock", e);
+    }
+  }
+};
+// Attach to visibility and focus events
+window.addEventListener("focus", () => window.dispatchEvent(new Event("process-unlock-check")));
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    window.dispatchEvent(new Event("process-unlock-check"));
+  }
+});
+</script>
 
 <script>
 window.removeWatermarkPrompt = function() {
@@ -1626,6 +1648,20 @@ function fillFormFromHistory(id) {
   window.currentUserID = null;
   window.isPremiumUser = false;
 
+  // --- FIREBASE UNLOCK PROCESSOR LISTENER ---
+  window.addEventListener('process-unlock-check', async () => {
+    if (localStorage.getItem("pendingWhatsAppUnlock") === "true" && window.currentUserID) {
+      localStorage.removeItem("pendingWhatsAppUnlock"); 
+      try {
+        const userRef = doc(db, "users", window.currentUserID);
+        await updateDoc(userRef, { unlockedCards: increment(1) });
+        window.showToast("Next Free Card Unlocked! Click Generate again.", "success");
+      } catch(e) {
+        console.error("Error unlocking card: ", e);
+      }
+    }
+  });
+
   const planData = [
     { id:"quarterly_3",   duration:"3 Months", price:199, original:297, savings:"Save ₹98",  tag:"Most Popular", recommended:true  },
     { id:"half_yearly_6", duration:"6 Months", price:399, original:594, savings:"Save ₹193", tag:"Best Value",   recommended:false },
@@ -1740,6 +1776,10 @@ function fillFormFromHistory(id) {
       document.getElementById("userEmailDisplay").innerText = user.email;
       showScreen("splash-screen");
       startDocListener(user);
+      
+      // Attempt an unlock check if the webview reloaded completely
+      setTimeout(() => window.dispatchEvent(new Event("process-unlock-check")), 1500);
+      
     } else { showScreen("login-screen"); }
   });
 
@@ -1790,15 +1830,11 @@ function fillFormFromHistory(id) {
         if(genBtn) {
             if (!window.isPremiumUser && usageCount >= unlockedCount) {
                 genBtn.innerHTML = '<i class="fab fa-whatsapp" style="font-size:18px;"></i> Share to WA to Unlock';
-                genBtn.className = 'btn btn-teal'; // Matches the Refer & Earn button theme
-                genBtn.style.background = ''; // Clears inline styles
-                genBtn.style.boxShadow = '';  // Clears inline styles
+                genBtn.className = 'btn btn-teal'; // Matches the beautiful teal theme of the Refer button
                 genBtn.onclick = () => window.forceWhatsAppShare();
             } else {
                 genBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Generate Card';
-                genBtn.className = 'btn btn-primary'; // Back to standard primary button
-                genBtn.style.background = ''; 
-                genBtn.style.boxShadow = '';  
+                genBtn.className = 'btn btn-primary'; // Back to standard primary theme
                 genBtn.onclick = () => window.generateAndSave();
             }
         }
@@ -1912,30 +1948,28 @@ function fillFormFromHistory(id) {
     }
   };
 
-  // Automatically handles WhatsApp sharing and unlocks the next iteration 
+  // --- UPDATED: Automatically handles WhatsApp sharing and unlocks securely for WebViews ---
   window.forceWhatsAppShare = function() {
     const btn = document.getElementById("btnGenerateCard");
     const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
     btn.disabled = true;
+
+    // 1. SAVE STATE: So we remember the user tried to share even if WebView reloads the page
+    localStorage.setItem("pendingWhatsAppUnlock", "true");
 
     const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
     const msg = `Hey! I just created my Voter ID easily using this app. Make yours here:\n\n${link}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     
+    // 2. NAVIGATE: Better for webviews than window.open('_blank')
+    window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    
+    // 3. FALLBACK TIMEOUT: In case the webview doesn't leave the page
     setTimeout(async () => {
-      try {
-        const userRef = doc(db, "users", window.currentUserID);
-        await updateDoc(userRef, { unlockedCards: increment(1) });
-        showToast("Next Free Card Unlocked! Click Generate again.", "success");
-      } catch(e) {
-        console.error(e);
-        showToast("Failed to unlock.", "error");
-      } finally {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-      }
-    }, 3500);
+      window.dispatchEvent(new Event("process-unlock-check"));
+      btn.innerHTML = origText;
+      btn.disabled = false;
+    }, 4500);
   };
 
   window.openHistory = async function() {
