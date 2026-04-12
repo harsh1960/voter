@@ -1366,28 +1366,6 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
 
 
 <script>
-// --- NEW: Handle WebView Pausing/Reloading for WhatsApp Share ---
-window.checkAndProcessPendingUnlock = async function() {
-  if (localStorage.getItem("pendingWhatsAppUnlock") === "true" && window.currentUserID) {
-    localStorage.removeItem("pendingWhatsAppUnlock"); // clear it immediately
-    try {
-      // Must dynamically import Firestore functions if they are only available in the module script below.
-      // A better approach is simply setting a global flag and letting the Firebase module script handle it.
-    } catch(e) {
-      console.error("Error checking unlock", e);
-    }
-  }
-};
-// Attach to visibility and focus events
-window.addEventListener("focus", () => window.dispatchEvent(new Event("process-unlock-check")));
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") {
-    window.dispatchEvent(new Event("process-unlock-check"));
-  }
-});
-</script>
-
-<script>
 window.removeWatermarkPrompt = function() {
   document.getElementById("upgradeBtn").click();
 };
@@ -1648,20 +1626,6 @@ function fillFormFromHistory(id) {
   window.currentUserID = null;
   window.isPremiumUser = false;
 
-  // --- FIREBASE UNLOCK PROCESSOR LISTENER ---
-  window.addEventListener('process-unlock-check', async () => {
-    if (localStorage.getItem("pendingWhatsAppUnlock") === "true" && window.currentUserID) {
-      localStorage.removeItem("pendingWhatsAppUnlock"); 
-      try {
-        const userRef = doc(db, "users", window.currentUserID);
-        await updateDoc(userRef, { unlockedCards: increment(1) });
-        window.showToast("Next Free Card Unlocked! Click Generate again.", "success");
-      } catch(e) {
-        console.error("Error unlocking card: ", e);
-      }
-    }
-  });
-
   const planData = [
     { id:"quarterly_3",   duration:"3 Months", price:199, original:297, savings:"Save ₹98",  tag:"Most Popular", recommended:true  },
     { id:"half_yearly_6", duration:"6 Months", price:399, original:594, savings:"Save ₹193", tag:"Best Value",   recommended:false },
@@ -1776,10 +1740,6 @@ function fillFormFromHistory(id) {
       document.getElementById("userEmailDisplay").innerText = user.email;
       showScreen("splash-screen");
       startDocListener(user);
-      
-      // Attempt an unlock check if the webview reloaded completely
-      setTimeout(() => window.dispatchEvent(new Event("process-unlock-check")), 1500);
-      
     } else { showScreen("login-screen"); }
   });
 
@@ -1949,27 +1909,42 @@ function fillFormFromHistory(id) {
   };
 
   // --- UPDATED: Automatically handles WhatsApp sharing and unlocks securely for WebViews ---
-  window.forceWhatsAppShare = function() {
+  window.forceWhatsAppShare = async function() {
     const btn = document.getElementById("btnGenerateCard");
     const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking...';
     btn.disabled = true;
 
-    // 1. SAVE STATE: So we remember the user tried to share even if WebView reloads the page
-    localStorage.setItem("pendingWhatsAppUnlock", "true");
+    try {
+      // 1. Unlock the card in Firebase FIRST (Optimistic Unlocking).
+      // This ensures that even if the WebView dies or refreshes while the user is in WhatsApp,
+      // the card is already unlocked in the cloud.
+      const userRef = doc(db, "users", window.currentUserID);
+      await updateDoc(userRef, { unlockedCards: increment(1) });
 
-    const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
-    const msg = `Hey! I just created my Voter ID easily using this app. Make yours here:\n\n${link}`;
-    
-    // 2. NAVIGATE: Better for webviews than window.open('_blank')
-    window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    
-    // 3. FALLBACK TIMEOUT: In case the webview doesn't leave the page
-    setTimeout(async () => {
-      window.dispatchEvent(new Event("process-unlock-check"));
+      // 2. Prepare the link
+      const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
+      const msg = `Hey! I just created my Voter ID easily using this app. Make yours here:\n\n${link}`;
+
+      // 3. Show success message briefly, then redirect
+      window.showToast("Card Unlocked! Opening WhatsApp...", "success");
+
+      setTimeout(() => {
+          // Navigate to WhatsApp using href (more reliable in WebViews than window.open)
+          window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+          
+          // Reset button text just in case the webview doesn't pause/reload
+          btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Generate Card';
+          btn.className = 'btn btn-primary';
+          btn.disabled = false;
+      }, 1000);
+
+    } catch(e) {
+      console.error("Error unlocking:", e);
+      window.showToast("Failed to unlock. Check your connection.", "error");
       btn.innerHTML = origText;
       btn.disabled = false;
-    }, 4500);
+    }
   };
 
   window.openHistory = async function() {
