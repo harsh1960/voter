@@ -1909,7 +1909,7 @@ function fillFormFromHistory(id) {
     }
   };
 
-  // --- WebView Safe Optimistic Unlocking ---
+  // --- WebView Safe Optimistic Unlocking with Auto-Sync (Catch-up) ---
   window.forceWhatsAppShare = async function() {
     const btn = document.getElementById("btnGenerateCard");
     const origText = btn.innerHTML;
@@ -1917,9 +1917,20 @@ function fillFormFromHistory(id) {
     btn.disabled = true;
 
     try {
-      // 1. Optimistic Unlock: Update the database FIRST before leaving the app
+      // 1. Optimistic Unlock with Auto-Sync: Fetch current stats to jump ahead of cardsGenerated
       const userRef = doc(db, "users", window.currentUserID);
-      await updateDoc(userRef, { unlockedCards: increment(1) });
+      const userSnap = await getDoc(userRef);
+      let nextUnlock = 1;
+      if(userSnap.exists()){
+         const d = userSnap.data();
+         const gen = d.cardsGenerated || 0;
+         const unl = d.unlockedCards || 1;
+         // If they have 124 generated but only 9 unlocked, this jumps them to 125 instantly.
+         nextUnlock = Math.max(gen, unl) + 1;
+      }
+
+      // Update the database FIRST before leaving the app
+      await updateDoc(userRef, { unlockedCards: nextUnlock });
 
       // 2. Prepare the link
       const link = window.location.origin + window.location.pathname + "?ref=" + window.currentUserID;
@@ -1930,6 +1941,7 @@ function fillFormFromHistory(id) {
 
       // 4. Navigate to WhatsApp after a short delay so the toast is visible
       setTimeout(() => {
+          // Navigate to WhatsApp using href (more reliable in WebViews than window.open)
           window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
           
           // Reset button immediately so it is ready upon return
