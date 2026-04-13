@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 /* ===== DESIGN TOKENS — LIGHT THEME ===== */
@@ -669,8 +670,12 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
 .c-text { position:absolute; font-weight:bold; color:#000; white-space:nowrap; }
 .c-photo { position:absolute; left:10px; top:90px; width:120px; height:150px; border:2px solid #444; background:#fff; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
 .c-photo img { width:100%; height:100%; object-fit:cover; }
+
+/* UPDATED QR BOX FOR DYNAMIC QR */
 .qr-box { position:absolute; left:25px; top:60px; width:100px; display:flex; flex-direction:column; align-items:center; }
-.qr-img { width:110px; height:110px; object-fit:contain; background:#fff; mix-blend-mode:multiply; }
+.qr-img { width:110px; height:110px; background:#fff; mix-blend-mode:multiply; padding: 2px; }
+.qr-img img, .qr-img canvas { width: 100%; height: 100%; object-fit: contain; }
+
 .p-epic   { left:12px; top:68px; font-size:14px; }
 .p-h-name { left:140px; top:120px; font-size:12.5px; }
 .p-e-name { left:140px; top:138px; font-size:12.5px; }
@@ -1305,10 +1310,12 @@ input:checked + .anim-slider:before { transform:translateX(20px); background:#ff
             <div class="e-addr-text" id="dispAddrEng"></div>
           </div>
           <div class="c-text p-date" id="dispDate"></div>
+          
           <div class="qr-box">
-            <img src="qr.jpeg" class="qr-img">
+            <div id="dynamic-qr" class="qr-img"></div>
             <div class="c-text p-epic-back" id="dispEpicBack"></div>
           </div>
+
           <div class="watermark-overlay">MADE WITH VOTER ID MAKER</div>
           <div class="wm-alert" data-html2canvas-ignore="true" onclick="removeWatermarkPrompt()">
             Remove Watermark? Buy Premium <i class="fas fa-arrow-right"></i>
@@ -1420,6 +1427,26 @@ function generateCardUI(){
   set("dispAddrEng", get("addrEng"));
   set("dispDate", get("dlDate") ? "Date : " + get("dlDate") : "");
   set("dispEpicBack", get("epic"));
+  
+  // NEW: Authentic Data Dynamic QR Logic
+  const epicNum = get("epic") || "N/A";
+  const uName = get("userName") || "N/A";
+  const fName = get("fatherName") || "N/A";
+  const uDob = get("dob") || "N/A";
+  const uGen = get("gender") || "N/A";
+  
+  const qrData = `VOTER DETAILS\nEPIC: ${epicNum}\nName: ${uName}\nFather: ${fName}\nDOB: ${uDob}\nGender: ${uGen}`;
+  const qrContainer = document.getElementById("dynamic-qr");
+  qrContainer.innerHTML = ""; // Clear existing QR
+  new QRCode(qrContainer, {
+    text: qrData,
+    width: 106,
+    height: 106,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.M
+  });
+  
   if(window.croppedPhotoData) {
     document.getElementById("dPhoto").src = window.croppedPhotoData;
   } else {
